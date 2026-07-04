@@ -43,7 +43,7 @@ export const Route = createFileRoute("/api/public/cashfree-webhook")({
         if (orderId) {
           const { data: pay } = await supabaseAdmin
             .from("payments")
-            .update({ status, raw: parsed, updated_at: new Date().toISOString() })
+            .update({ status, raw: parsed as never, updated_at: new Date().toISOString() })
             .eq("cashfree_order_id", orderId)
             .select("user_id, status")
             .maybeSingle();
