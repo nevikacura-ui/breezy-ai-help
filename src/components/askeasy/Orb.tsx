@@ -50,12 +50,12 @@ export function Orb({
         playsInline
         preload="auto"
         aria-hidden
-        className="h-full w-full object-cover drop-shadow-[0_20px_60px_rgba(120,80,255,0.35)]"
+        className="orb-video h-full w-full object-cover drop-shadow-[0_20px_60px_rgba(120,80,255,0.35)]"
         style={{
           maskImage:
-            "radial-gradient(circle at 50% 50%, black 55%, transparent 78%)",
+            "radial-gradient(circle at 50% 50%, black 45%, transparent 70%)",
           WebkitMaskImage:
-            "radial-gradient(circle at 50% 50%, black 55%, transparent 78%)",
+            "radial-gradient(circle at 50% 50%, black 45%, transparent 70%)",
           filter: energized
             ? "saturate(1.25) brightness(1.08)"
             : active
