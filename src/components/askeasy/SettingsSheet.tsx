@@ -3,8 +3,8 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Sun, Moon, Monitor, Zap } from "lucide-react";
-import type { Settings, Theme } from "@/lib/askeasy";
+import { Sun, Moon, Monitor, Zap, Check, Lock, Sparkles, Leaf } from "lucide-react";
+import { MODELS, type ModelId, type Settings, type Theme } from "@/lib/askeasy";
 
 type Props = {
   open: boolean;
@@ -12,6 +12,8 @@ type Props = {
   settings: Settings;
   update: (patch: Partial<Settings>) => void;
   onClearConversation: () => void;
+  onUpgrade: () => void;
+  isProEffective: boolean;
 };
 
 const THEMES: { id: Theme; label: string; icon: React.ReactNode }[] = [
@@ -20,8 +22,15 @@ const THEMES: { id: Theme; label: string; icon: React.ReactNode }[] = [
   { id: "system", label: "System", icon: <Monitor className="h-3.5 w-3.5" /> },
 ];
 
+const MODEL_ICON: Record<ModelId, React.ReactNode> = {
+  "askeasy/smart": <Sparkles className="h-3.5 w-3.5" />,
+  "askeasy/eco": <Leaf className="h-3.5 w-3.5" />,
+  "askeasy/ultra": <Zap className="h-3.5 w-3.5" />,
+};
 
-export function SettingsSheet({ open, onOpenChange, settings, update, onClearConversation }: Props) {
+export function SettingsSheet({ open, onOpenChange, settings, update, onClearConversation, onUpgrade, isProEffective }: Props) {
+  const currentModel = settings.openRouterModel as ModelId;
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md">
@@ -43,6 +52,58 @@ export function SettingsSheet({ open, onOpenChange, settings, update, onClearCon
             <p className="text-xs text-muted-foreground">Used in your greeting.</p>
           </section>
 
+          {/* Model */}
+          <section className="space-y-3">
+            <div className="text-xs uppercase tracking-wider text-muted-foreground">Model</div>
+            <div className="space-y-1.5">
+              {MODELS.map((m) => {
+                const active = m.id === currentModel;
+                const locked = m.tier === "pro" && !isProEffective;
+                return (
+                  <button
+                    key={m.id}
+                    onClick={() => {
+                      if (locked) { onUpgrade(); return; }
+                      update({ openRouterModel: m.id });
+                    }}
+                    className={
+                      "flex w-full items-center gap-3 rounded-2xl border px-3 py-2.5 text-left transition " +
+                      (active
+                        ? "border-foreground/20 bg-foreground/[0.05]"
+                        : "border-border/60 hover:bg-foreground/[0.03]")
+                    }
+                  >
+                    <span
+                      className="flex h-8 w-8 items-center justify-center rounded-full"
+                      style={{
+                        background: m.tier === "pro" ? "var(--send-gradient)" : "color-mix(in oklab, var(--foreground) 10%, transparent)",
+                        color: m.tier === "pro" ? "white" : undefined,
+                      }}
+                    >
+                      {MODEL_ICON[m.id]}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center gap-1.5">
+                        <span className="text-[13.5px] font-medium">{m.label}</span>
+                        {m.tier === "pro" ? (
+                          <span className="rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-white" style={{ background: "var(--send-gradient)" }}>
+                            Pro
+                          </span>
+                        ) : (
+                          <span className="rounded-full bg-foreground/8 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider text-muted-foreground">
+                            Free
+                          </span>
+                        )}
+                      </span>
+                      <span className="mt-0.5 block text-[11.5px] text-muted-foreground">{m.hint}</span>
+                    </span>
+                    {locked ? <Lock className="h-4 w-4 text-muted-foreground" /> : active ? <Check className="h-4 w-4 text-foreground/70" /> : null}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
           {/* Appearance */}
           <section className="space-y-3">
             <div className="text-xs uppercase tracking-wider text-muted-foreground">Appearance</div>
@@ -55,9 +116,7 @@ export function SettingsSheet({ open, onOpenChange, settings, update, onClearCon
                     onClick={() => update({ theme: t.id })}
                     className={
                       "flex items-center justify-center gap-1.5 rounded-full py-2 text-[12px] font-medium transition " +
-                      (active
-                        ? "bg-foreground text-background shadow-sm"
-                        : "text-foreground/70 hover:text-foreground")
+                      (active ? "bg-foreground text-background shadow-sm" : "text-foreground/70 hover:text-foreground")
                     }
                   >
                     {t.icon}
@@ -71,61 +130,33 @@ export function SettingsSheet({ open, onOpenChange, settings, update, onClearCon
           {/* Plan */}
           <section className="space-y-2">
             <div className="text-xs uppercase tracking-wider text-muted-foreground">Plan</div>
-            <div
-              className="flex items-center justify-between rounded-2xl border border-border/60 p-3"
-              style={
-                settings.isPro
-                  ? { borderColor: "color-mix(in oklab, white 18%, transparent)" }
-                  : undefined
-              }
-            >
+            <div className="flex items-center justify-between rounded-2xl border border-border/60 p-3">
               <div className="flex items-center gap-3">
                 <span
                   className="flex h-9 w-9 items-center justify-center rounded-full text-white"
                   style={{
-                    background: settings.isPro
-                      ? "var(--send-gradient)"
-                      : "color-mix(in oklab, var(--foreground) 10%, transparent)",
-                    color: settings.isPro ? "white" : "var(--foreground)",
+                    background: isProEffective ? "var(--send-gradient)" : "color-mix(in oklab, var(--foreground) 10%, transparent)",
+                    color: isProEffective ? "white" : "var(--foreground)",
                   }}
                 >
                   <Zap className="h-4 w-4" />
                 </span>
                 <div>
-                  <div className="text-sm font-medium text-foreground">
-                    {settings.isPro ? "Pro" : "Free"}
-                  </div>
+                  <div className="text-sm font-medium text-foreground">{isProEffective ? "Pro" : "Free"}</div>
                   <div className="text-[11.5px] text-muted-foreground">
-                    {settings.isPro
+                    {isProEffective
                       ? "Ultra model · unlimited usage"
-                      : "5 text · 2 image/file · 2 voice per session"}
+                      : "5 text · 2 image/file · 2 voice per day"}
                   </div>
                 </div>
               </div>
-              {settings.isPro ? (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => update({ isPro: false, openRouterModel: "askeasy/smart" })}
-                >
-                  Downgrade
-                </Button>
-              ) : (
-                <Button
-                  size="sm"
-                  className="text-white"
-                  style={{ background: "var(--send-gradient)" }}
-                  onClick={() => update({ isPro: true, openRouterModel: "askeasy/ultra" })}
-                >
+              {!isProEffective && (
+                <Button size="sm" className="text-white" style={{ background: "var(--send-gradient)" }} onClick={onUpgrade}>
                   Upgrade
                 </Button>
               )}
             </div>
-            <p className="text-[11px] text-muted-foreground">
-              Change the active model any time from the pill in the top bar.
-            </p>
           </section>
-
 
           {/* Voice */}
           <section>
@@ -146,17 +177,7 @@ export function SettingsSheet({ open, onOpenChange, settings, update, onClearCon
   );
 }
 
-function Row({
-  label,
-  hint,
-  checked,
-  onChange,
-}: {
-  label: string;
-  hint: string;
-  checked: boolean;
-  onChange: (v: boolean) => void;
-}) {
+function Row({ label, hint, checked, onChange }: { label: string; hint: string; checked: boolean; onChange: (v: boolean) => void }) {
   return (
     <div className="flex items-start justify-between gap-4">
       <div>

@@ -2,120 +2,137 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Settings2, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
 import { Orb } from "@/components/askeasy/Orb";
 import { Composer } from "@/components/askeasy/Composer";
 import { SettingsSheet } from "@/components/askeasy/SettingsSheet";
 import { CameraSheet } from "@/components/askeasy/CameraSheet";
 import { Typewriter } from "@/components/askeasy/Typewriter";
-import { ModelPill } from "@/components/askeasy/ModelPill";
+import { QuotaMeter } from "@/components/askeasy/QuotaMeter";
+import { UpgradeDialog } from "@/components/askeasy/UpgradeDialog";
+import { AccountMenu } from "@/components/askeasy/AccountMenu";
 import {
   useConversation,
   useSettings,
   useUsage,
+  useAuthUser,
   sendToAI,
   quotaCheck,
   modelTier,
   type Attachment,
   type Message,
-  type ModelId,
 } from "@/lib/askeasy";
+import { getMe, appendMessage, clearMessages, bumpUsage, listMessages } from "@/lib/pro.functions";
 
 export const Route = createFileRoute("/")({
   component: Home,
 });
 
-
 function Home() {
   const { settings, update, hydrated } = useSettings();
   const { messages, addMessage, updateMessage, clear } = useConversation();
   const { usage, bump, resetUsage } = useUsage();
+  const user = useAuthUser();
+
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [cameraOpen, setCameraOpen] = useState(false);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [upgradeReason, setUpgradeReason] = useState<string | undefined>();
   const [thinking, setThinking] = useState(false);
   const [pendingAttachments, setPendingAttachments] = useState<Attachment[]>([]);
   const [orbActive, setOrbActive] = useState(false);
   const [orbEnergized, setOrbEnergized] = useState(false);
+  const [serverIsPro, setServerIsPro] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const fetchMe = useServerFn(getMe);
+  const fetchMessages = useServerFn(listMessages);
+  const appendMsg = useServerFn(appendMessage);
+  const clearMsgs = useServerFn(clearMessages);
+  const bumpSrv = useServerFn(bumpUsage);
+
+  const isPro = user ? serverIsPro : settings.isPro;
+
+  // Cloud sync on login
   useEffect(() => {
-    scrollRef.current?.scrollTo({
-      top: scrollRef.current.scrollHeight,
-      behavior: "smooth",
-    });
+    if (!user) { setServerIsPro(false); return; }
+    let cancelled = false;
+    (async () => {
+      try {
+        const me = await fetchMe();
+        if (cancelled) return;
+        setServerIsPro(!!me.profile.is_pro);
+        // hydrate usage counters from server (overrides local)
+        resetUsage();
+        if (me.usage.text) bump("text", me.usage.text);
+        if (me.usage.media) bump("media", me.usage.media);
+        if (me.usage.voice) bump("voice", me.usage.voice);
+
+        const rows = await fetchMessages();
+        if (cancelled) return;
+        if (rows.length) {
+          // wipe local and replace with server messages
+          clear();
+          for (const r of rows) {
+            addMessage({
+              role: r.role as "user" | "assistant",
+              content: r.content,
+              attachments: (r.attachments as unknown as Attachment[]) ?? [],
+            });
+          }
+        }
+      } catch (e) { console.error("cloud sync failed", e); }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, thinking]);
 
-  const requestPro = useCallback(() => {
-    if (settings.isPro) {
-      toast.success("You're already on Pro — Ultra unlocked.");
-      return;
-    }
-    toast("Upgrade to Pro", {
-      description: "Unlock Ultra + unlimited text, image, and voice.",
-      action: {
-        label: "Go Pro",
-        onClick: () => {
-          update({ isPro: true, openRouterModel: "askeasy/ultra" });
-          toast.success("Pro unlocked — welcome to Ultra ⚡");
-        },
-      },
-    });
-  }, [settings.isPro, update]);
+  const openUpgrade = useCallback((reason?: string) => {
+    if (isPro) { toast.success("You're already on Pro ⚡"); return; }
+    setUpgradeReason(reason);
+    setUpgradeOpen(true);
+  }, [isPro]);
 
   const send = async (text: string, attachments: Attachment[]) => {
     if (!text && attachments.length === 0) return;
 
-    // Quota gate — only enforced on free models. Pro users bypass.
     const currentTier = modelTier(settings.openRouterModel);
-    if (!settings.isPro && currentTier === "free") {
+    if (!isPro && currentTier === "free") {
       const { overLimit } = quotaCheck(usage, text, attachments);
       if (overLimit.length > 0) {
-        const kind =
-          overLimit[0] === "text"
-            ? "text messages"
-            : overLimit[0] === "media"
-              ? "image/file uploads"
-              : "voice notes";
-        toast("Free limit reached", {
-          description: `You've used all free ${kind}. Upgrade to Pro to keep going.`,
-          action: { label: "Go Pro", onClick: requestPro },
-        });
+        const kind = overLimit[0] === "text" ? "text messages" : overLimit[0] === "media" ? "image/file uploads" : "voice notes";
+        openUpgrade(`You've used all free ${kind} for today. Upgrade to keep going.`);
         return;
       }
     }
 
-    // Count usage buckets consumed by this send.
     const mediaN = attachments.filter((a) => a.type === "image" || a.type === "file").length;
     const voiceN = attachments.filter((a) => a.type === "audio").length;
-    if (!settings.isPro) {
-      if (text.trim().length > 0) bump("text");
-      if (mediaN > 0) bump("media", mediaN);
-      if (voiceN > 0) bump("voice", voiceN);
+    if (!isPro) {
+      if (text.trim().length > 0) { bump("text"); if (user) bumpSrv({ data: { kind: "text", n: 1 } }).catch(() => {}); }
+      if (mediaN > 0) { bump("media", mediaN); if (user) bumpSrv({ data: { kind: "media", n: mediaN } }).catch(() => {}); }
+      if (voiceN > 0) { bump("voice", voiceN); if (user) bumpSrv({ data: { kind: "voice", n: voiceN } }).catch(() => {}); }
     }
 
     addMessage({ role: "user", content: text, attachments });
     setPendingAttachments([]);
+    if (user) appendMsg({ data: { role: "user", content: text, attachments } }).catch(() => {});
 
     const placeholder = addMessage({ role: "assistant", content: "" });
     setThinking(true);
     try {
       const reply = await sendToAI({
-        messages: [
-          ...messages,
-          {
-            id: "tmp",
-            role: "user",
-            content: text,
-            attachments,
-            createdAt: Date.now(),
-          },
-        ],
+        messages: [...messages, { id: "tmp", role: "user", content: text, attachments, createdAt: Date.now() }],
         settings,
       });
       updateMessage(placeholder.id, { content: reply });
+      if (user) appendMsg({ data: { role: "assistant", content: reply } }).catch(() => {});
     } catch (e) {
-      updateMessage(placeholder.id, {
-        content: "Something went wrong. Please try again.",
-      });
+      updateMessage(placeholder.id, { content: "Something went wrong. Please try again." });
       console.error(e);
     } finally {
       setThinking(false);
@@ -130,11 +147,6 @@ function Home() {
     [],
   );
 
-  const handleSelectModel = (id: ModelId) => {
-    update({ openRouterModel: id });
-    toast.success(`Switched to ${id.split("/")[1]}`, { duration: 1600 });
-  };
-
   const hasConversation = messages.length > 0;
 
   if (!hydrated) return <div className="min-h-dvh bg-background" />;
@@ -144,18 +156,16 @@ function Home() {
       <div
         aria-hidden
         className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full opacity-50 blur-3xl transition-opacity duration-700"
-        style={{
-          background:
-            "radial-gradient(circle, oklch(0.8 0.12 300 / 0.5), transparent 70%)",
-        }}
+        style={{ background: "radial-gradient(circle, oklch(0.8 0.12 300 / 0.5), transparent 70%)" }}
       />
 
-      {/* Top bar — New · Model · Settings */}
+      {/* Top bar — New · (spacer) · Account · Settings */}
       <header className="relative z-30 flex items-center justify-between gap-2 px-4 pt-5">
         <button
           onClick={() => {
             clear();
-            resetUsage();
+            if (user) clearMsgs().catch(() => {});
+            if (!user) resetUsage();
           }}
           className="glass flex h-9 items-center gap-1.5 rounded-full px-3 text-[13px] font-medium text-foreground/80 transition hover:text-foreground"
           title="New conversation"
@@ -164,38 +174,24 @@ function Home() {
           New
         </button>
 
-        <ModelPill
-          model={settings.openRouterModel as ModelId}
-          isPro={settings.isPro}
-          usage={usage}
-          onSelect={handleSelectModel}
-          onRequestPro={requestPro}
-        />
-
-        <button
-          onClick={() => setSettingsOpen(true)}
-          aria-label="Settings"
-          className="glass flex h-9 w-9 items-center justify-center rounded-full text-foreground/70 transition hover:text-foreground"
-        >
-          <Settings2 className="h-4 w-4" />
-        </button>
+        <div className="flex items-center gap-2">
+          <AccountMenu />
+          <button
+            onClick={() => setSettingsOpen(true)}
+            aria-label="Settings"
+            className="glass flex h-9 w-9 items-center justify-center rounded-full text-foreground/70 transition hover:text-foreground"
+          >
+            <Settings2 className="h-4 w-4" />
+          </button>
+        </div>
       </header>
-
-
 
       {/* Content */}
       {hasConversation ? (
-        <section
-          ref={scrollRef}
-          className="relative z-10 flex-1 overflow-y-auto px-4 pb-40 pt-6"
-        >
+        <section ref={scrollRef} className="relative z-10 flex-1 overflow-y-auto px-4 pb-40 pt-6">
           <div className="mx-auto flex max-w-2xl flex-col gap-4">
             {messages.map((m) => (
-              <MessageBubble
-                key={m.id}
-                message={m}
-                thinking={thinking && m.role === "assistant" && !m.content}
-              />
+              <MessageBubble key={m.id} message={m} thinking={thinking && m.role === "assistant" && !m.content} />
             ))}
           </div>
         </section>
@@ -204,10 +200,9 @@ function Home() {
           <div className="animate-fade-in animate-breathe" style={{ animationDelay: "0.1s" }}>
             <Orb size={220} intense active={orbActive} energized={orbEnergized} />
           </div>
-
           <div className="animate-fade-up mt-10 space-y-4" style={{ animationDelay: "0.3s" }}>
             <h1 className="font-display text-[2.75rem] font-medium leading-[1.05] tracking-[-0.035em] text-foreground sm:text-6xl">
-              Welcome{settings.name ? `, ${settings.name}` : ", Nevika"}
+              Welcome{settings.name ? `, ${settings.name}` : user?.name ? `, ${user.name.split(" ")[0]}` : ""}
             </h1>
             <p className="mx-auto flex min-h-[1.6em] max-w-md items-baseline justify-center gap-2 text-lg font-light tracking-tight text-foreground/70 sm:text-xl">
               <span>I can</span>
@@ -242,16 +237,13 @@ function Home() {
           disabled={thinking}
           onOpenCamera={() => setCameraOpen(true)}
           externalAttachments={pendingAttachments}
-          onAddAttachments={(a) =>
-            setPendingAttachments((prev) => [...prev, ...a])
-          }
-          onRemoveAttachment={(id) =>
-            setPendingAttachments((prev) => prev.filter((att) => att.id !== id))
-          }
+          onAddAttachments={(a) => setPendingAttachments((prev) => [...prev, ...a])}
+          onRemoveAttachment={(id) => setPendingAttachments((prev) => prev.filter((att) => att.id !== id))}
           onActivityChange={handleActivity}
         />
+        <QuotaMeter usage={usage} isPro={isPro} onUpgrade={() => openUpgrade()} />
         {!hasConversation && (
-          <p className="mt-3 text-center text-[11px] text-muted-foreground/70">
+          <p className="mt-2 text-center text-[11px] text-muted-foreground/70">
             AskEasy can make mistakes. Verify important info.
           </p>
         )}
@@ -262,11 +254,16 @@ function Home() {
         onOpenChange={setSettingsOpen}
         settings={settings}
         update={update}
+        isProEffective={isPro}
+        onUpgrade={() => { setSettingsOpen(false); openUpgrade(); }}
         onClearConversation={() => {
           clear();
+          if (user) clearMsgs().catch(() => {});
           setSettingsOpen(false);
         }}
       />
+
+      <UpgradeDialog open={upgradeOpen} onOpenChange={setUpgradeOpen} reason={upgradeReason} />
 
       <CameraSheet
         open={cameraOpen}
@@ -274,12 +271,7 @@ function Home() {
         onCapture={(dataUrl) => {
           setPendingAttachments((prev) => [
             ...prev,
-            {
-              id: crypto.randomUUID(),
-              type: "image",
-              dataUrl,
-              name: "camera.jpg",
-            },
+            { id: crypto.randomUUID(), type: "image", dataUrl, name: "camera.jpg" },
           ]);
           setCameraOpen(false);
         }}
@@ -288,39 +280,23 @@ function Home() {
   );
 }
 
-function MessageBubble({
-  message,
-  thinking,
-}: {
-  message: Message;
-  thinking: boolean;
-}) {
+function MessageBubble({ message, thinking }: { message: Message; thinking: boolean }) {
   const isUser = message.role === "user";
   return (
     <div className={"flex " + (isUser ? "justify-end" : "justify-start")}>
       <div
         className={
           "max-w-[85%] rounded-3xl px-4 py-3 text-[15px] leading-relaxed " +
-          (isUser
-            ? "bg-foreground text-background"
-            : "glass text-foreground")
+          (isUser ? "bg-foreground text-background" : "glass text-foreground")
         }
       >
         {message.attachments && message.attachments.length > 0 && (
           <div className="mb-2 flex flex-wrap gap-2">
             {message.attachments.map((a) =>
               a.type === "image" ? (
-                <img
-                  key={a.id}
-                  src={a.dataUrl}
-                  alt=""
-                  className="h-24 w-24 rounded-xl object-cover"
-                />
+                <img key={a.id} src={a.dataUrl} alt="" className="h-24 w-24 rounded-xl object-cover" />
               ) : (
-                <div
-                  key={a.id}
-                  className="rounded-full bg-background/20 px-3 py-1 text-xs"
-                >
+                <div key={a.id} className="rounded-full bg-background/20 px-3 py-1 text-xs">
                   {a.name ?? a.type}
                 </div>
               ),
@@ -330,14 +306,8 @@ function MessageBubble({
         {thinking ? (
           <span className="inline-flex gap-1">
             <span className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-current" />
-            <span
-              className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-current"
-              style={{ animationDelay: "0.15s" }}
-            />
-            <span
-              className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-current"
-              style={{ animationDelay: "0.3s" }}
-            />
+            <span className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-current" style={{ animationDelay: "0.15s" }} />
+            <span className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-current" style={{ animationDelay: "0.3s" }} />
           </span>
         ) : (
           <span className="whitespace-pre-wrap">{message.content}</span>
