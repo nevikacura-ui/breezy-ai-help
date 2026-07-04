@@ -14,13 +14,171 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      messages: {
+        Row: {
+          attachments: Json
+          content: string
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          attachments?: Json
+          content?: string
+          created_at?: string
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          attachments?: Json
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          amount: number
+          cashfree_order_id: string
+          created_at: string
+          currency: string
+          id: string
+          payment_session_id: string | null
+          raw: Json | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          cashfree_order_id: string
+          created_at?: string
+          currency?: string
+          id?: string
+          payment_session_id?: string | null
+          raw?: Json | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          cashfree_order_id?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          payment_session_id?: string | null
+          raw?: Json | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          is_pro: boolean
+          pro_until: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          is_pro?: boolean
+          pro_until?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          is_pro?: boolean
+          pro_until?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      usage_daily: {
+        Row: {
+          day: string
+          media_count: number
+          text_count: number
+          user_id: string
+          voice_count: number
+        }
+        Insert: {
+          day?: string
+          media_count?: number
+          text_count?: number
+          user_id: string
+          voice_count?: number
+        }
+        Update: {
+          day?: string
+          media_count?: number
+          text_count?: number
+          user_id?: string
+          voice_count?: number
+        }
+        Relationships: []
+      }
+      webhook_events: {
+        Row: {
+          created_at: string
+          event_type: string | null
+          id: string
+          payload: Json | null
+          source: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          event_type?: string | null
+          id?: string
+          payload?: Json | null
+          source: string
+          status: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string | null
+          id?: string
+          payload?: Json | null
+          source?: string
+          status?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      bump_usage: {
+        Args: { _kind: string; _n?: number }
+        Returns: {
+          day: string
+          media_count: number
+          text_count: number
+          user_id: string
+          voice_count: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "usage_daily"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       [_ in never]: never
