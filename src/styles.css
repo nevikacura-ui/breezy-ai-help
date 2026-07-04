@@ -122,6 +122,10 @@
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 @keyframes pulse-soft {
   0%, 100% { opacity: 0.6; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.08); }
@@ -134,8 +138,26 @@
   0%, 100% { opacity: 0.85; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.12); }
 }
+@keyframes shimmer {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+@keyframes breathe {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.03); }
+}
 
 @utility animate-orb-float { animation: orb-float 8s ease-in-out infinite; }
 @utility animate-orb-spin { animation: orb-spin 40s linear infinite; }
 @utility animate-fade-up { animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@utility animate-fade-in { animation: fade-in 1.2s cubic-bezier(0.22, 1, 0.36, 1) both; }
 @utility animate-pulse-soft { animation: pulse-soft 2.4s ease-in-out infinite; }
+@utility animate-shimmer { animation: shimmer 4s linear infinite; }
+@utility animate-breathe { animation: breathe 6s ease-in-out infinite; }
+@utility text-gradient {
+  background: linear-gradient(90deg, oklch(0.45 0.08 280), oklch(0.55 0.12 300), oklch(0.45 0.08 280));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
