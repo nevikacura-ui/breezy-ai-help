@@ -21,6 +21,7 @@ import {
   sendToAI,
   quotaCheck,
   modelTier,
+  resetIndiaModeArtifacts,
   type Attachment,
   type Message,
 } from "@/lib/askeasy";
