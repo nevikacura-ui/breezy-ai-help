@@ -330,15 +330,17 @@ function MessageBubble({ message, thinking }: { message: Message; thinking: bool
             )}
           </div>
         )}
-        {thinking ? (
-          <span className="inline-flex gap-1">
-            <span className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-current" />
-            <span className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-current" style={{ animationDelay: "0.15s" }} />
-            <span className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-current" style={{ animationDelay: "0.3s" }} />
-          </span>
-        ) : (
-          <span className="whitespace-pre-wrap">{message.content}</span>
-        )}
+        <div className="flex items-start gap-2">
+          {message.content && <span className="whitespace-pre-wrap flex-1">{message.content}</span>}
+          {thinking && (
+            <img
+              src={tricolorRing.url}
+              alt=""
+              draggable={false}
+              className="h-5 w-5 shrink-0 select-none animate-spin [animation-duration:1.6s]"
+            />
+          )}
+        </div>
       </div>
     </div>
   );
