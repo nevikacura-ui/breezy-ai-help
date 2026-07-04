@@ -18,12 +18,6 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-const SUGGESTIONS = [
-  "Explain something in simple words",
-  "Plan my day",
-  "Help me write a message",
-  "Summarize this photo",
-];
 
 type ModelTier = {
   id: string;
@@ -90,9 +84,9 @@ function Home() {
 
 
   const hasConversation = messages.length > 0;
-  const greetingName = settings.name.trim() || "there";
   const currentModel =
     MODELS.find((m) => m.id === settings.openRouterModel) ?? MODELS[0];
+
 
   if (!hydrated) return <div className="min-h-dvh bg-background" />;
 
