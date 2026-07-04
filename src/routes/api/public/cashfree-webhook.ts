@@ -30,9 +30,6 @@ export const Route = createFileRoute("/api/public/cashfree-webhook")({
           status: verified ? "verified" : "signature_failed",
           payload: parsed as never,
         });
-          status: verified ? "verified" : "signature_failed",
-          payload: parsed,
-        });
 
         if (!verified) return new Response("Invalid signature", { status: 401 });
 
