@@ -163,9 +163,10 @@ function Home() {
                 className="fixed inset-0 z-10 cursor-default"
                 onClick={() => setModelOpen(false)}
               />
-              <div className="glass animate-fade-up absolute left-1/2 top-11 z-20 w-60 -translate-x-1/2 rounded-2xl p-1.5 shadow-[0_20px_60px_-20px_oklch(0.2_0.05_280/0.4)]">
+              <div className="glass animate-fade-up absolute left-1/2 top-11 z-20 w-64 -translate-x-1/2 rounded-2xl p-1.5 shadow-[0_20px_60px_-20px_oklch(0.2_0.05_280/0.4)]">
                 {MODELS.map((m) => {
                   const active = m.id === settings.openRouterModel;
+                  const isPro = m.tier === "pro";
                   return (
                     <button
                       key={m.id}
@@ -174,16 +175,38 @@ function Home() {
                         setModelOpen(false);
                       }}
                       className={
-                        "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition " +
-                        (active
-                          ? "bg-foreground/10"
-                          : "hover:bg-foreground/5")
+                        "relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition " +
+                        (active ? "bg-foreground/10" : "hover:bg-foreground/5")
+                      }
+                      style={
+                        isPro
+                          ? {
+                              boxShadow:
+                                "inset 0 0 0 1px transparent",
+                              backgroundImage: active
+                                ? "linear-gradient(var(--card), var(--card)), conic-gradient(from 0deg, oklch(0.78 0.2 30), oklch(0.72 0.22 300), oklch(0.78 0.2 200), oklch(0.82 0.2 90), oklch(0.78 0.2 30))"
+                                : undefined,
+                              backgroundOrigin: active ? "border-box" : undefined,
+                              backgroundClip: active ? "padding-box, border-box" : undefined,
+                              border: active ? "1px solid transparent" : undefined,
+                            }
+                          : undefined
                       }
                     >
-                      <Bubble size={20} state="idle" />
+                      <Bubble size={22} state={isPro ? "active" : "idle"} />
                       <div className="flex-1">
-                        <div className="text-[13px] font-medium text-foreground">
-                          {m.label}
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[13px] font-medium text-foreground">
+                            {m.label}
+                          </span>
+                          {isPro && (
+                            <span
+                              className="rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-white"
+                              style={{ background: "var(--send-gradient)" }}
+                            >
+                              Pro
+                            </span>
+                          )}
                         </div>
                         <div className="text-[11px] text-muted-foreground">
                           {m.hint}
@@ -198,41 +221,15 @@ function Home() {
           )}
         </div>
 
-        <div className="flex items-center gap-1.5">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
-            onChange={(e) => {
-              handleFiles(e.target.files);
-              e.target.value = "";
-            }}
-          />
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            aria-label="Attach image"
-            className="glass flex h-9 w-9 items-center justify-center rounded-full text-foreground/70 transition hover:text-foreground"
-          >
-            <Plus className="h-4 w-4" />
-          </button>
-          <button
-            onClick={() => setCameraOpen(true)}
-            aria-label="Camera"
-            className="glass flex h-9 w-9 items-center justify-center rounded-full text-foreground/70 transition hover:text-foreground"
-          >
-            <Camera className="h-4 w-4" />
-          </button>
-          <button
-            onClick={() => setSettingsOpen(true)}
-            aria-label="Settings"
-            className="glass flex h-9 w-9 items-center justify-center rounded-full text-foreground/70 transition hover:text-foreground"
-          >
-            <Settings2 className="h-4 w-4" />
-          </button>
-        </div>
+        <button
+          onClick={() => setSettingsOpen(true)}
+          aria-label="Settings"
+          className="glass flex h-9 w-9 items-center justify-center rounded-full text-foreground/70 transition hover:text-foreground"
+        >
+          <Settings2 className="h-4 w-4" />
+        </button>
       </header>
+
 
       {/* Content */}
       {hasConversation ? (
