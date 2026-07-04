@@ -148,14 +148,14 @@ export const Route = createFileRoute("/api/chat")({
                     "You are AskEasy, a warm, concise, helpful assistant. Answer clearly using markdown when useful." +
                     langLine,
                 };
-                const mapped = messages.map((m) => ({ role: m.role, content: m.content }));
-                if (wantsLang && mapped.length > 0) {
-                  const last = mapped[mapped.length - 1];
+                const history = messages.map((m) => ({ role: m.role, content: m.content }));
+                if (wantsLang && history.length > 0) {
+                  const last = history[history.length - 1];
                   if (last.role === "user") {
                     last.content = `${last.content}\n\n[Reply strictly in ${langName}${script ? ` (${script} script)` : ""}.]`;
                   }
                 }
-                return [sys, ...mapped];
+                return [sys, ...history];
               })(),
             }),
           },
