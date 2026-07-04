@@ -15,21 +15,21 @@ export type Message = {
   createdAt: number;
 };
 
+export type Theme = "light" | "dark" | "system";
+
 export type Settings = {
   name: string;
-  darkMode: boolean;
-  smartMode: boolean;
+  theme: Theme;
   voiceEnabled: boolean;
   openRouterModel: string;
 };
 
-const SETTINGS_KEY = "askeasy.settings.v1";
+const SETTINGS_KEY = "askeasy.settings.v2";
 const MESSAGES_KEY = "askeasy.messages.v1";
 
 const DEFAULT_SETTINGS: Settings = {
   name: "",
-  darkMode: false,
-  smartMode: true,
+  theme: "system",
   voiceEnabled: true,
   openRouterModel: "askeasy/smart",
 };
