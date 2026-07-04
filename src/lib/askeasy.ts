@@ -54,10 +54,43 @@ export function modelTier(id: string): "free" | "pro" {
   return MODELS.find((m) => m.id === id)?.tier ?? "free";
 }
 
-const SETTINGS_KEY = "askeasy.settings.v4";
-const MESSAGES_KEY = "askeasy.messages.v1";
-const USAGE_KEY = "askeasy.usage.v1";
+export const SETTINGS_KEY = "askeasy.settings.v4";
+export const MESSAGES_KEY = "askeasy.messages.v1";
+export const USAGE_KEY = "askeasy.usage.v1";
 const INDIA_DEFAULT_LANGUAGE: LangCode = "hi";
+
+/**
+ * Purge every India Mode–related cache from localStorage + sessionStorage:
+ * cached messages, attachment drafts, and any language/india scoped keys.
+ * The persisted settings object is rewritten with language forced to "en".
+ * Exported so the UI + integration tests can invoke the same routine.
+ */
+export function resetIndiaModeArtifacts(): void {
+  if (typeof window === "undefined") return;
+  const ls = window.localStorage;
+  const ss = window.sessionStorage;
+  try {
+    ls.removeItem(MESSAGES_KEY);
+    const scopedPrefixes = ["askeasy.india", "askeasy.language", "askeasy.draft", "askeasy.attachments"];
+    for (const store of [ls, ss]) {
+      const doomed: string[] = [];
+      for (let i = 0; i < store.length; i++) {
+        const k = store.key(i);
+        if (!k) continue;
+        if (scopedPrefixes.some((p) => k.startsWith(p))) doomed.push(k);
+      }
+      for (const k of doomed) store.removeItem(k);
+    }
+    const raw = ls.getItem(SETTINGS_KEY);
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw) as Partial<Settings>;
+        ls.setItem(SETTINGS_KEY, JSON.stringify({ ...parsed, indiaMode: false, language: "en" }));
+      } catch { /* ignore malformed settings */ }
+    }
+  } catch { /* storage may be unavailable */ }
+}
+
 
 const DEFAULT_SETTINGS: Settings = {
   name: "",
