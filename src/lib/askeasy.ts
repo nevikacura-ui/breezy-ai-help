@@ -57,6 +57,7 @@ export function modelTier(id: string): "free" | "pro" {
 const SETTINGS_KEY = "askeasy.settings.v4";
 const MESSAGES_KEY = "askeasy.messages.v1";
 const USAGE_KEY = "askeasy.usage.v1";
+const INDIA_DEFAULT_LANGUAGE: LangCode = "hi";
 
 const DEFAULT_SETTINGS: Settings = {
   name: "",
@@ -71,6 +72,15 @@ const DEFAULT_SETTINGS: Settings = {
 
 const DEFAULT_USAGE: Usage = { text: 0, media: 0, voice: 0 };
 
+function normalizeSettings(settings: Settings): Settings {
+  if (!settings.indiaMode) {
+    return { ...settings, language: "en" };
+  }
+  return {
+    ...settings,
+    language: settings.language === "en" ? INDIA_DEFAULT_LANGUAGE : settings.language,
+  };
+}
 
 function readJSON<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
@@ -87,7 +97,7 @@ export function useSettings() {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    setSettings(readJSON<Settings>(SETTINGS_KEY, DEFAULT_SETTINGS));
+    setSettings(normalizeSettings(readJSON<Settings>(SETTINGS_KEY, DEFAULT_SETTINGS)));
     setHydrated(true);
   }, []);
 
@@ -121,7 +131,7 @@ export function useSettings() {
   }, [settings.theme, settings.indiaMode]);
 
   const update = useCallback(
-    (patch: Partial<Settings>) => setSettings((s) => ({ ...s, ...patch })),
+    (patch: Partial<Settings>) => setSettings((s) => normalizeSettings({ ...s, ...patch })),
     []
   );
 
