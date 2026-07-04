@@ -18,12 +18,6 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-const SUGGESTIONS = [
-  "Explain something in simple words",
-  "Plan my day",
-  "Help me write a message",
-  "Summarize this photo",
-];
 
 type ModelTier = {
   id: string;
@@ -90,9 +84,9 @@ function Home() {
 
 
   const hasConversation = messages.length > 0;
-  const greetingName = settings.name.trim() || "there";
   const currentModel =
     MODELS.find((m) => m.id === settings.openRouterModel) ?? MODELS[0];
+
 
   if (!hydrated) return <div className="min-h-dvh bg-background" />;
 
@@ -227,39 +221,17 @@ function Home() {
         </section>
       ) : (
         <section className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 text-center">
-          <div className="animate-fade-up" style={{ animationDelay: "0.05s" }}>
-            <Orb size={240} intense />
+          <div className="animate-fade-in animate-breathe" style={{ animationDelay: "0.1s" }}>
+            <Orb size={220} intense />
           </div>
 
-          <h1
-            className="font-display animate-fade-up mt-8 text-[2rem] leading-[1.05] tracking-tight text-foreground sm:text-5xl"
-            style={{ animationDelay: "0.15s" }}
-          >
-            Hey {greetingName},
-            <br />
-            <span className="italic text-foreground/90">what can I help with?</span>
-          </h1>
-
-          <p
-            className="animate-fade-up mt-4 max-w-xs text-[13px] leading-relaxed text-muted-foreground"
-            style={{ animationDelay: "0.25s" }}
-          >
-            Ask anything. Speak it, snap it, or type it — the right AI answers instantly.
-          </p>
-
-          <div
-            className="animate-fade-up mt-8 flex max-w-lg flex-wrap justify-center gap-2"
-            style={{ animationDelay: "0.35s" }}
-          >
-            {SUGGESTIONS.map((s) => (
-              <button
-                key={s}
-                onClick={() => send(s, [])}
-                className="glass rounded-full px-3.5 py-1.5 text-[12px] font-medium text-foreground/75 transition hover:text-foreground"
-              >
-                {s}
-              </button>
-            ))}
+          <div className="animate-fade-up mt-10 space-y-3" style={{ animationDelay: "0.3s" }}>
+            <h1 className="font-display text-[2.5rem] leading-none tracking-tight text-foreground sm:text-6xl">
+              Welcome, Nevika
+            </h1>
+            <p className="animate-shimmer text-gradient mx-auto max-w-md text-lg font-light tracking-wide sm:text-xl">
+              Ask anything. The easy way.
+            </p>
           </div>
         </section>
       )}
