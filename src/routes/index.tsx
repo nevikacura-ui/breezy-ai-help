@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Settings2, Plus, Camera, ChevronDown, Check } from "lucide-react";
+import { Settings2, Plus, ChevronDown, Check } from "lucide-react";
 import { Orb } from "@/components/askeasy/Orb";
 import { Bubble } from "@/components/askeasy/Bubble";
 import { Composer } from "@/components/askeasy/Composer";
@@ -25,13 +25,19 @@ const SUGGESTIONS = [
   "Summarize this photo",
 ];
 
-const MODELS: { id: string; label: string; hint: string }[] = [
-  { id: "openrouter/auto", label: "Smart", hint: "Picks the best model" },
-  { id: "openai/gpt-4o-mini", label: "Fast", hint: "Quick everyday answers" },
-  { id: "openai/gpt-4o", label: "Pro", hint: "Deep reasoning" },
-  { id: "anthropic/claude-3.5-sonnet", label: "Claude", hint: "Great writing" },
-  { id: "google/gemini-2.0-flash-exp", label: "Gemini", hint: "Vision + speed" },
+type ModelTier = {
+  id: string;
+  label: string;
+  hint: string;
+  tier: "free" | "pro";
+};
+
+const MODELS: ModelTier[] = [
+  { id: "askeasy/smart", label: "Smart", hint: "Balanced everyday answers", tier: "free" },
+  { id: "askeasy/pro", label: "Pro", hint: "Deep reasoning & long context", tier: "pro" },
+  { id: "askeasy/eco", label: "Eco", hint: "Fast & lightweight", tier: "free" },
 ];
+
 
 function Home() {
   const { settings, update, hydrated } = useSettings();
