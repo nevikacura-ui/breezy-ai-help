@@ -141,7 +141,7 @@ export const Route = createFileRoute("/api/chat")({
                 const wantsLang = !!langName && langCode !== "en";
                 const langLine = wantsLang
                   ? ` OUTPUT LANGUAGE RULE (non-negotiable): You MUST write every response entirely in ${langName}${script ? ` using ${script} script` : ""}. This applies even when the user's question is in English, Hindi, or any other language — translate your answer into ${langName} before replying. Do not answer in English. Do not mix languages. Keep proper nouns and code identifiers as-is.`
-                  : "";
+                  : " OUTPUT LANGUAGE RULE (non-negotiable): Reply entirely in English, regardless of the language used earlier in this conversation or in the user's current message. Do not use Hindi, Gujarati, or any other language. Keep proper nouns as-is.";
                 const sys = {
                   role: "system" as const,
                   content:
@@ -149,10 +149,12 @@ export const Route = createFileRoute("/api/chat")({
                     langLine,
                 };
                 const history = messages.map((m) => ({ role: m.role, content: m.content }));
-                if (wantsLang && history.length > 0) {
+                const enforceName = wantsLang ? langName : "English";
+                const enforceScript = wantsLang ? script : undefined;
+                if (history.length > 0) {
                   const last = history[history.length - 1];
                   if (last.role === "user") {
-                    last.content = `${last.content}\n\n[Reply strictly in ${langName}${script ? ` (${script} script)` : ""}.]`;
+                    last.content = `${last.content}\n\n[Reply strictly in ${enforceName}${enforceScript ? ` (${enforceScript} script)` : ""}.]`;
                   }
                 }
                 return [sys, ...history];
