@@ -68,7 +68,7 @@ export function SettingsSheet({ open, onOpenChange, settings, update, onClearCon
               </div>
               <Switch
                 checked={settings.indiaMode}
-                onCheckedChange={(v) =>
+                onCheckedChange={(v) => {
                   update({
                     indiaMode: v,
                     // Turning ON: default to Hindi if still English.
@@ -77,8 +77,9 @@ export function SettingsSheet({ open, onOpenChange, settings, update, onClearCon
                       ? (settings.language === "en" ? "hi" : settings.language)
                       : "en",
                     indiaOnboarded: true,
-                  })
-                }
+                  });
+                  if (!v) onClearConversation();
+                }}
               />
             </div>
             {settings.indiaMode && (
