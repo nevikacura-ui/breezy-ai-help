@@ -21,13 +21,15 @@ export const Route = createFileRoute("/api/public/cashfree-webhook")({
         }
 
         // Always audit
-        type Json = Record<string, unknown> | null;
-        let parsed: Json = null;
-        try { parsed = JSON.parse(rawBody) as Json; } catch { /* ignore */ }
+        let parsed: Record<string, unknown> | null = null;
+        try { parsed = JSON.parse(rawBody) as Record<string, unknown>; } catch { /* ignore */ }
 
         await supabaseAdmin.from("webhook_events").insert({
           source: "cashfree",
-          event_type: ((parsed as { type?: string } | null)?.type) ?? null,
+          event_type: (parsed?.type as string | undefined) ?? null,
+          status: verified ? "verified" : "signature_failed",
+          payload: parsed as never,
+        });
           status: verified ? "verified" : "signature_failed",
           payload: parsed,
         });
