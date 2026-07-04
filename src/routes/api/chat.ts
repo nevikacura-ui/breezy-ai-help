@@ -31,6 +31,17 @@ const LANG_NAMES: Record<string, string> = {
   brx: "Bodo", sat: "Santali", mni: "Manipuri",
 };
 
+const LANG_SCRIPTS: Record<string, string> = {
+  hi: "Devanagari", mai: "Devanagari", bho: "Devanagari", ne: "Devanagari",
+  sa: "Devanagari", kok: "Devanagari", doi: "Devanagari", brx: "Devanagari",
+  mr: "Devanagari",
+  bn: "Bengali", as: "Bengali",
+  ta: "Tamil", te: "Telugu", kn: "Kannada", ml: "Malayalam",
+  gu: "Gujarati", pa: "Gurmukhi", or: "Odia",
+  ur: "Perso-Arabic (Nastaliq)", ks: "Perso-Arabic (Nastaliq)", sd: "Perso-Arabic",
+  sat: "Ol Chiki", mni: "Meitei Mayek",
+};
+
 export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
