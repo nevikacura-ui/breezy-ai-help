@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Settings2, Plus } from "lucide-react";
+import { Check, Languages, Plus, Settings2 } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { Orb } from "@/components/askeasy/Orb";
@@ -10,6 +10,7 @@ import { CameraSheet } from "@/components/askeasy/CameraSheet";
 import { Typewriter } from "@/components/askeasy/Typewriter";
 import { UpgradeDialog } from "@/components/askeasy/UpgradeDialog";
 import { AccountMenu } from "@/components/askeasy/AccountMenu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import tricolorRing from "@/assets/tricolor-ring.png.asset.json";
 import {
   useConversation,
@@ -24,7 +25,7 @@ import {
   type Message,
 } from "@/lib/askeasy";
 import { getMe, appendMessage, clearMessages, bumpUsage, listMessages } from "@/lib/pro.functions";
-import { LANGUAGES } from "@/lib/i18n";
+import { LANGUAGES, type LangCode } from "@/lib/i18n";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -113,6 +114,23 @@ function Home() {
     setUpgradeOpen(true);
   }, [isPro]);
 
+  const clearConversation = useCallback(() => {
+    clear();
+    if (user) clearMsgs().catch(() => {});
+    if (!user) resetUsage();
+  }, [clear, clearMsgs, resetUsage, user]);
+
+  const selectLanguage = useCallback((language: LangCode) => {
+    update({ indiaMode: true, language, indiaOnboarded: true });
+    const active = LANGUAGES.find((l) => l.code === language);
+    if (active && language !== "en") {
+      toast.success(`${active.label} enforced`, {
+        description: `Replies will generate in ${active.native}.`,
+        duration: 1600,
+      });
+    }
+  }, [update]);
+
   const send = async (text: string, attachments: Attachment[]) => {
     if (!text && attachments.length === 0) return;
 
@@ -140,6 +158,15 @@ function Home() {
 
     const placeholder = addMessage({ role: "assistant", content: "" });
     setThinking(true);
+    if (settings.indiaMode && settings.language !== "en") {
+      const active = LANGUAGES.find((l) => l.code === settings.language);
+      if (active) {
+        toast.success(`${active.label} enforced`, {
+          description: `Generating this answer in ${active.native}.`,
+          duration: 1400,
+        });
+      }
+    }
     try {
       const reply = await sendToAI({
         messages: [...messages, { id: "tmp", role: "user", content: text, attachments, createdAt: Date.now() }],
@@ -190,9 +217,7 @@ function Home() {
       <header className="relative z-30 flex items-center justify-between gap-2 px-4 pt-5">
         <button
           onClick={() => {
-            clear();
-            if (user) clearMsgs().catch(() => {});
-            if (!user) resetUsage();
+            clearConversation();
           }}
           className="glass flex h-9 items-center gap-1.5 rounded-full px-3 text-[13px] font-medium text-foreground/80 transition hover:text-foreground"
           title="New conversation"
@@ -206,15 +231,7 @@ function Home() {
             const active = LANGUAGES.find((l) => l.code === settings.language);
             if (!active) return null;
             return (
-              <button
-                onClick={() => setSettingsOpen(true)}
-                className="glass flex h-9 items-center gap-1.5 rounded-full px-2.5 text-[12px] font-medium text-foreground/80 transition hover:text-foreground"
-                title={`Language: ${active.label}`}
-                aria-label={`Language: ${active.label}. Change in settings.`}
-              >
-                <img src={tricolorRing.url} alt="" draggable={false} className="h-4 w-4 select-none" />
-                <span className="max-w-[110px] truncate">{active.native}</span>
-              </button>
+              <QuickLanguagePicker active={active} onSelect={selectLanguage} />
             );
           })()}
           <AccountMenu />
@@ -300,10 +317,16 @@ function Home() {
         update={update}
         isProEffective={isPro}
         usage={usage}
+        onIndiaModeOff={() => {
+          clearConversation();
+          toast.success("India Mode off", {
+            description: "Chat and language reset to English.",
+            duration: 1600,
+          });
+        }}
         onUpgrade={() => { setSettingsOpen(false); openUpgrade(); }}
         onClearConversation={() => {
-          clear();
-          if (user) clearMsgs().catch(() => {});
+          clearConversation();
           setSettingsOpen(false);
         }}
       />
@@ -327,6 +350,56 @@ function Home() {
         }}
       />
     </main>
+  );
+}
+
+function QuickLanguagePicker({
+  active,
+  onSelect,
+}: {
+  active: (typeof LANGUAGES)[number];
+  onSelect: (language: LangCode) => void;
+}) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          className="glass flex h-9 items-center gap-1.5 rounded-full px-2.5 text-[12px] font-medium text-foreground/80 transition hover:text-foreground"
+          title={`Language: ${active.label}`}
+          aria-label={`Language: ${active.label}. Change language.`}
+        >
+          <img src={tricolorRing.url} alt="" draggable={false} className="h-4 w-4 select-none" />
+          <span className="max-w-[86px] truncate">{active.native}</span>
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="glass w-[min(22rem,calc(100vw-2rem))] rounded-3xl border-border/60 p-2">
+        <div className="mb-2 flex items-center gap-2 px-2 py-1 text-[12px] font-medium text-muted-foreground">
+          <Languages className="h-3.5 w-3.5" />
+          Reply language
+        </div>
+        <div className="grid max-h-[19rem] grid-cols-3 gap-1.5 overflow-y-auto pr-1">
+          {LANGUAGES.filter((l) => l.code !== "en").map((l) => {
+            const selected = active.code === l.code;
+            return (
+              <button
+                key={l.code}
+                onClick={() => onSelect(l.code)}
+                className={
+                  "relative rounded-2xl border px-2 py-2 text-center text-[12px] leading-tight transition " +
+                  (selected
+                    ? "border-primary/50 bg-primary/10 text-foreground"
+                    : "border-border/60 text-foreground/80 hover:bg-foreground/[0.04]")
+                }
+              >
+                {selected && <Check className="absolute right-1.5 top-1.5 h-3 w-3 text-primary" />}
+                <div className="font-medium">{l.native}</div>
+                <div className="mt-0.5 text-[10px] text-muted-foreground">{l.label}</div>
+              </button>
+            );
+          })}
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
 
