@@ -60,8 +60,19 @@ export function useSettings() {
 
   useEffect(() => {
     if (typeof document === "undefined") return;
-    document.documentElement.classList.toggle("dark", settings.darkMode);
-  }, [settings.darkMode]);
+    const applyTheme = () => {
+      const t = settings.theme;
+      const prefersDark =
+        window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
+      const dark = t === "dark" || (t === "system" && prefersDark);
+      document.documentElement.classList.toggle("dark", dark);
+    };
+    applyTheme();
+    if (settings.theme !== "system") return;
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    mq.addEventListener("change", applyTheme);
+    return () => mq.removeEventListener("change", applyTheme);
+  }, [settings.theme]);
 
   const update = useCallback(
     (patch: Partial<Settings>) => setSettings((s) => ({ ...s, ...patch })),
