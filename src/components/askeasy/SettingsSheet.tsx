@@ -68,63 +68,64 @@ export function SettingsSheet({ open, onOpenChange, settings, update, onClearCon
             </div>
           </section>
 
-          {/* Mode / Model */}
-          <section className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">Mode</div>
-              <div className="text-[10px] text-muted-foreground">Smart is default</div>
+          {/* Plan */}
+          <section className="space-y-2">
+            <div className="text-xs uppercase tracking-wider text-muted-foreground">Plan</div>
+            <div
+              className="flex items-center justify-between rounded-2xl border border-border/60 p-3"
+              style={
+                settings.isPro
+                  ? { borderColor: "color-mix(in oklab, white 18%, transparent)" }
+                  : undefined
+              }
+            >
+              <div className="flex items-center gap-3">
+                <span
+                  className="flex h-9 w-9 items-center justify-center rounded-full text-white"
+                  style={{
+                    background: settings.isPro
+                      ? "var(--send-gradient)"
+                      : "color-mix(in oklab, var(--foreground) 10%, transparent)",
+                    color: settings.isPro ? "white" : "var(--foreground)",
+                  }}
+                >
+                  <Zap className="h-4 w-4" />
+                </span>
+                <div>
+                  <div className="text-sm font-medium text-foreground">
+                    {settings.isPro ? "Pro" : "Free"}
+                  </div>
+                  <div className="text-[11.5px] text-muted-foreground">
+                    {settings.isPro
+                      ? "Ultra model · unlimited usage"
+                      : "5 text · 2 image/file · 2 voice per session"}
+                  </div>
+                </div>
+              </div>
+              {settings.isPro ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => update({ isPro: false, openRouterModel: "askeasy/smart" })}
+                >
+                  Downgrade
+                </Button>
+              ) : (
+                <Button
+                  size="sm"
+                  className="text-white"
+                  style={{ background: "var(--send-gradient)" }}
+                  onClick={() => update({ isPro: true, openRouterModel: "askeasy/ultra" })}
+                >
+                  Upgrade
+                </Button>
+              )}
             </div>
-            <div className="space-y-1.5">
-              {MODELS.map((m) => {
-                const active = settings.openRouterModel === m.id;
-                const isPro = m.tier === "pro";
-                return (
-                  <button
-                    key={m.id}
-                    onClick={() => update({ openRouterModel: m.id })}
-                    className={
-                      "group flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition " +
-                      (active
-                        ? "border-foreground/20 bg-foreground/[0.06]"
-                        : "border-border/60 hover:border-foreground/15 hover:bg-foreground/[0.03]")
-                    }
-                  >
-                    <span
-                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-foreground"
-                      style={{
-                        background: isPro
-                          ? "var(--send-gradient)"
-                          : "color-mix(in oklab, var(--foreground) 8%, transparent)",
-                        color: isPro ? "white" : undefined,
-                      }}
-                    >
-                      {m.icon}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="flex items-center gap-1.5">
-                        <span className="text-[14px] font-medium text-foreground">{m.label}</span>
-                        {isPro && (
-                          <span
-                            className="rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-white"
-                            style={{ background: "var(--send-gradient)" }}
-                          >
-                            Pro
-                          </span>
-                        )}
-                        {m.tier === "free" && (
-                          <span className="rounded-full bg-foreground/8 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider text-muted-foreground">
-                            Free
-                          </span>
-                        )}
-                      </span>
-                      <span className="mt-0.5 block text-[11.5px] text-muted-foreground">{m.hint}</span>
-                    </span>
-                    {active && <Check className="h-4 w-4 shrink-0 text-foreground/70" />}
-                  </button>
-                );
-              })}
-            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Change the active model any time from the pill in the top bar.
+            </p>
           </section>
+
 
           {/* Voice */}
           <section>
