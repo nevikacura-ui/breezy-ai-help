@@ -9,12 +9,25 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UpgradeSuccessRouteImport } from './routes/upgrade.success'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as ApiPublicCashfreeWebhookRouteImport } from './routes/api/public/cashfree-webhook'
 
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UpgradeSuccessRoute = UpgradeSuccessRouteImport.update({
+  id: '/upgrade/success',
+  path: '/upgrade/success',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
@@ -22,40 +35,88 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicCashfreeWebhookRoute =
+  ApiPublicCashfreeWebhookRouteImport.update({
+    id: '/api/public/cashfree-webhook',
+    path: '/api/public/cashfree-webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/api/chat': typeof ApiChatRoute
+  '/upgrade/success': typeof UpgradeSuccessRoute
+  '/api/public/cashfree-webhook': typeof ApiPublicCashfreeWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/api/chat': typeof ApiChatRoute
+  '/upgrade/success': typeof UpgradeSuccessRoute
+  '/api/public/cashfree-webhook': typeof ApiPublicCashfreeWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/api/chat': typeof ApiChatRoute
+  '/upgrade/success': typeof UpgradeSuccessRoute
+  '/api/public/cashfree-webhook': typeof ApiPublicCashfreeWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/chat'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/api/chat'
+    | '/upgrade/success'
+    | '/api/public/cashfree-webhook'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/chat'
-  id: '__root__' | '/' | '/api/chat'
+  to:
+    | '/'
+    | '/auth'
+    | '/api/chat'
+    | '/upgrade/success'
+    | '/api/public/cashfree-webhook'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/api/chat'
+    | '/upgrade/success'
+    | '/api/public/cashfree-webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
   ApiChatRoute: typeof ApiChatRoute
+  UpgradeSuccessRoute: typeof UpgradeSuccessRoute
+  ApiPublicCashfreeWebhookRoute: typeof ApiPublicCashfreeWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/upgrade/success': {
+      id: '/upgrade/success'
+      path: '/upgrade/success'
+      fullPath: '/upgrade/success'
+      preLoaderRoute: typeof UpgradeSuccessRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/chat': {
@@ -65,23 +126,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/cashfree-webhook': {
+      id: '/api/public/cashfree-webhook'
+      path: '/api/public/cashfree-webhook'
+      fullPath: '/api/public/cashfree-webhook'
+      preLoaderRoute: typeof ApiPublicCashfreeWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
   ApiChatRoute: ApiChatRoute,
+  UpgradeSuccessRoute: UpgradeSuccessRoute,
+  ApiPublicCashfreeWebhookRoute: ApiPublicCashfreeWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

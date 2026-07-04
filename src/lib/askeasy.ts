@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export type Attachment = {
   id: string;
@@ -237,4 +238,23 @@ export async function sendToAI(args: {
 
   const data = (await res.json()) as { reply?: string };
   return data.reply ?? "";
+}
+
+// -------- Auth session + cloud sync --------
+export type AuthUser = { id: string; email?: string; name?: string; avatar?: string } | null;
+
+export function useAuthUser(): AuthUser {
+  const [user, setUser] = useState<AuthUser>(null);
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      const u = data.session?.user;
+      if (u) setUser({ id: u.id, email: u.email ?? undefined, name: (u.user_metadata as { full_name?: string } | undefined)?.full_name, avatar: (u.user_metadata as { avatar_url?: string } | undefined)?.avatar_url });
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      const u = session?.user;
+      setUser(u ? { id: u.id, email: u.email ?? undefined, name: (u.user_metadata as { full_name?: string } | undefined)?.full_name, avatar: (u.user_metadata as { avatar_url?: string } | undefined)?.avatar_url } : null);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+  return user;
 }
