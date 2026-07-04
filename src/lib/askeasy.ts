@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 
 export type Attachment = {
   id: string;
-  type: "image" | "audio";
+  type: "image" | "audio" | "file";
   dataUrl: string;
   name?: string;
 };
@@ -31,7 +31,7 @@ const DEFAULT_SETTINGS: Settings = {
   darkMode: false,
   smartMode: true,
   voiceEnabled: true,
-  openRouterModel: "openrouter/auto",
+  openRouterModel: "askeasy/smart",
 };
 
 function readJSON<T>(key: string, fallback: T): T {

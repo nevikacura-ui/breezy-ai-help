@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Settings2, Plus, Camera, ChevronDown, Check } from "lucide-react";
+import { Settings2, Plus, ChevronDown, Check } from "lucide-react";
 import { Orb } from "@/components/askeasy/Orb";
 import { Bubble } from "@/components/askeasy/Bubble";
 import { Composer } from "@/components/askeasy/Composer";
@@ -25,13 +25,19 @@ const SUGGESTIONS = [
   "Summarize this photo",
 ];
 
-const MODELS: { id: string; label: string; hint: string }[] = [
-  { id: "openrouter/auto", label: "Smart", hint: "Picks the best model" },
-  { id: "openai/gpt-4o-mini", label: "Fast", hint: "Quick everyday answers" },
-  { id: "openai/gpt-4o", label: "Pro", hint: "Deep reasoning" },
-  { id: "anthropic/claude-3.5-sonnet", label: "Claude", hint: "Great writing" },
-  { id: "google/gemini-2.0-flash-exp", label: "Gemini", hint: "Vision + speed" },
+type ModelTier = {
+  id: string;
+  label: string;
+  hint: string;
+  tier: "free" | "pro";
+};
+
+const MODELS: ModelTier[] = [
+  { id: "askeasy/smart", label: "Smart", hint: "Balanced everyday answers", tier: "free" },
+  { id: "askeasy/pro", label: "Pro", hint: "Deep reasoning & long context", tier: "pro" },
+  { id: "askeasy/eco", label: "Eco", hint: "Fast & lightweight", tier: "free" },
 ];
+
 
 function Home() {
   const { settings, update, hydrated } = useSettings();
@@ -42,7 +48,6 @@ function Home() {
   const [thinking, setThinking] = useState(false);
   const [pendingAttachments, setPendingAttachments] = useState<Attachment[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({
@@ -83,27 +88,6 @@ function Home() {
     }
   };
 
-  const handleFiles = (files: FileList | null) => {
-    if (!files) return;
-    Array.from(files)
-      .filter((f) => f.type.startsWith("image/"))
-      .slice(0, 4)
-      .forEach((file) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          setPendingAttachments((prev) => [
-            ...prev,
-            {
-              id: crypto.randomUUID(),
-              type: "image",
-              dataUrl: String(reader.result),
-              name: file.name,
-            },
-          ]);
-        };
-        reader.readAsDataURL(file);
-      });
-  };
 
   const hasConversation = messages.length > 0;
   const greetingName = settings.name.trim() || "there";
@@ -157,9 +141,10 @@ function Home() {
                 className="fixed inset-0 z-10 cursor-default"
                 onClick={() => setModelOpen(false)}
               />
-              <div className="glass animate-fade-up absolute left-1/2 top-11 z-20 w-60 -translate-x-1/2 rounded-2xl p-1.5 shadow-[0_20px_60px_-20px_oklch(0.2_0.05_280/0.4)]">
+              <div className="glass animate-fade-up absolute left-1/2 top-11 z-20 w-64 -translate-x-1/2 rounded-2xl p-1.5 shadow-[0_20px_60px_-20px_oklch(0.2_0.05_280/0.4)]">
                 {MODELS.map((m) => {
                   const active = m.id === settings.openRouterModel;
+                  const isPro = m.tier === "pro";
                   return (
                     <button
                       key={m.id}
@@ -168,16 +153,38 @@ function Home() {
                         setModelOpen(false);
                       }}
                       className={
-                        "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition " +
-                        (active
-                          ? "bg-foreground/10"
-                          : "hover:bg-foreground/5")
+                        "relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition " +
+                        (active ? "bg-foreground/10" : "hover:bg-foreground/5")
+                      }
+                      style={
+                        isPro
+                          ? {
+                              boxShadow:
+                                "inset 0 0 0 1px transparent",
+                              backgroundImage: active
+                                ? "linear-gradient(var(--card), var(--card)), conic-gradient(from 0deg, oklch(0.78 0.2 30), oklch(0.72 0.22 300), oklch(0.78 0.2 200), oklch(0.82 0.2 90), oklch(0.78 0.2 30))"
+                                : undefined,
+                              backgroundOrigin: active ? "border-box" : undefined,
+                              backgroundClip: active ? "padding-box, border-box" : undefined,
+                              border: active ? "1px solid transparent" : undefined,
+                            }
+                          : undefined
                       }
                     >
-                      <Bubble size={20} state="idle" />
+                      <Bubble size={22} state={isPro ? "active" : "idle"} />
                       <div className="flex-1">
-                        <div className="text-[13px] font-medium text-foreground">
-                          {m.label}
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[13px] font-medium text-foreground">
+                            {m.label}
+                          </span>
+                          {isPro && (
+                            <span
+                              className="rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-white"
+                              style={{ background: "var(--send-gradient)" }}
+                            >
+                              Pro
+                            </span>
+                          )}
                         </div>
                         <div className="text-[11px] text-muted-foreground">
                           {m.hint}
@@ -192,41 +199,15 @@ function Home() {
           )}
         </div>
 
-        <div className="flex items-center gap-1.5">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
-            onChange={(e) => {
-              handleFiles(e.target.files);
-              e.target.value = "";
-            }}
-          />
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            aria-label="Attach image"
-            className="glass flex h-9 w-9 items-center justify-center rounded-full text-foreground/70 transition hover:text-foreground"
-          >
-            <Plus className="h-4 w-4" />
-          </button>
-          <button
-            onClick={() => setCameraOpen(true)}
-            aria-label="Camera"
-            className="glass flex h-9 w-9 items-center justify-center rounded-full text-foreground/70 transition hover:text-foreground"
-          >
-            <Camera className="h-4 w-4" />
-          </button>
-          <button
-            onClick={() => setSettingsOpen(true)}
-            aria-label="Settings"
-            className="glass flex h-9 w-9 items-center justify-center rounded-full text-foreground/70 transition hover:text-foreground"
-          >
-            <Settings2 className="h-4 w-4" />
-          </button>
-        </div>
+        <button
+          onClick={() => setSettingsOpen(true)}
+          aria-label="Settings"
+          className="glass flex h-9 w-9 items-center justify-center rounded-full text-foreground/70 transition hover:text-foreground"
+        >
+          <Settings2 className="h-4 w-4" />
+        </button>
       </header>
+
 
       {/* Content */}
       {hasConversation ? (
@@ -296,10 +277,13 @@ function Home() {
         <Composer
           onSend={send}
           disabled={thinking}
-          voiceEnabled={settings.voiceEnabled}
+          onOpenCamera={() => setCameraOpen(true)}
           externalAttachments={pendingAttachments}
+          onAddAttachments={(a) =>
+            setPendingAttachments((prev) => [...prev, ...a])
+          }
           onRemoveAttachment={(id) =>
-            setPendingAttachments((prev) => prev.filter((a) => a.id !== id))
+            setPendingAttachments((prev) => prev.filter((att) => att.id !== id))
           }
         />
         {!hasConversation && (
