@@ -33,8 +33,11 @@ export function Composer({
   externalAttachments,
   onAddAttachments,
   onRemoveAttachment,
+  onActivityChange,
 }: Props) {
   const [text, setText] = useState("");
+  const [focused, setFocused] = useState(false);
+  const [hovered, setHovered] = useState(false);
   const [voiceAttachment, setVoiceAttachment] = useState<Attachment | null>(null);
   const [recording, setRecording] = useState(false);
   const [recordSeconds, setRecordSeconds] = useState(0);
