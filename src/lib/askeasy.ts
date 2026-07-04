@@ -22,17 +22,46 @@ export type Settings = {
   theme: Theme;
   voiceEnabled: boolean;
   openRouterModel: string;
+  isPro: boolean;
 };
 
-const SETTINGS_KEY = "askeasy.settings.v2";
+export type ModelId = "askeasy/smart" | "askeasy/eco" | "askeasy/ultra";
+
+export type ModelInfo = {
+  id: ModelId;
+  label: string;
+  hint: string;
+  tier: "free" | "pro";
+};
+
+export const MODELS: ModelInfo[] = [
+  { id: "askeasy/smart", label: "Smart", hint: "Balanced everyday answers", tier: "free" },
+  { id: "askeasy/eco",   label: "Eco",   hint: "Fast & lightweight",       tier: "free" },
+  { id: "askeasy/ultra", label: "Ultra", hint: "Deep reasoning · Pro",     tier: "pro"  },
+];
+
+export const FREE_LIMITS = { text: 5, media: 2, voice: 2 } as const;
+
+export type Usage = { text: number; media: number; voice: number };
+
+export function modelTier(id: string): "free" | "pro" {
+  return MODELS.find((m) => m.id === id)?.tier ?? "free";
+}
+
+const SETTINGS_KEY = "askeasy.settings.v3";
 const MESSAGES_KEY = "askeasy.messages.v1";
+const USAGE_KEY = "askeasy.usage.v1";
 
 const DEFAULT_SETTINGS: Settings = {
   name: "",
   theme: "system",
   voiceEnabled: true,
   openRouterModel: "askeasy/smart",
+  isPro: false,
 };
+
+const DEFAULT_USAGE: Usage = { text: 0, media: 0, voice: 0 };
+
 
 function readJSON<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
@@ -118,6 +147,66 @@ export function useConversation() {
 
   return { messages, addMessage, updateMessage, clear, hydrated };
 }
+
+export function useUsage() {
+  const [usage, setUsage] = useState<Usage>(DEFAULT_USAGE);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = window.localStorage.getItem(USAGE_KEY);
+      if (raw) setUsage({ ...DEFAULT_USAGE, ...JSON.parse(raw) });
+    } catch {}
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    window.localStorage.setItem(USAGE_KEY, JSON.stringify(usage));
+  }, [usage, hydrated]);
+
+  const bump = useCallback(
+    (kind: keyof Usage, n = 1) => setUsage((u) => ({ ...u, [kind]: u[kind] + n })),
+    []
+  );
+  const resetUsage = useCallback(() => setUsage(DEFAULT_USAGE), []);
+
+  return { usage, bump, resetUsage, hydrated };
+}
+
+/**
+ * Given attachments + text, decide which quota buckets a message consumes,
+ * and whether a free user is out of quota for any of them.
+ */
+export function quotaCheck(
+  usage: Usage,
+  text: string,
+  attachments: Attachment[]
+): {
+  needs: Array<keyof Usage>;
+  overLimit: Array<keyof Usage>;
+  remaining: Usage;
+} {
+  const needs: Array<keyof Usage> = [];
+  if (text.trim().length > 0) needs.push("text");
+  const mediaCount = attachments.filter((a) => a.type === "image" || a.type === "file").length;
+  const voiceCount = attachments.filter((a) => a.type === "audio").length;
+  if (mediaCount > 0) needs.push("media");
+  if (voiceCount > 0) needs.push("voice");
+
+  const remaining: Usage = {
+    text: Math.max(0, FREE_LIMITS.text - usage.text),
+    media: Math.max(0, FREE_LIMITS.media - usage.media),
+    voice: Math.max(0, FREE_LIMITS.voice - usage.voice),
+  };
+  const overLimit = needs.filter((k) => {
+    const cost = k === "text" ? 1 : k === "media" ? mediaCount : voiceCount;
+    return remaining[k] < cost;
+  });
+  return { needs, overLimit, remaining };
+}
+
 
 /**
  * Sends the conversation to the /api/chat server route which proxies OpenRouter.

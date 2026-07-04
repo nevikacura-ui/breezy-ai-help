@@ -1,26 +1,34 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Settings2, Plus } from "lucide-react";
+import { toast } from "sonner";
 import { Orb } from "@/components/askeasy/Orb";
 import { Composer } from "@/components/askeasy/Composer";
 import { SettingsSheet } from "@/components/askeasy/SettingsSheet";
 import { CameraSheet } from "@/components/askeasy/CameraSheet";
 import { Typewriter } from "@/components/askeasy/Typewriter";
+import { ModelPill } from "@/components/askeasy/ModelPill";
 import {
   useConversation,
   useSettings,
+  useUsage,
   sendToAI,
+  quotaCheck,
+  modelTier,
   type Attachment,
   type Message,
+  type ModelId,
 } from "@/lib/askeasy";
 
 export const Route = createFileRoute("/")({
   component: Home,
 });
 
+
 function Home() {
   const { settings, update, hydrated } = useSettings();
   const { messages, addMessage, updateMessage, clear } = useConversation();
+  const { usage, bump, resetUsage } = useUsage();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [thinking, setThinking] = useState(false);
@@ -36,8 +44,54 @@ function Home() {
     });
   }, [messages, thinking]);
 
+  const requestPro = useCallback(() => {
+    if (settings.isPro) {
+      toast.success("You're already on Pro — Ultra unlocked.");
+      return;
+    }
+    toast("Upgrade to Pro", {
+      description: "Unlock Ultra + unlimited text, image, and voice.",
+      action: {
+        label: "Go Pro",
+        onClick: () => {
+          update({ isPro: true, openRouterModel: "askeasy/ultra" });
+          toast.success("Pro unlocked — welcome to Ultra ⚡");
+        },
+      },
+    });
+  }, [settings.isPro, update]);
+
   const send = async (text: string, attachments: Attachment[]) => {
     if (!text && attachments.length === 0) return;
+
+    // Quota gate — only enforced on free models. Pro users bypass.
+    const currentTier = modelTier(settings.openRouterModel);
+    if (!settings.isPro && currentTier === "free") {
+      const { overLimit } = quotaCheck(usage, text, attachments);
+      if (overLimit.length > 0) {
+        const kind =
+          overLimit[0] === "text"
+            ? "text messages"
+            : overLimit[0] === "media"
+              ? "image/file uploads"
+              : "voice notes";
+        toast("Free limit reached", {
+          description: `You've used all free ${kind}. Upgrade to Pro to keep going.`,
+          action: { label: "Go Pro", onClick: requestPro },
+        });
+        return;
+      }
+    }
+
+    // Count usage buckets consumed by this send.
+    const mediaN = attachments.filter((a) => a.type === "image" || a.type === "file").length;
+    const voiceN = attachments.filter((a) => a.type === "audio").length;
+    if (!settings.isPro) {
+      if (text.trim().length > 0) bump("text");
+      if (mediaN > 0) bump("media", mediaN);
+      if (voiceN > 0) bump("voice", voiceN);
+    }
+
     addMessage({ role: "user", content: text, attachments });
     setPendingAttachments([]);
 
@@ -76,6 +130,11 @@ function Home() {
     [],
   );
 
+  const handleSelectModel = (id: ModelId) => {
+    update({ openRouterModel: id });
+    toast.success(`Switched to ${id.split("/")[1]}`, { duration: 1600 });
+  };
+
   const hasConversation = messages.length > 0;
 
   if (!hydrated) return <div className="min-h-dvh bg-background" />;
@@ -91,16 +150,27 @@ function Home() {
         }}
       />
 
-      {/* Top bar — minimal: New + Settings */}
+      {/* Top bar — New · Model · Settings */}
       <header className="relative z-30 flex items-center justify-between gap-2 px-4 pt-5">
         <button
-          onClick={clear}
+          onClick={() => {
+            clear();
+            resetUsage();
+          }}
           className="glass flex h-9 items-center gap-1.5 rounded-full px-3 text-[13px] font-medium text-foreground/80 transition hover:text-foreground"
           title="New conversation"
         >
           <Plus className="h-3.5 w-3.5" />
           New
         </button>
+
+        <ModelPill
+          model={settings.openRouterModel as ModelId}
+          isPro={settings.isPro}
+          usage={usage}
+          onSelect={handleSelectModel}
+          onRequestPro={requestPro}
+        />
 
         <button
           onClick={() => setSettingsOpen(true)}
@@ -110,6 +180,8 @@ function Home() {
           <Settings2 className="h-4 w-4" />
         </button>
       </header>
+
+
 
       {/* Content */}
       {hasConversation ? (
