@@ -233,9 +233,16 @@ export async function sendToAI(args: {
   settings: Settings;
   signal?: AbortSignal;
 }): Promise<string> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  try {
+    const { data } = await supabase.auth.getSession();
+    const tok = data.session?.access_token;
+    if (tok) headers["Authorization"] = `Bearer ${tok}`;
+  } catch { /* anonymous — fine */ }
+
   const res = await fetch("/api/chat", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     signal: args.signal,
     body: JSON.stringify({
       model: args.settings.openRouterModel,

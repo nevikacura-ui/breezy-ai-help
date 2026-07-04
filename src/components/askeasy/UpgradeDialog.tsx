@@ -11,6 +11,7 @@ type Props = {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   reason?: string;
+  labels?: { title?: string; cta?: string; opening?: string };
 };
 
 const CASHFREE_SDK = "https://sdk.cashfree.com/js/v3/cashfree.js";
@@ -30,7 +31,7 @@ function loadCashfree(): Promise<((opts: { mode: "sandbox" | "production" }) => 
   });
 }
 
-export function UpgradeDialog({ open, onOpenChange, reason }: Props) {
+export function UpgradeDialog({ open, onOpenChange, reason, labels }: Props) {
   const [busy, setBusy] = useState(false);
   const create = useServerFn(createCashfreeOrder);
   const navigate = useNavigate();
@@ -64,7 +65,7 @@ export function UpgradeDialog({ open, onOpenChange, reason }: Props) {
           >
             <Zap className="h-5 w-5" />
           </div>
-          <DialogTitle className="font-display text-center text-2xl">Upgrade to Pro</DialogTitle>
+          <DialogTitle className="font-display text-center text-2xl">{labels?.title ?? "Upgrade to Pro"}</DialogTitle>
           <DialogDescription className="text-center">
             {reason ?? "Unlimited chat, media and voice — plus the Ultra model."}
           </DialogDescription>
@@ -89,7 +90,7 @@ export function UpgradeDialog({ open, onOpenChange, reason }: Props) {
           style={{ background: "var(--send-gradient)" }}
         >
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
-          {busy ? "Opening secure checkout…" : "Continue to Cashfree"}
+          {busy ? (labels?.opening ?? "Opening secure checkout…") : (labels?.cta ?? "Continue to Cashfree")}
         </button>
         <p className="mt-3 text-center text-[11px] text-muted-foreground">
           Secure payments by Cashfree · UPI, cards, netbanking, wallets
