@@ -17,6 +17,13 @@ type ChatMessage = {
 type ChatRequestBody = {
   messages?: ChatMessage[];
   model?: string;
+  language?: string;
+};
+
+const LANG_NAMES: Record<string, string> = {
+  en: "English", hi: "Hindi", bn: "Bengali", ta: "Tamil", te: "Telugu",
+  mr: "Marathi", gu: "Gujarati", kn: "Kannada", ml: "Malayalam",
+  pa: "Punjabi", ur: "Urdu", or: "Odia", as: "Assamese",
 };
 
 export const Route = createFileRoute("/api/chat")({
@@ -68,7 +75,10 @@ export const Route = createFileRoute("/api/chat")({
                 {
                   role: "system",
                   content:
-                    "You are AskEasy, a warm, concise, helpful assistant. Answer clearly using markdown when useful.",
+                    "You are AskEasy, a warm, concise, helpful assistant. Answer clearly using markdown when useful." +
+                    (body.language && body.language !== "en" && LANG_NAMES[body.language]
+                      ? ` IMPORTANT: Always reply in ${LANG_NAMES[body.language]}, using its native script, regardless of the language the user writes in. Keep proper nouns as-is.`
+                      : ""),
                 },
                 ...messages.map((m) => ({
                   role: m.role,

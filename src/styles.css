@@ -86,6 +86,36 @@
   --page-gradient: radial-gradient(120% 80% at 50% 0%, oklch(0.09 0.015 265) 0%, oklch(0.03 0.005 260) 70%);
 }
 
+/* India Mode — tricolor theme (crisp white base, saffron primary, India green accent) */
+.india {
+  --background: oklch(0.99 0.002 90);
+  --foreground: oklch(0.18 0.03 265);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.03 265);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.03 265);
+  --primary: oklch(0.72 0.19 55);          /* saffron #FF9933 */
+  --primary-foreground: oklch(0.99 0.002 90);
+  --secondary: oklch(0.6 0.17 148);         /* india green #138808 */
+  --secondary-foreground: oklch(0.99 0.002 90);
+  --muted: oklch(0.965 0.008 80);
+  --muted-foreground: oklch(0.48 0.04 260);
+  --accent: oklch(0.92 0.06 55);            /* soft saffron tint */
+  --accent-foreground: oklch(0.22 0.03 265);
+  --destructive: oklch(0.6 0.22 27);
+  --border: oklch(0.88 0.02 80);
+  --input: oklch(0.88 0.02 80);
+  --ring: oklch(0.72 0.19 55);
+
+  --glass-bg: color-mix(in oklab, white 82%, transparent);
+  --glass-border: color-mix(in oklab, oklch(0.72 0.19 55) 22%, transparent);
+  --send-gradient: linear-gradient(135deg, oklch(0.72 0.19 55), oklch(0.6 0.17 148));
+  --page-gradient:
+    radial-gradient(60% 40% at 50% 0%, color-mix(in oklab, oklch(0.72 0.19 55) 18%, transparent) 0%, transparent 70%),
+    radial-gradient(60% 40% at 50% 100%, color-mix(in oklab, oklch(0.6 0.17 148) 16%, transparent) 0%, transparent 70%),
+    white;
+}
+
 @layer base {
   * { border-color: var(--color-border); }
   html, body, #root { height: 100%; }

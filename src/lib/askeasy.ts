@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { LangCode } from "./i18n";
+import { t as translate } from "./i18n";
 
 export type Attachment = {
   id: string;
@@ -24,6 +26,8 @@ export type Settings = {
   voiceEnabled: boolean;
   openRouterModel: string;
   isPro: boolean;
+  indiaMode: boolean;
+  language: LangCode;
 };
 
 export type ModelId = "askeasy/smart" | "askeasy/eco" | "askeasy/ultra";
@@ -49,7 +53,7 @@ export function modelTier(id: string): "free" | "pro" {
   return MODELS.find((m) => m.id === id)?.tier ?? "free";
 }
 
-const SETTINGS_KEY = "askeasy.settings.v3";
+const SETTINGS_KEY = "askeasy.settings.v4";
 const MESSAGES_KEY = "askeasy.messages.v1";
 const USAGE_KEY = "askeasy.usage.v1";
 
@@ -59,6 +63,8 @@ const DEFAULT_SETTINGS: Settings = {
   voiceEnabled: true,
   openRouterModel: "askeasy/smart",
   isPro: false,
+  indiaMode: false,
+  language: "en",
 };
 
 const DEFAULT_USAGE: Usage = { text: 0, media: 0, voice: 0 };
@@ -91,18 +97,26 @@ export function useSettings() {
   useEffect(() => {
     if (typeof document === "undefined") return;
     const applyTheme = () => {
+      const root = document.documentElement;
+      // India Mode overrides light/dark with the tricolor theme.
+      if (settings.indiaMode) {
+        root.classList.remove("dark");
+        root.classList.add("india");
+        return;
+      }
+      root.classList.remove("india");
       const t = settings.theme;
       const prefersDark =
         window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
       const dark = t === "dark" || (t === "system" && prefersDark);
-      document.documentElement.classList.toggle("dark", dark);
+      root.classList.toggle("dark", dark);
     };
     applyTheme();
-    if (settings.theme !== "system") return;
+    if (settings.indiaMode || settings.theme !== "system") return;
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     mq.addEventListener("change", applyTheme);
     return () => mq.removeEventListener("change", applyTheme);
-  }, [settings.theme]);
+  }, [settings.theme, settings.indiaMode]);
 
   const update = useCallback(
     (patch: Partial<Settings>) => setSettings((s) => ({ ...s, ...patch })),
@@ -110,6 +124,15 @@ export function useSettings() {
   );
 
   return { settings, update, hydrated };
+}
+
+/** Localized string helper bound to current settings. */
+export function useI18n(settings: Settings) {
+  const lang: LangCode = settings.indiaMode ? settings.language : "en";
+  return useCallback(
+    (key: string, vars?: Record<string, string>) => translate(lang, key, vars),
+    [lang],
+  );
 }
 
 export function useConversation() {
@@ -176,10 +199,6 @@ export function useUsage() {
   return { usage, bump, resetUsage, hydrated };
 }
 
-/**
- * Given attachments + text, decide which quota buckets a message consumes,
- * and whether a free user is out of quota for any of them.
- */
 export function quotaCheck(
   usage: Usage,
   text: string,
@@ -209,10 +228,6 @@ export function quotaCheck(
 }
 
 
-/**
- * Sends the conversation to the /api/chat server route which proxies OpenRouter.
- * Free tier: Gemini Flash / GPT-4o-mini. Pro tier: GPT-4o.
- */
 export async function sendToAI(args: {
   messages: Message[];
   settings: Settings;
@@ -224,6 +239,7 @@ export async function sendToAI(args: {
     signal: args.signal,
     body: JSON.stringify({
       model: args.settings.openRouterModel,
+      language: args.settings.indiaMode ? args.settings.language : undefined,
       messages: args.messages.map((m) => ({
         role: m.role,
         content: m.content,
