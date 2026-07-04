@@ -290,37 +290,6 @@ function Home() {
         reason={upgradeReason}
         labels={{ title: t("upgrade.title"), cta: t("upgrade.cta"), opening: t("upgrade.opening") }}
       />
-          onSend={send}
-          disabled={thinking}
-          onOpenCamera={() => setCameraOpen(true)}
-          externalAttachments={pendingAttachments}
-          onAddAttachments={(a) => setPendingAttachments((prev) => [...prev, ...a])}
-          onRemoveAttachment={(id) => setPendingAttachments((prev) => prev.filter((att) => att.id !== id))}
-          onActivityChange={handleActivity}
-        />
-        {!hasConversation && (
-          <p className="mt-2 text-center text-[11px] text-muted-foreground/70">
-            {t("footer.disclaimer")}
-          </p>
-        )}
-      </div>
-
-      <SettingsSheet
-        open={settingsOpen}
-        onOpenChange={setSettingsOpen}
-        settings={settings}
-        update={update}
-        isProEffective={isPro}
-        usage={usage}
-        onUpgrade={() => { setSettingsOpen(false); openUpgrade(); }}
-        onClearConversation={() => {
-          clear();
-          if (user) clearMsgs().catch(() => {});
-          setSettingsOpen(false);
-        }}
-      />
-
-      <UpgradeDialog open={upgradeOpen} onOpenChange={setUpgradeOpen} reason={upgradeReason} />
 
       <CameraSheet
         open={cameraOpen}
