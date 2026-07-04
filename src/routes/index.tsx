@@ -261,6 +261,7 @@ function Home() {
           onActivityChange={handleActivity}
           placeholder={t("compose.placeholder")}
           thinkingLabel={t("compose.thinking")}
+          indiaMode={settings.indiaMode}
         />
         {!hasConversation && (
           <p className="mt-2 text-center text-[11px] text-muted-foreground/70">
