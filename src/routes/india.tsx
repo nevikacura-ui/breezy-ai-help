@@ -32,7 +32,7 @@ function IndiaOnboarding() {
   const pill = tr(selected, "onboard.pill");
 
   const enter = () => {
-    update({ indiaMode: true, language: selected });
+    update({ indiaMode: true, language: selected, indiaOnboarded: true });
     navigate({ to: "/" });
   };
 
