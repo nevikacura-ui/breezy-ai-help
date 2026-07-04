@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 
 export type Attachment = {
   id: string;
-  type: "image" | "audio";
+  type: "image" | "audio" | "file";
   dataUrl: string;
   name?: string;
 };
