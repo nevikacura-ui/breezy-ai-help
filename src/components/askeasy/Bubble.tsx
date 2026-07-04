@@ -51,12 +51,12 @@ export const Bubble = forwardRef<HTMLButtonElement, BubbleProps>(function Bubble
   const gradient =
     state === "listening"
       ? "conic-gradient(from 0deg, oklch(0.7 0.24 25), oklch(0.75 0.22 15), oklch(0.68 0.26 5), oklch(0.72 0.24 35), oklch(0.7 0.24 25))"
-      : "conic-gradient(from 0deg, oklch(0.78 0.2 30), oklch(0.72 0.22 300), oklch(0.78 0.2 200), oklch(0.82 0.2 90), oklch(0.78 0.2 30))";
+      : "conic-gradient(from 0deg, oklch(0.78 0.19 60), oklch(0.72 0.22 30), oklch(0.65 0.24 350), oklch(0.7 0.2 290), oklch(0.75 0.16 220), oklch(0.78 0.19 60))";
 
   const glowGradient =
     state === "listening"
       ? "conic-gradient(from 0deg, oklch(0.7 0.24 25), oklch(0.75 0.22 15), oklch(0.68 0.26 5), oklch(0.72 0.24 35), oklch(0.7 0.24 25))"
-      : "conic-gradient(from 0deg, oklch(0.75 0.18 30), oklch(0.7 0.2 300), oklch(0.75 0.18 200), oklch(0.8 0.18 90), oklch(0.75 0.18 30))";
+      : "conic-gradient(from 0deg, oklch(0.75 0.17 55), oklch(0.7 0.2 30), oklch(0.65 0.22 350), oklch(0.7 0.18 290), oklch(0.72 0.15 220), oklch(0.75 0.17 55))";
 
   const content = (
     <span
