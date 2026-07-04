@@ -261,9 +261,16 @@ function Home() {
       {/* Content */}
       {hasConversation ? (
         <section ref={scrollRef} className="relative z-10 flex-1 overflow-y-auto px-4 pb-40 pt-6">
-          <div className="mx-auto flex max-w-2xl flex-col gap-4">
+          <div
+            key={`msgs-${settings.indiaMode ? "india" : "std"}-${settings.theme}`}
+            className="mx-auto flex max-w-2xl flex-col gap-4"
+          >
             {messages.map((m) => (
-              <MessageBubble key={m.id} message={m} thinking={thinking && m.role === "assistant"} />
+              <MessageBubble
+                key={`${settings.indiaMode ? "india" : "std"}-${settings.theme}-${m.id}`}
+                message={m}
+                thinking={thinking && m.role === "assistant"}
+              />
             ))}
           </div>
         </section>
