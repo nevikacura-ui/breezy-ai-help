@@ -285,15 +285,15 @@ export function Composer({
         <div
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
-          className="glass flex items-center gap-3 rounded-full py-2 pl-2 pr-2 shadow-[0_20px_60px_-25px_oklch(0.2_0.05_280/0.4)] transition-all duration-500"
+          className="glass flex items-center gap-3 rounded-full py-2 pl-2 pr-2 shadow-[0_30px_80px_-30px_oklch(0_0_0/0.6)] transition-all duration-500"
           style={{
             boxShadow: disabled
-              ? "0 0 0 1px oklch(0.72 0.22 300 / 0.35), 0 20px 60px -20px oklch(0.7 0.2 300 / 0.35)"
+              ? "inset 0 0 0 1px oklch(0.72 0.22 30 / 0.35), 0 24px 70px -22px oklch(0.7 0.2 30 / 0.35)"
               : recording
-                ? "0 0 0 1px oklch(0.7 0.24 25 / 0.4), 0 20px 60px -20px oklch(0.7 0.24 25 / 0.35)"
+                ? "inset 0 0 0 1px oklch(0.7 0.24 25 / 0.4), 0 24px 70px -22px oklch(0.7 0.24 25 / 0.35)"
                 : focused
-                  ? "0 0 0 1px oklch(0.75 0.14 295 / 0.35), 0 24px 70px -22px oklch(0.7 0.18 295 / 0.4)"
-                  : undefined,
+                  ? "inset 0 0 0 1px oklch(0.75 0.16 40 / 0.35), 0 28px 80px -24px oklch(0.7 0.18 30 / 0.4)"
+                  : "inset 0 0 0 1px color-mix(in oklab, white 6%, transparent), 0 30px 80px -30px oklch(0 0 0 / 0.6)",
           }}
         >
           <Bubble
