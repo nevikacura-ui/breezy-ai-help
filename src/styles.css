@@ -52,12 +52,12 @@
   --accent: oklch(0.94 0.02 280);
   --accent-foreground: oklch(0.22 0.03 265);
   --destructive: oklch(0.6 0.22 27);
-  --border: oklch(0.92 0.008 260);
-  --input: oklch(0.92 0.008 260);
+  --border: oklch(0.86 0.012 260);
+  --input: oklch(0.86 0.012 260);
   --ring: oklch(0.7 0.05 280);
 
-  --glass-bg: color-mix(in oklab, white 70%, transparent);
-  --glass-border: color-mix(in oklab, white 40%, transparent);
+  --glass-bg: color-mix(in oklab, white 78%, transparent);
+  --glass-border: color-mix(in oklab, oklch(0.55 0.02 260) 22%, transparent);
   --send-gradient: linear-gradient(135deg, oklch(0.85 0.08 300), oklch(0.75 0.14 290));
   --page-gradient: radial-gradient(120% 80% at 50% 0%, oklch(0.97 0.015 260) 0%, oklch(0.985 0.003 250) 60%);
 }
