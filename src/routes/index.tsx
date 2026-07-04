@@ -1,8 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { Settings2, Plus, ChevronDown, Check } from "lucide-react";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { Settings2, Plus } from "lucide-react";
 import { Orb } from "@/components/askeasy/Orb";
-import { Bubble } from "@/components/askeasy/Bubble";
 import { Composer } from "@/components/askeasy/Composer";
 import { SettingsSheet } from "@/components/askeasy/SettingsSheet";
 import { CameraSheet } from "@/components/askeasy/CameraSheet";
@@ -18,29 +17,15 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-
-type ModelTier = {
-  id: string;
-  label: string;
-  hint: string;
-  tier: "free" | "pro";
-};
-
-const MODELS: ModelTier[] = [
-  { id: "askeasy/smart", label: "Smart", hint: "Balanced everyday answers", tier: "free" },
-  { id: "askeasy/pro", label: "Pro", hint: "Deep reasoning & long context", tier: "pro" },
-  { id: "askeasy/eco", label: "Eco", hint: "Fast & lightweight", tier: "free" },
-];
-
-
 function Home() {
   const { settings, update, hydrated } = useSettings();
   const { messages, addMessage, updateMessage, clear } = useConversation();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [cameraOpen, setCameraOpen] = useState(false);
-  const [modelOpen, setModelOpen] = useState(false);
   const [thinking, setThinking] = useState(false);
   const [pendingAttachments, setPendingAttachments] = useState<Attachment[]>([]);
+  const [orbActive, setOrbActive] = useState(false);
+  const [orbEnergized, setOrbEnergized] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -82,11 +67,15 @@ function Home() {
     }
   };
 
+  const handleActivity = useCallback(
+    ({ focused, hasInput }: { focused: boolean; hasInput: boolean }) => {
+      setOrbActive(focused || hasInput);
+      setOrbEnergized(hasInput);
+    },
+    [],
+  );
 
   const hasConversation = messages.length > 0;
-  const currentModel =
-    MODELS.find((m) => m.id === settings.openRouterModel) ?? MODELS[0];
-
 
   if (!hydrated) return <div className="min-h-dvh bg-background" />;
 
@@ -94,14 +83,14 @@ function Home() {
     <main className="relative flex min-h-dvh flex-col overflow-hidden">
       <div
         aria-hidden
-        className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full opacity-50 blur-3xl"
+        className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full opacity-50 blur-3xl transition-opacity duration-700"
         style={{
           background:
             "radial-gradient(circle, oklch(0.8 0.12 300 / 0.5), transparent 70%)",
         }}
       />
 
-      {/* Top bar */}
+      {/* Top bar — minimal: New + Settings */}
       <header className="relative z-30 flex items-center justify-between gap-2 px-4 pt-5">
         <button
           onClick={clear}
@@ -112,87 +101,6 @@ function Home() {
           New
         </button>
 
-        {/* Model selector — centerpiece */}
-        <div className="relative">
-          <button
-            onClick={() => setModelOpen((v) => !v)}
-            className="glass flex h-9 items-center gap-2 rounded-full pl-2 pr-3 text-[13px] font-medium text-foreground transition"
-          >
-            <Bubble size={18} state="idle" />
-            <span>{currentModel.label}</span>
-            <ChevronDown
-              className={
-                "h-3.5 w-3.5 text-foreground/60 transition " +
-                (modelOpen ? "rotate-180" : "")
-              }
-            />
-          </button>
-
-          {modelOpen && (
-            <>
-              <button
-                aria-label="Close menu"
-                className="fixed inset-0 z-10 cursor-default"
-                onClick={() => setModelOpen(false)}
-              />
-              <div className="glass animate-fade-up absolute left-1/2 top-11 z-20 w-64 -translate-x-1/2 rounded-2xl p-1.5 shadow-[0_20px_60px_-20px_oklch(0.2_0.05_280/0.4)]">
-                {MODELS.map((m) => {
-                  const active = m.id === settings.openRouterModel;
-                  const isPro = m.tier === "pro";
-                  return (
-                    <button
-                      key={m.id}
-                      onClick={() => {
-                        update({ openRouterModel: m.id });
-                        setModelOpen(false);
-                      }}
-                      className={
-                        "relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition " +
-                        (active ? "bg-foreground/10" : "hover:bg-foreground/5")
-                      }
-                      style={
-                        isPro
-                          ? {
-                              boxShadow:
-                                "inset 0 0 0 1px transparent",
-                              backgroundImage: active
-                                ? "linear-gradient(var(--card), var(--card)), conic-gradient(from 0deg, oklch(0.78 0.2 30), oklch(0.72 0.22 300), oklch(0.78 0.2 200), oklch(0.82 0.2 90), oklch(0.78 0.2 30))"
-                                : undefined,
-                              backgroundOrigin: active ? "border-box" : undefined,
-                              backgroundClip: active ? "padding-box, border-box" : undefined,
-                              border: active ? "1px solid transparent" : undefined,
-                            }
-                          : undefined
-                      }
-                    >
-                      <Bubble size={22} state={isPro ? "active" : "idle"} />
-                      <div className="flex-1">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[13px] font-medium text-foreground">
-                            {m.label}
-                          </span>
-                          {isPro && (
-                            <span
-                              className="rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-white"
-                              style={{ background: "var(--send-gradient)" }}
-                            >
-                              Pro
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-[11px] text-muted-foreground">
-                          {m.hint}
-                        </div>
-                      </div>
-                      {active && <Check className="h-3.5 w-3.5 text-foreground/70" />}
-                    </button>
-                  );
-                })}
-              </div>
-            </>
-          )}
-        </div>
-
         <button
           onClick={() => setSettingsOpen(true)}
           aria-label="Settings"
@@ -201,7 +109,6 @@ function Home() {
           <Settings2 className="h-4 w-4" />
         </button>
       </header>
-
 
       {/* Content */}
       {hasConversation ? (
@@ -222,12 +129,12 @@ function Home() {
       ) : (
         <section className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 text-center">
           <div className="animate-fade-in animate-breathe" style={{ animationDelay: "0.1s" }}>
-            <Orb size={220} intense />
+            <Orb size={220} intense active={orbActive} energized={orbEnergized} />
           </div>
 
           <div className="animate-fade-up mt-10 space-y-3" style={{ animationDelay: "0.3s" }}>
             <h1 className="font-display text-[2.5rem] leading-none tracking-tight text-foreground sm:text-6xl">
-              Welcome, Nevika
+              Welcome{settings.name ? `, ${settings.name}` : ", Nevika"}
             </h1>
             <p className="animate-shimmer text-gradient mx-auto max-w-md text-lg font-light tracking-wide sm:text-xl">
               Ask anything. The easy way.
@@ -257,6 +164,7 @@ function Home() {
           onRemoveAttachment={(id) =>
             setPendingAttachments((prev) => prev.filter((att) => att.id !== id))
           }
+          onActivityChange={handleActivity}
         />
         {!hasConversation && (
           <p className="mt-3 text-center text-[11px] text-muted-foreground/70">
@@ -286,9 +194,10 @@ function Home() {
               id: crypto.randomUUID(),
               type: "image",
               dataUrl,
-              name: "photo.jpg",
+              name: "camera.jpg",
             },
           ]);
+          setCameraOpen(false);
         }}
       />
     </main>
@@ -304,46 +213,50 @@ function MessageBubble({
 }) {
   const isUser = message.role === "user";
   return (
-    <div className={"flex w-full " + (isUser ? "justify-end" : "justify-start")}>
+    <div className={"flex " + (isUser ? "justify-end" : "justify-start")}>
       <div
         className={
-          "flex max-w-[85%] flex-col gap-2 " +
-          (isUser ? "items-end" : "items-start")
+          "max-w-[85%] rounded-3xl px-4 py-3 text-[15px] leading-relaxed " +
+          (isUser
+            ? "bg-foreground text-background"
+            : "glass text-foreground")
         }
       >
         {message.attachments && message.attachments.length > 0 && (
-          <div className="flex flex-wrap gap-2">
+          <div className="mb-2 flex flex-wrap gap-2">
             {message.attachments.map((a) =>
               a.type === "image" ? (
                 <img
                   key={a.id}
                   src={a.dataUrl}
                   alt=""
-                  className="max-h-56 rounded-2xl object-cover"
+                  className="h-24 w-24 rounded-xl object-cover"
                 />
               ) : (
-                <audio key={a.id} src={a.dataUrl} controls className="h-10" />
+                <div
+                  key={a.id}
+                  className="rounded-full bg-background/20 px-3 py-1 text-xs"
+                >
+                  {a.name ?? a.type}
+                </div>
               ),
             )}
           </div>
         )}
-        {(message.content || thinking) && (
-          <div
-            className={
-              isUser
-                ? "rounded-3xl rounded-br-md bg-primary px-4 py-2.5 text-[15px] leading-relaxed text-primary-foreground"
-                : "whitespace-pre-wrap px-1 text-[15px] leading-relaxed text-foreground"
-            }
-          >
-            {thinking ? (
-              <span className="inline-flex items-center gap-2 text-foreground/60">
-                <Bubble size={18} state="thinking" />
-                <span className="text-[13px]">Thinking…</span>
-              </span>
-            ) : (
-              message.content
-            )}
-          </div>
+        {thinking ? (
+          <span className="inline-flex gap-1">
+            <span className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-current" />
+            <span
+              className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-current"
+              style={{ animationDelay: "0.15s" }}
+            />
+            <span
+              className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-current"
+              style={{ animationDelay: "0.3s" }}
+            />
+          </span>
+        ) : (
+          <span className="whitespace-pre-wrap">{message.content}</span>
         )}
       </div>
     </div>

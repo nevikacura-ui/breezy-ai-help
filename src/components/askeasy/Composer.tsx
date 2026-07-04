@@ -10,6 +10,8 @@ type Props = {
   externalAttachments: Attachment[];
   onAddAttachments: (a: Attachment[]) => void;
   onRemoveAttachment: (id: string) => void;
+  /** Emitted when input area is focused/hovered — used by the orb. */
+  onActivityChange?: (state: { focused: boolean; hasInput: boolean }) => void;
 };
 
 const LONG_PRESS_MS = 450;
@@ -31,8 +33,11 @@ export function Composer({
   externalAttachments,
   onAddAttachments,
   onRemoveAttachment,
+  onActivityChange,
 }: Props) {
   const [text, setText] = useState("");
+  const [focused, setFocused] = useState(false);
+  const [hovered, setHovered] = useState(false);
   const [voiceAttachment, setVoiceAttachment] = useState<Attachment | null>(null);
   const [recording, setRecording] = useState(false);
   const [recordSeconds, setRecordSeconds] = useState(0);
@@ -66,6 +71,11 @@ export function Composer({
     ? [...externalAttachments, voiceAttachment]
     : externalAttachments;
   const hasContent = text.trim().length > 0 || allAttachments.length > 0;
+
+  useEffect(() => {
+    onActivityChange?.({ focused: focused || hovered, hasInput: hasContent });
+  }, [focused, hovered, hasContent, onActivityChange]);
+
 
   const submit = () => {
     if (!hasContent || disabled) return;
@@ -273,13 +283,17 @@ export function Composer({
         />
 
         <div
-          className="glass flex items-center gap-3 rounded-full py-2 pl-2 pr-2 shadow-[0_20px_60px_-25px_oklch(0.2_0.05_280/0.4)] transition"
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          className="glass flex items-center gap-3 rounded-full py-2 pl-2 pr-2 shadow-[0_20px_60px_-25px_oklch(0.2_0.05_280/0.4)] transition-all duration-500"
           style={{
             boxShadow: disabled
               ? "0 0 0 1px oklch(0.72 0.22 300 / 0.35), 0 20px 60px -20px oklch(0.7 0.2 300 / 0.35)"
               : recording
                 ? "0 0 0 1px oklch(0.7 0.24 25 / 0.4), 0 20px 60px -20px oklch(0.7 0.24 25 / 0.35)"
-                : undefined,
+                : focused
+                  ? "0 0 0 1px oklch(0.75 0.14 295 / 0.35), 0 24px 70px -22px oklch(0.7 0.18 295 / 0.4)"
+                  : undefined,
           }}
         >
           <Bubble
@@ -309,6 +323,8 @@ export function Composer({
               ref={textareaRef}
               value={text}
               onChange={(e) => setText(e.target.value)}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();

@@ -15,21 +15,21 @@ export type Message = {
   createdAt: number;
 };
 
+export type Theme = "light" | "dark" | "system";
+
 export type Settings = {
   name: string;
-  darkMode: boolean;
-  smartMode: boolean;
+  theme: Theme;
   voiceEnabled: boolean;
   openRouterModel: string;
 };
 
-const SETTINGS_KEY = "askeasy.settings.v1";
+const SETTINGS_KEY = "askeasy.settings.v2";
 const MESSAGES_KEY = "askeasy.messages.v1";
 
 const DEFAULT_SETTINGS: Settings = {
   name: "",
-  darkMode: false,
-  smartMode: true,
+  theme: "system",
   voiceEnabled: true,
   openRouterModel: "askeasy/smart",
 };
@@ -60,8 +60,19 @@ export function useSettings() {
 
   useEffect(() => {
     if (typeof document === "undefined") return;
-    document.documentElement.classList.toggle("dark", settings.darkMode);
-  }, [settings.darkMode]);
+    const applyTheme = () => {
+      const t = settings.theme;
+      const prefersDark =
+        window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
+      const dark = t === "dark" || (t === "system" && prefersDark);
+      document.documentElement.classList.toggle("dark", dark);
+    };
+    applyTheme();
+    if (settings.theme !== "system") return;
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    mq.addEventListener("change", applyTheme);
+    return () => mq.removeEventListener("change", applyTheme);
+  }, [settings.theme]);
 
   const update = useCallback(
     (patch: Partial<Settings>) => setSettings((s) => ({ ...s, ...patch })),

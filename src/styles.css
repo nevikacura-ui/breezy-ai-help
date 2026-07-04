@@ -95,6 +95,22 @@
     -webkit-font-smoothing: antialiased;
     font-feature-settings: "ss01", "cv11";
   }
+  /* Seamless theme transitions — colors, borders, shadows morph smoothly */
+  html {
+    transition: background-color 500ms ease, color 500ms ease;
+  }
+  body {
+    transition: background 600ms ease, color 500ms ease;
+  }
+  *, *::before, *::after {
+    transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+    transition-duration: 400ms;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  /* Respect motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration: 0ms !important; }
+  }
 }
 
 @utility font-display {
