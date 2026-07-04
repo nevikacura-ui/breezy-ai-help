@@ -55,15 +55,13 @@ function Home() {
 
   const isPro = user ? serverIsPro : settings.isPro;
 
-  // Domain routing: askindia.io visitors land on onboarding first (unless they
-  // already picked India Mode, meaning they've completed onboarding).
+  // Domain routing: askindia.io visitors land on onboarding until they've
+  // chosen India Mode. Once indiaMode is on, they enter the app directly.
   useEffect(() => {
     if (!hydrated || typeof window === "undefined") return;
     const host = window.location.hostname.toLowerCase();
     const isIndiaDomain = host.includes("askindia");
-    const seen = window.localStorage.getItem("askeasy.indiaOnboardSeen") === "1";
-    if (isIndiaDomain && !settings.indiaMode && !seen) {
-      window.localStorage.setItem("askeasy.indiaOnboardSeen", "1");
+    if (isIndiaDomain && !settings.indiaMode) {
       navigate({ to: "/india" });
     }
   }, [hydrated, settings.indiaMode, navigate]);
@@ -254,6 +252,44 @@ function Home() {
         style={hasConversation ? undefined : { animationDelay: "0.45s" }}
       >
         <Composer
+          onSend={send}
+          disabled={thinking}
+          onOpenCamera={() => setCameraOpen(true)}
+          externalAttachments={pendingAttachments}
+          onAddAttachments={(a) => setPendingAttachments((prev) => [...prev, ...a])}
+          onRemoveAttachment={(id) => setPendingAttachments((prev) => prev.filter((att) => att.id !== id))}
+          onActivityChange={handleActivity}
+          placeholder={t("compose.placeholder")}
+          thinkingLabel={t("compose.thinking")}
+        />
+        {!hasConversation && (
+          <p className="mt-2 text-center text-[11px] text-muted-foreground/70">
+            {t("footer.disclaimer")}
+          </p>
+        )}
+      </div>
+
+      <SettingsSheet
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+        settings={settings}
+        update={update}
+        isProEffective={isPro}
+        usage={usage}
+        onUpgrade={() => { setSettingsOpen(false); openUpgrade(); }}
+        onClearConversation={() => {
+          clear();
+          if (user) clearMsgs().catch(() => {});
+          setSettingsOpen(false);
+        }}
+      />
+
+      <UpgradeDialog
+        open={upgradeOpen}
+        onOpenChange={setUpgradeOpen}
+        reason={upgradeReason}
+        labels={{ title: t("upgrade.title"), cta: t("upgrade.cta"), opening: t("upgrade.opening") }}
+      />
           onSend={send}
           disabled={thinking}
           onOpenCamera={() => setCameraOpen(true)}
