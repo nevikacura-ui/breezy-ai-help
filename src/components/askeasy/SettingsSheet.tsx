@@ -3,7 +3,7 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Sun, Moon, Monitor, Check, Sparkles, Zap, Leaf } from "lucide-react";
+import { Sun, Moon, Monitor, Zap } from "lucide-react";
 import type { Settings, Theme } from "@/lib/askeasy";
 
 type Props = {
@@ -20,19 +20,6 @@ const THEMES: { id: Theme; label: string; icon: React.ReactNode }[] = [
   { id: "system", label: "System", icon: <Monitor className="h-3.5 w-3.5" /> },
 ];
 
-type ModelOpt = {
-  id: string;
-  label: string;
-  hint: string;
-  tier: "free" | "pro";
-  icon: React.ReactNode;
-};
-
-const MODELS: ModelOpt[] = [
-  { id: "askeasy/smart", label: "Smart", hint: "Balanced everyday answers", tier: "free", icon: <Sparkles className="h-4 w-4" /> },
-  { id: "askeasy/ultra", label: "Ultra", hint: "Deep reasoning & long context", tier: "pro", icon: <Zap className="h-4 w-4" /> },
-  { id: "askeasy/eco", label: "Eco", hint: "Fast & lightweight", tier: "free", icon: <Leaf className="h-4 w-4" /> },
-];
 
 export function SettingsSheet({ open, onOpenChange, settings, update, onClearConversation }: Props) {
   return (
