@@ -163,6 +163,14 @@
   0%, 100% { opacity: 0.85; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.03); }
 }
+@keyframes orb-spin-reverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+@keyframes orb-core-pulse {
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
 
 @utility animate-orb-float { animation: orb-float 8s ease-in-out infinite; }
 @utility animate-orb-spin { animation: orb-spin 40s linear infinite; }
