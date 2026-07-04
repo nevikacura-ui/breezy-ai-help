@@ -283,13 +283,17 @@ export function Composer({
         />
 
         <div
-          className="glass flex items-center gap-3 rounded-full py-2 pl-2 pr-2 shadow-[0_20px_60px_-25px_oklch(0.2_0.05_280/0.4)] transition"
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          className="glass flex items-center gap-3 rounded-full py-2 pl-2 pr-2 shadow-[0_20px_60px_-25px_oklch(0.2_0.05_280/0.4)] transition-all duration-500"
           style={{
             boxShadow: disabled
               ? "0 0 0 1px oklch(0.72 0.22 300 / 0.35), 0 20px 60px -20px oklch(0.7 0.2 300 / 0.35)"
               : recording
                 ? "0 0 0 1px oklch(0.7 0.24 25 / 0.4), 0 20px 60px -20px oklch(0.7 0.24 25 / 0.35)"
-                : undefined,
+                : focused
+                  ? "0 0 0 1px oklch(0.75 0.14 295 / 0.35), 0 24px 70px -22px oklch(0.7 0.18 295 / 0.4)"
+                  : undefined,
           }}
         >
           <Bubble
