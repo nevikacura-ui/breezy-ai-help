@@ -3,8 +3,9 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Sun, Moon, Monitor, Zap, Check, Lock, Sparkles, Leaf } from "lucide-react";
-import { MODELS, type ModelId, type Settings, type Theme } from "@/lib/askeasy";
+import { Sun, Moon, Monitor, Zap, Check, Lock, Sparkles, Leaf, MessageSquare, ImageIcon, Mic } from "lucide-react";
+import { MODELS, FREE_LIMITS, type ModelId, type Settings, type Theme, type Usage, useI18n } from "@/lib/askeasy";
+import { LANGUAGES, type LangCode } from "@/lib/i18n";
 
 type Props = {
   open: boolean;
@@ -14,6 +15,7 @@ type Props = {
   onClearConversation: () => void;
   onUpgrade: () => void;
   isProEffective: boolean;
+  usage: Usage;
 };
 
 const THEMES: { id: Theme; label: string; icon: React.ReactNode }[] = [
@@ -28,15 +30,16 @@ const MODEL_ICON: Record<ModelId, React.ReactNode> = {
   "askeasy/ultra": <Zap className="h-3.5 w-3.5" />,
 };
 
-export function SettingsSheet({ open, onOpenChange, settings, update, onClearConversation, onUpgrade, isProEffective }: Props) {
+export function SettingsSheet({ open, onOpenChange, settings, update, onClearConversation, onUpgrade, isProEffective, usage }: Props) {
   const currentModel = settings.openRouterModel as ModelId;
+  const t = useI18n(settings);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md">
         <SheetHeader>
-          <SheetTitle className="font-display text-2xl">Settings</SheetTitle>
-          <SheetDescription>UI, model, and mode — all in one place.</SheetDescription>
+          <SheetTitle className="font-display text-2xl">{t("settings")}</SheetTitle>
+          <SheetDescription>UI, model, language, and limits — all in one place.</SheetDescription>
         </SheetHeader>
 
         <div className="mt-8 space-y-8">
@@ -50,6 +53,49 @@ export function SettingsSheet({ open, onOpenChange, settings, update, onClearCon
               onChange={(e) => update({ name: e.target.value })}
             />
             <p className="text-xs text-muted-foreground">Used in your greeting.</p>
+          </section>
+
+          {/* India Mode */}
+          <section className="space-y-3">
+            <div className="text-xs uppercase tracking-wider text-muted-foreground">India</div>
+            <div className="flex items-start justify-between gap-4 rounded-2xl border border-border/60 p-3">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                  <span className="text-base">🇮🇳</span>
+                  {t("settings.india")}
+                </div>
+                <div className="text-xs text-muted-foreground">{t("settings.india.hint")}</div>
+              </div>
+              <Switch
+                checked={settings.indiaMode}
+                onCheckedChange={(v) => update({ indiaMode: v, language: v && settings.language === "en" ? "hi" : settings.language })}
+              />
+            </div>
+            {settings.indiaMode && (
+              <div className="space-y-2">
+                <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("settings.language")}</Label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {LANGUAGES.map((l) => {
+                    const active = settings.language === l.code;
+                    return (
+                      <button
+                        key={l.code}
+                        onClick={() => update({ language: l.code as LangCode })}
+                        className={
+                          "rounded-xl border px-2 py-2 text-center text-[12px] leading-tight transition " +
+                          (active
+                            ? "border-primary/40 bg-primary/10 text-foreground"
+                            : "border-border/60 hover:bg-foreground/[0.03] text-foreground/80")
+                        }
+                      >
+                        <div className="font-medium">{l.native}</div>
+                        <div className="text-[10px] text-muted-foreground">{l.label}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </section>
 
           {/* Model */}
@@ -104,32 +150,34 @@ export function SettingsSheet({ open, onOpenChange, settings, update, onClearCon
             </div>
           </section>
 
-          {/* Appearance */}
-          <section className="space-y-3">
-            <div className="text-xs uppercase tracking-wider text-muted-foreground">Appearance</div>
-            <div className="glass grid grid-cols-3 gap-1 rounded-full p-1">
-              {THEMES.map((t) => {
-                const active = settings.theme === t.id;
-                return (
-                  <button
-                    key={t.id}
-                    onClick={() => update({ theme: t.id })}
-                    className={
-                      "flex items-center justify-center gap-1.5 rounded-full py-2 text-[12px] font-medium transition " +
-                      (active ? "bg-foreground text-background shadow-sm" : "text-foreground/70 hover:text-foreground")
-                    }
-                  >
-                    {t.icon}
-                    {t.label}
-                  </button>
-                );
-              })}
-            </div>
-          </section>
+          {/* Appearance — hidden when India Mode is on since it takes over the theme */}
+          {!settings.indiaMode && (
+            <section className="space-y-3">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">Appearance</div>
+              <div className="glass grid grid-cols-3 gap-1 rounded-full p-1">
+                {THEMES.map((th) => {
+                  const active = settings.theme === th.id;
+                  return (
+                    <button
+                      key={th.id}
+                      onClick={() => update({ theme: th.id })}
+                      className={
+                        "flex items-center justify-center gap-1.5 rounded-full py-2 text-[12px] font-medium transition " +
+                        (active ? "bg-foreground text-background shadow-sm" : "text-foreground/70 hover:text-foreground")
+                      }
+                    >
+                      {th.icon}
+                      {th.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          )}
 
-          {/* Plan */}
+          {/* Plan + Usage limits */}
           <section className="space-y-2">
-            <div className="text-xs uppercase tracking-wider text-muted-foreground">Plan</div>
+            <div className="text-xs uppercase tracking-wider text-muted-foreground">Plan &amp; usage</div>
             <div className="flex items-center justify-between rounded-2xl border border-border/60 p-3">
               <div className="flex items-center gap-3">
                 <span
@@ -144,9 +192,7 @@ export function SettingsSheet({ open, onOpenChange, settings, update, onClearCon
                 <div>
                   <div className="text-sm font-medium text-foreground">{isProEffective ? "Pro" : "Free"}</div>
                   <div className="text-[11.5px] text-muted-foreground">
-                    {isProEffective
-                      ? "Ultra model · unlimited usage"
-                      : "5 text · 2 image/file · 2 voice per day"}
+                    {isProEffective ? "Ultra model · unlimited usage" : "Daily free limits below"}
                   </div>
                 </div>
               </div>
@@ -156,6 +202,14 @@ export function SettingsSheet({ open, onOpenChange, settings, update, onClearCon
                 </Button>
               )}
             </div>
+
+            {!isProEffective && (
+              <div className="grid grid-cols-3 gap-2 pt-1">
+                <UsageTile icon={<MessageSquare className="h-3.5 w-3.5" />} label="Text" used={usage.text} of={FREE_LIMITS.text} />
+                <UsageTile icon={<ImageIcon className="h-3.5 w-3.5" />} label="Image/File" used={usage.media} of={FREE_LIMITS.media} />
+                <UsageTile icon={<Mic className="h-3.5 w-3.5" />} label="Voice" used={usage.voice} of={FREE_LIMITS.voice} />
+              </div>
+            )}
           </section>
 
           {/* Voice */}
@@ -174,6 +228,27 @@ export function SettingsSheet({ open, onOpenChange, settings, update, onClearCon
         </div>
       </SheetContent>
     </Sheet>
+  );
+}
+
+function UsageTile({ icon, label, used, of }: { icon: React.ReactNode; label: string; used: number; of: number }) {
+  const empty = used >= of;
+  const remaining = Math.max(0, of - used);
+  const pct = Math.min(100, (used / of) * 100);
+  return (
+    <div className={"rounded-xl border p-2 " + (empty ? "border-destructive/40 bg-destructive/5" : "border-border/60")}>
+      <div className={"flex items-center gap-1.5 text-[11px] font-medium " + (empty ? "text-destructive" : "text-foreground/80")}>
+        {icon}
+        {label}
+      </div>
+      <div className={"mt-1 text-[13px] font-semibold tabular-nums " + (empty ? "text-destructive" : "text-foreground")}>
+        {remaining}
+        <span className="text-[10px] font-normal text-muted-foreground"> / {of}</span>
+      </div>
+      <div className="mt-1 h-1 overflow-hidden rounded-full bg-foreground/10">
+        <div className={"h-full " + (empty ? "bg-destructive" : "bg-foreground/60")} style={{ width: `${pct}%` }} />
+      </div>
+    </div>
   );
 }
 
