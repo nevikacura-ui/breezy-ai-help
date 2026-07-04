@@ -98,7 +98,7 @@ function IndiaOnboarding() {
 
         <Link
           to="/"
-          onClick={() => update({ indiaMode: false })}
+          onClick={() => update({ indiaMode: false, language: "en", indiaOnboarded: true })}
           className="mt-4 text-[12px] text-foreground/50 hover:text-foreground/80"
         >
           Continue in English →
