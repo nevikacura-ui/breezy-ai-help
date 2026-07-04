@@ -68,7 +68,17 @@ export function SettingsSheet({ open, onOpenChange, settings, update, onClearCon
               </div>
               <Switch
                 checked={settings.indiaMode}
-                onCheckedChange={(v) => update({ indiaMode: v, language: v && settings.language === "en" ? "hi" : settings.language })}
+                onCheckedChange={(v) =>
+                  update({
+                    indiaMode: v,
+                    // Turning ON: default to Hindi if still English.
+                    // Turning OFF: reset to English so the UI + AI leave India Mode fully.
+                    language: v
+                      ? (settings.language === "en" ? "hi" : settings.language)
+                      : "en",
+                    indiaOnboarded: true,
+                  })
+                }
               />
             </div>
             {settings.indiaMode && (

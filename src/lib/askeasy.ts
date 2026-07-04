@@ -28,6 +28,7 @@ export type Settings = {
   isPro: boolean;
   indiaMode: boolean;
   language: LangCode;
+  indiaOnboarded: boolean;
 };
 
 export type ModelId = "askeasy/smart" | "askeasy/eco" | "askeasy/ultra";
@@ -65,6 +66,7 @@ const DEFAULT_SETTINGS: Settings = {
   isPro: false,
   indiaMode: false,
   language: "en",
+  indiaOnboarded: false,
 };
 
 const DEFAULT_USAGE: Usage = { text: 0, media: 0, voice: 0 };

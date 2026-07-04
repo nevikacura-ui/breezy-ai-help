@@ -63,10 +63,13 @@ function Home() {
     if (!hydrated || typeof window === "undefined") return;
     const host = window.location.hostname.toLowerCase();
     const isIndiaDomain = host.includes("askindia");
-    if (isIndiaDomain && !settings.indiaMode) {
+    // Only send first-time askindia.io visitors to onboarding. Once they've
+    // been through it (either enabled India Mode or chose "Continue in English"),
+    // never redirect again — they can toggle India Mode from Settings.
+    if (isIndiaDomain && !settings.indiaOnboarded) {
       navigate({ to: "/india" });
     }
-  }, [hydrated, settings.indiaMode, navigate]);
+  }, [hydrated, settings.indiaOnboarded, navigate]);
 
   // Cloud sync on login
   useEffect(() => {
