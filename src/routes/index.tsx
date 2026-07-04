@@ -24,6 +24,7 @@ import {
   type Message,
 } from "@/lib/askeasy";
 import { getMe, appendMessage, clearMessages, bumpUsage, listMessages } from "@/lib/pro.functions";
+import { LANGUAGES } from "@/lib/i18n";
 
 export const Route = createFileRoute("/")({
   component: Home,
