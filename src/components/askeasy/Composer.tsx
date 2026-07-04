@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowUp, FileUp, Camera, Mic, Square, X } from "lucide-react";
 import type { Attachment } from "@/lib/askeasy";
 import { Bubble } from "./Bubble";
+import tricolorRing from "@/assets/tricolor-ring.png.asset.json";
 
 type Props = {
   onSend: (text: string, attachments: Attachment[]) => void;
@@ -14,6 +15,7 @@ type Props = {
   onActivityChange?: (state: { focused: boolean; hasInput: boolean }) => void;
   placeholder?: string;
   thinkingLabel?: string;
+  indiaMode?: boolean;
 };
 
 const LONG_PRESS_MS = 450;
@@ -38,6 +40,7 @@ export function Composer({
   onActivityChange,
   placeholder,
   thinkingLabel,
+  indiaMode,
 }: Props) {
   const [text, setText] = useState("");
   const [focused, setFocused] = useState(false);
@@ -300,19 +303,45 @@ export function Composer({
                   : "inset 0 0 0 1px color-mix(in oklab, white 6%, transparent), 0 30px 80px -30px oklch(0 0 0 / 0.6)",
           }}
         >
-          <Bubble
-            size={28}
-            state={bubbleState}
-            interactive
-            ariaLabel={recording ? "Stop recording" : "Open actions — hold to talk"}
-            onPointerDown={onBubbleDown}
-            onPointerUp={onBubbleUp}
-            onPointerLeave={clearLongPress}
-            onPointerCancel={clearLongPress}
-            onClick={onBubbleClick}
-            onContextMenu={(e) => e.preventDefault()}
-            className="ml-1"
-          />
+          {indiaMode ? (
+            <button
+              type="button"
+              aria-label={recording ? "Stop recording" : "Open actions — hold to talk"}
+              onPointerDown={onBubbleDown}
+              onPointerUp={onBubbleUp}
+              onPointerLeave={clearLongPress}
+              onPointerCancel={clearLongPress}
+              onClick={onBubbleClick}
+              onContextMenu={(e) => e.preventDefault()}
+              className="ml-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-transform duration-200 hover:scale-105 active:scale-95"
+            >
+              <img
+                src={tricolorRing.url}
+                alt=""
+                draggable={false}
+                className={
+                  "h-8 w-8 select-none " +
+                  (bubbleState === "thinking" || bubbleState === "listening"
+                    ? "animate-spin [animation-duration:2.4s]"
+                    : "")
+                }
+              />
+            </button>
+          ) : (
+            <Bubble
+              size={28}
+              state={bubbleState}
+              interactive
+              ariaLabel={recording ? "Stop recording" : "Open actions — hold to talk"}
+              onPointerDown={onBubbleDown}
+              onPointerUp={onBubbleUp}
+              onPointerLeave={clearLongPress}
+              onPointerCancel={clearLongPress}
+              onClick={onBubbleClick}
+              onContextMenu={(e) => e.preventDefault()}
+              className="ml-1"
+            />
+          )}
 
 
           {recording ? (
