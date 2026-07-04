@@ -5,6 +5,7 @@ import { Orb } from "@/components/askeasy/Orb";
 import { Composer } from "@/components/askeasy/Composer";
 import { SettingsSheet } from "@/components/askeasy/SettingsSheet";
 import { CameraSheet } from "@/components/askeasy/CameraSheet";
+import { Typewriter } from "@/components/askeasy/Typewriter";
 import {
   useConversation,
   useSettings,
