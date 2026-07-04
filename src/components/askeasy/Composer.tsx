@@ -346,7 +346,12 @@ export function Composer({
 
           {recording ? (
             <div className="flex flex-1 items-center gap-2 text-sm text-foreground/80">
-              <span className="h-2 w-2 animate-pulse-soft rounded-full bg-destructive" />
+              <img
+                src={tricolorRing.url}
+                alt=""
+                draggable={false}
+                className="h-5 w-5 shrink-0 select-none animate-spin [animation-duration:1.6s]"
+              />
               Listening… {formatTime(recordSeconds)}
               <span className="ml-1 text-[11px] text-muted-foreground">
                 tap ring to stop
