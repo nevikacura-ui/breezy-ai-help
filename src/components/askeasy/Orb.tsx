@@ -29,9 +29,9 @@ export function Orb({
   const pulse = energized ? "1.8s" : active ? "2.6s" : "4s";
 
   const ringGradient =
-    "conic-gradient(from 0deg, oklch(0.78 0.2 30), oklch(0.72 0.22 300), oklch(0.78 0.2 200), oklch(0.82 0.2 90), oklch(0.78 0.2 30))";
+    "conic-gradient(from 0deg, oklch(0.8 0.19 60), oklch(0.72 0.22 30), oklch(0.65 0.24 350), oklch(0.68 0.2 290), oklch(0.75 0.16 220), oklch(0.8 0.19 60))";
   const innerGradient =
-    "conic-gradient(from 180deg, oklch(0.82 0.18 280), oklch(0.78 0.2 320), oklch(0.85 0.15 200), oklch(0.82 0.18 280))";
+    "conic-gradient(from 180deg, oklch(0.78 0.2 45), oklch(0.7 0.22 15), oklch(0.65 0.2 320), oklch(0.72 0.16 260), oklch(0.78 0.2 45))";
 
   return (
     <div
