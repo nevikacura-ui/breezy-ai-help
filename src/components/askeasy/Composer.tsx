@@ -10,6 +10,8 @@ type Props = {
   externalAttachments: Attachment[];
   onAddAttachments: (a: Attachment[]) => void;
   onRemoveAttachment: (id: string) => void;
+  /** Emitted when input area is focused/hovered — used by the orb. */
+  onActivityChange?: (state: { focused: boolean; hasInput: boolean }) => void;
 };
 
 const LONG_PRESS_MS = 450;
