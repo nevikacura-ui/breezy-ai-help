@@ -10,6 +10,7 @@ import { CameraSheet } from "@/components/askeasy/CameraSheet";
 import { Typewriter } from "@/components/askeasy/Typewriter";
 import { UpgradeDialog } from "@/components/askeasy/UpgradeDialog";
 import { AccountMenu } from "@/components/askeasy/AccountMenu";
+import tricolorRing from "@/assets/tricolor-ring.png.asset.json";
 import {
   useConversation,
   useSettings,
@@ -210,7 +211,7 @@ function Home() {
         <section ref={scrollRef} className="relative z-10 flex-1 overflow-y-auto px-4 pb-40 pt-6">
           <div className="mx-auto flex max-w-2xl flex-col gap-4">
             {messages.map((m) => (
-              <MessageBubble key={m.id} message={m} thinking={thinking && m.role === "assistant" && !m.content} />
+              <MessageBubble key={m.id} message={m} thinking={thinking && m.role === "assistant"} />
             ))}
           </div>
         </section>
@@ -330,15 +331,17 @@ function MessageBubble({ message, thinking }: { message: Message; thinking: bool
             )}
           </div>
         )}
-        {thinking ? (
-          <span className="inline-flex gap-1">
-            <span className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-current" />
-            <span className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-current" style={{ animationDelay: "0.15s" }} />
-            <span className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-current" style={{ animationDelay: "0.3s" }} />
-          </span>
-        ) : (
-          <span className="whitespace-pre-wrap">{message.content}</span>
-        )}
+        <div className="flex items-start gap-2">
+          {message.content && <span className="whitespace-pre-wrap flex-1">{message.content}</span>}
+          {thinking && (
+            <img
+              src={tricolorRing.url}
+              alt=""
+              draggable={false}
+              className="h-5 w-5 shrink-0 select-none animate-spin [animation-duration:1.6s]"
+            />
+          )}
+        </div>
       </div>
     </div>
   );
