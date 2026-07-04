@@ -114,6 +114,11 @@ function Home() {
       if (user) clearMsgs().catch(() => {});
       setPendingAttachments([]);
       setThinking(false);
+      resetIndiaModeArtifacts();
+      toast.success("India Mode off", {
+        description: "Language, chat, and drafts reset to English.",
+        duration: 1800,
+      });
     }
     prevIndiaMode.current = settings.indiaMode;
   }, [settings.indiaMode, hydrated, clear, clearMsgs, user]);
