@@ -13,6 +13,7 @@ type Props = {
   settings: Settings;
   update: (patch: Partial<Settings>) => void;
   onClearConversation: () => void;
+  onIndiaModeOff: () => void;
   onUpgrade: () => void;
   isProEffective: boolean;
   usage: Usage;
@@ -30,7 +31,7 @@ const MODEL_ICON: Record<ModelId, React.ReactNode> = {
   "askeasy/ultra": <Zap className="h-3.5 w-3.5" />,
 };
 
-export function SettingsSheet({ open, onOpenChange, settings, update, onClearConversation, onUpgrade, isProEffective, usage }: Props) {
+export function SettingsSheet({ open, onOpenChange, settings, update, onClearConversation, onIndiaModeOff, onUpgrade, isProEffective, usage }: Props) {
   const currentModel = settings.openRouterModel as ModelId;
   const t = useI18n(settings);
 
@@ -68,7 +69,7 @@ export function SettingsSheet({ open, onOpenChange, settings, update, onClearCon
               </div>
               <Switch
                 checked={settings.indiaMode}
-                onCheckedChange={(v) =>
+                onCheckedChange={(v) => {
                   update({
                     indiaMode: v,
                     // Turning ON: default to Hindi if still English.
@@ -77,8 +78,9 @@ export function SettingsSheet({ open, onOpenChange, settings, update, onClearCon
                       ? (settings.language === "en" ? "hi" : settings.language)
                       : "en",
                     indiaOnboarded: true,
-                  })
-                }
+                  });
+                  if (!v) onIndiaModeOff();
+                }}
               />
             </div>
             {settings.indiaMode && (
