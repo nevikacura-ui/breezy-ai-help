@@ -12,6 +12,8 @@ type Props = {
   onRemoveAttachment: (id: string) => void;
   /** Emitted when input area is focused/hovered — used by the orb. */
   onActivityChange?: (state: { focused: boolean; hasInput: boolean }) => void;
+  placeholder?: string;
+  thinkingLabel?: string;
 };
 
 const LONG_PRESS_MS = 450;
@@ -34,6 +36,8 @@ export function Composer({
   onAddAttachments,
   onRemoveAttachment,
   onActivityChange,
+  placeholder,
+  thinkingLabel,
 }: Props) {
   const [text, setText] = useState("");
   const [focused, setFocused] = useState(false);
@@ -332,7 +336,7 @@ export function Composer({
                   submit();
                 }
               }}
-              placeholder={disabled ? "Thinking…" : "Ask anything…"}
+              placeholder={disabled ? (thinkingLabel ?? "Thinking…") : (placeholder ?? "Ask anything…")}
               rows={1}
               disabled={disabled}
               className="flex-1 resize-none bg-transparent py-1.5 text-[16px] leading-6 text-foreground placeholder:text-muted-foreground/70 focus:outline-none disabled:opacity-60"
