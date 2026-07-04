@@ -10,6 +10,7 @@ import { CameraSheet } from "@/components/askeasy/CameraSheet";
 import { Typewriter } from "@/components/askeasy/Typewriter";
 import { UpgradeDialog } from "@/components/askeasy/UpgradeDialog";
 import { AccountMenu } from "@/components/askeasy/AccountMenu";
+import tricolorRing from "@/assets/tricolor-ring.png.asset.json";
 import {
   useConversation,
   useSettings,
