@@ -26,6 +26,9 @@ const LANG_NAMES: Record<string, string> = {
   en: "English", hi: "Hindi", bn: "Bengali", ta: "Tamil", te: "Telugu",
   mr: "Marathi", gu: "Gujarati", kn: "Kannada", ml: "Malayalam",
   pa: "Punjabi", ur: "Urdu", or: "Odia", as: "Assamese",
+  mai: "Maithili", bho: "Bhojpuri", ne: "Nepali", sa: "Sanskrit",
+  kok: "Konkani", doi: "Dogri", sd: "Sindhi", ks: "Kashmiri",
+  brx: "Bodo", sat: "Santali", mni: "Manipuri",
 };
 
 export const Route = createFileRoute("/api/chat")({

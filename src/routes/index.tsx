@@ -143,6 +143,9 @@ function Home() {
       });
       updateMessage(placeholder.id, { content: reply });
       if (user) appendMsg({ data: { role: "assistant", content: reply } }).catch(() => {});
+      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+        try { navigator.vibrate([18, 40, 18]); } catch { /* noop */ }
+      }
     } catch (e) {
       updateMessage(placeholder.id, { content: "Something went wrong. Please try again." });
       console.error(e);
