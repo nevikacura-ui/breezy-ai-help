@@ -126,6 +126,14 @@
   0%, 100% { opacity: 0.6; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.08); }
 }
+@keyframes bubble-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes bubble-pulse {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.12); }
+}
 
 @utility animate-orb-float { animation: orb-float 8s ease-in-out infinite; }
 @utility animate-orb-spin { animation: orb-spin 40s linear infinite; }

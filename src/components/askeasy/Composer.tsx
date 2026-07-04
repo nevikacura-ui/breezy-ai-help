@@ -1,31 +1,29 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowUp, Camera, Mic, Plus, Sparkles, Square, X } from "lucide-react";
+import { ArrowUp, Mic, Square, X } from "lucide-react";
 import type { Attachment } from "@/lib/askeasy";
+import { Bubble } from "./Bubble";
 
 type Props = {
   onSend: (text: string, attachments: Attachment[]) => void;
   disabled?: boolean;
-  onOpenCamera: () => void;
   voiceEnabled: boolean;
-  smartMode: boolean;
-  onToggleSmart: () => void;
+  externalAttachments: Attachment[];
+  onRemoveAttachment: (id: string) => void;
 };
 
 export function Composer({
   onSend,
   disabled,
-  onOpenCamera,
   voiceEnabled,
-  smartMode,
-  onToggleSmart,
+  externalAttachments,
+  onRemoveAttachment,
 }: Props) {
   const [text, setText] = useState("");
-  const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [recording, setRecording] = useState(false);
   const [recordSeconds, setRecordSeconds] = useState(0);
+  const [voiceAttachment, setVoiceAttachment] = useState<Attachment | null>(null);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
@@ -35,43 +33,23 @@ export function Composer({
     const el = textareaRef.current;
     if (!el) return;
     el.style.height = "auto";
-    el.style.height = Math.min(el.scrollHeight, 180) + "px";
+    el.style.height = Math.min(el.scrollHeight, 160) + "px";
   }, [text]);
 
-  useEffect(() => {
-    textareaRef.current?.focus();
-  }, []);
-
-  const hasContent = text.trim().length > 0 || attachments.length > 0;
+  const allAttachments = voiceAttachment
+    ? [...externalAttachments, voiceAttachment]
+    : externalAttachments;
+  const hasContent = text.trim().length > 0 || allAttachments.length > 0;
 
   const submit = () => {
     if (!hasContent || disabled) return;
-    onSend(text.trim(), attachments);
+    onSend(text.trim(), allAttachments);
     setText("");
-    setAttachments([]);
+    setVoiceAttachment(null);
+    allAttachments.forEach((a) => {
+      if (a !== voiceAttachment) onRemoveAttachment(a.id);
+    });
     requestAnimationFrame(() => textareaRef.current?.focus());
-  };
-
-  const handleFiles = (files: FileList | null) => {
-    if (!files) return;
-    Array.from(files)
-      .filter((f) => f.type.startsWith("image/"))
-      .slice(0, 4)
-      .forEach((file) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          setAttachments((prev) => [
-            ...prev,
-            {
-              id: crypto.randomUUID(),
-              type: "image",
-              dataUrl: String(reader.result),
-              name: file.name,
-            },
-          ]);
-        };
-        reader.readAsDataURL(file);
-      });
   };
 
   const startRecording = async () => {
@@ -90,15 +68,12 @@ export function Composer({
         const blob = new Blob(chunksRef.current, { type: mime });
         const reader = new FileReader();
         reader.onload = () => {
-          setAttachments((prev) => [
-            ...prev,
-            {
-              id: crypto.randomUUID(),
-              type: "audio",
-              dataUrl: String(reader.result),
-              name: `voice-note.${mime.includes("mp4") ? "m4a" : "webm"}`,
-            },
-          ]);
+          setVoiceAttachment({
+            id: crypto.randomUUID(),
+            type: "audio",
+            dataUrl: String(reader.result),
+            name: `voice-note.${mime.includes("mp4") ? "m4a" : "webm"}`,
+          });
         };
         reader.readAsDataURL(blob);
         stream.getTracks().forEach((t) => t.stop());
@@ -123,51 +98,55 @@ export function Composer({
     setRecording(false);
   };
 
+  const bubbleState = disabled ? "thinking" : recording ? "listening" : "idle";
+
   return (
     <div className="mx-auto w-full max-w-2xl">
-      <div className="glass rounded-[28px] p-3 shadow-[0_20px_60px_-20px_oklch(0.2_0.05_280/0.35)]">
-        {attachments.length > 0 && (
-          <div className="mb-2 flex flex-wrap gap-2 px-1">
-            {attachments.map((a) => (
-              <div key={a.id} className="group relative">
-                {a.type === "image" ? (
-                  <img
-                    src={a.dataUrl}
-                    alt=""
-                    className="h-16 w-16 rounded-xl object-cover"
-                  />
-                ) : (
-                  <div className="flex h-16 items-center gap-2 rounded-xl bg-foreground/10 px-3 text-xs">
-                    <Mic className="h-3.5 w-3.5" /> Voice note
-                  </div>
-                )}
-                <button
-                  onClick={() =>
-                    setAttachments((prev) => prev.filter((x) => x.id !== a.id))
-                  }
-                  className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-background opacity-0 transition group-hover:opacity-100"
-                  aria-label="Remove"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+      {allAttachments.length > 0 && (
+        <div className="mb-2 flex flex-wrap gap-2 px-2">
+          {allAttachments.map((a) => (
+            <div key={a.id} className="group relative">
+              {a.type === "image" ? (
+                <img
+                  src={a.dataUrl}
+                  alt=""
+                  className="h-16 w-16 rounded-xl object-cover"
+                />
+              ) : (
+                <div className="flex h-10 items-center gap-2 rounded-full bg-foreground/10 px-3 text-xs">
+                  <Mic className="h-3.5 w-3.5" /> Voice note
+                </div>
+              )}
+              <button
+                onClick={() =>
+                  a === voiceAttachment
+                    ? setVoiceAttachment(null)
+                    : onRemoveAttachment(a.id)
+                }
+                className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-background"
+                aria-label="Remove"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div
+        className="glass flex items-center gap-3 rounded-full py-2 pl-4 pr-2 shadow-[0_20px_60px_-25px_oklch(0.2_0.05_280/0.4)] transition"
+        style={{
+          boxShadow: disabled
+            ? "0 0 0 1px oklch(0.72 0.22 300 / 0.35), 0 20px 60px -20px oklch(0.7 0.2 300 / 0.35)"
+            : undefined,
+        }}
+      >
+        <Bubble size={26} state={bubbleState} />
 
         {recording ? (
-          <div className="flex items-center justify-between px-3 py-2">
-            <div className="flex items-center gap-2 text-sm text-foreground/80">
-              <span className="h-2 w-2 animate-pulse-soft rounded-full bg-destructive" />
-              Listening… {formatTime(recordSeconds)}
-            </div>
-            <button
-              onClick={stopRecording}
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive text-white"
-              aria-label="Stop recording"
-            >
-              <Square className="h-4 w-4 fill-current" />
-            </button>
+          <div className="flex flex-1 items-center gap-2 text-sm text-foreground/80">
+            <span className="h-2 w-2 animate-pulse-soft rounded-full bg-destructive" />
+            Listening… {formatTime(recordSeconds)}
           </div>
         ) : (
           <textarea
@@ -180,95 +159,44 @@ export function Composer({
                 submit();
               }
             }}
-            placeholder="Ask anything…"
+            placeholder={disabled ? "Thinking…" : "Ask anything…"}
             rows={1}
             disabled={disabled}
-            className="w-full resize-none bg-transparent px-3 pt-2 text-[16px] leading-6 text-foreground placeholder:text-muted-foreground/80 focus:outline-none disabled:opacity-50"
+            className="flex-1 resize-none bg-transparent py-1.5 text-[16px] leading-6 text-foreground placeholder:text-muted-foreground/70 focus:outline-none disabled:opacity-60"
           />
         )}
 
-        <div className="mt-2 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              onChange={(e) => {
-                handleFiles(e.target.files);
-                e.target.value = "";
-              }}
-            />
-            <IconChip label="Attach image" onClick={() => fileInputRef.current?.click()}>
-              <Plus className="h-[18px] w-[18px]" />
-            </IconChip>
-            <IconChip label="Camera" onClick={onOpenCamera}>
-              <Camera className="h-[18px] w-[18px]" />
-            </IconChip>
-            <button
-              onClick={onToggleSmart}
-              className={
-                "ml-1 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-medium transition " +
-                (smartMode
-                  ? "bg-foreground text-background"
-                  : "bg-foreground/5 text-foreground/70 hover:bg-foreground/10")
-              }
-            >
-              <Sparkles className="h-3.5 w-3.5" />
-              Smart
-            </button>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {!hasContent && !recording && voiceEnabled && (
-              <IconChip label="Voice" onClick={startRecording} primary>
-                <Mic className="h-[18px] w-[18px]" />
-              </IconChip>
-            )}
-            {(hasContent || recording) && (
-              <button
-                aria-label="Send"
-                onClick={submit}
-                disabled={!hasContent || disabled}
-                className="flex h-11 w-11 items-center justify-center rounded-full text-white shadow-lg transition-all duration-300 disabled:opacity-40"
-                style={{ background: "var(--send-gradient)" }}
-              >
-                <ArrowUp className="h-5 w-5" strokeWidth={2.5} />
-              </button>
-            )}
-          </div>
-        </div>
+        {recording ? (
+          <button
+            onClick={stopRecording}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive text-white"
+            aria-label="Stop recording"
+          >
+            <Square className="h-4 w-4 fill-current" />
+          </button>
+        ) : hasContent ? (
+          <button
+            aria-label="Send"
+            onClick={submit}
+            disabled={disabled}
+            className="flex h-10 w-10 items-center justify-center rounded-full text-white shadow-lg transition disabled:opacity-40"
+            style={{ background: "var(--send-gradient)" }}
+          >
+            <ArrowUp className="h-5 w-5" strokeWidth={2.5} />
+          </button>
+        ) : voiceEnabled ? (
+          <button
+            aria-label="Voice"
+            onClick={startRecording}
+            className="flex h-10 w-10 items-center justify-center rounded-full text-foreground/70 transition hover:bg-foreground/5 hover:text-foreground"
+          >
+            <Mic className="h-[18px] w-[18px]" />
+          </button>
+        ) : (
+          <div className="h-10 w-10" />
+        )}
       </div>
     </div>
-  );
-}
-
-function IconChip({
-  children,
-  label,
-  primary = false,
-  onClick,
-}: {
-  children: React.ReactNode;
-  label: string;
-  primary?: boolean;
-  onClick?: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      aria-label={label}
-      type="button"
-      className={
-        "flex h-10 w-10 items-center justify-center rounded-full transition " +
-        (primary
-          ? "bg-foreground text-background hover:opacity-90"
-          : "text-foreground/70 hover:bg-foreground/5 hover:text-foreground")
-      }
-    >
-      {children}
-    </button>
   );
 }
 
