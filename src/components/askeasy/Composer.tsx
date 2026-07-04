@@ -72,6 +72,11 @@ export function Composer({
     : externalAttachments;
   const hasContent = text.trim().length > 0 || allAttachments.length > 0;
 
+  useEffect(() => {
+    onActivityChange?.({ focused: focused || hovered, hasInput: hasContent });
+  }, [focused, hovered, hasContent, onActivityChange]);
+
+
   const submit = () => {
     if (!hasContent || disabled) return;
     haptic(10);
