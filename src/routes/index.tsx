@@ -88,27 +88,6 @@ function Home() {
     }
   };
 
-  const handleFiles = (files: FileList | null) => {
-    if (!files) return;
-    Array.from(files)
-      .filter((f) => f.type.startsWith("image/"))
-      .slice(0, 4)
-      .forEach((file) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          setPendingAttachments((prev) => [
-            ...prev,
-            {
-              id: crypto.randomUUID(),
-              type: "image",
-              dataUrl: String(reader.result),
-              name: file.name,
-            },
-          ]);
-        };
-        reader.readAsDataURL(file);
-      });
-  };
 
   const hasConversation = messages.length > 0;
   const greetingName = settings.name.trim() || "there";
