@@ -44,7 +44,6 @@ export const Bubble = forwardRef<HTMLButtonElement, BubbleProps>(function Bubble
 ) {
   const spin =
     state === "thinking" ? "2.4s" : state === "listening" ? "3s" : state === "active" ? "5s" : "9s";
-  const pulse = state === "thinking" ? "1.2s" : state === "listening" ? "1s" : "3.6s";
 
   const scale = state === "active" ? 1.06 : state === "listening" ? 1.04 : 1;
 
@@ -79,36 +78,16 @@ export const Bubble = forwardRef<HTMLButtonElement, BubbleProps>(function Bubble
           opacity: state === "idle" ? 0.35 : 0.6,
         }}
       />
-      {/* Thin premium ring */}
+      {/* Thin premium hollow ring */}
       <span
         className="absolute inset-0 rounded-full"
         style={{
           background: gradient,
           animation: `bubble-spin ${spin} linear infinite`,
           WebkitMask:
-            "radial-gradient(circle, transparent 62%, black 64%, black 97%, transparent 100%)",
-          mask: "radial-gradient(circle, transparent 62%, black 64%, black 97%, transparent 100%)",
+            "radial-gradient(circle, transparent 58%, black 60%, black 96%, transparent 100%)",
+          mask: "radial-gradient(circle, transparent 58%, black 60%, black 96%, transparent 100%)",
           filter: "saturate(0.9) brightness(1.05)",
-        }}
-      />
-      {/* Inner glass core */}
-      <span
-        className="absolute inset-[14%] rounded-full"
-        style={{
-          background:
-            "radial-gradient(circle at 32% 28%, oklch(1 0 0 / 0.5), oklch(0.85 0.04 70 / 0.12) 55%, transparent 78%)",
-          boxShadow:
-            "inset 0 0 0 0.5px oklch(1 0 0 / 0.16), inset 0 -2px 6px oklch(0 0 0 / 0.35)",
-          animation: `bubble-pulse ${pulse} ease-in-out infinite`,
-        }}
-      />
-      {/* Specular highlight */}
-      <span
-        className="pointer-events-none absolute left-[28%] top-[20%] h-[18%] w-[22%] rounded-full"
-        style={{
-          background:
-            "radial-gradient(ellipse at center, oklch(1 0 0 / 0.85), transparent 70%)",
-          filter: "blur(0.5px)",
         }}
       />
     </span>
