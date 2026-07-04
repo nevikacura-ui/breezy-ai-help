@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Settings2, Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -8,7 +8,6 @@ import { Composer } from "@/components/askeasy/Composer";
 import { SettingsSheet } from "@/components/askeasy/SettingsSheet";
 import { CameraSheet } from "@/components/askeasy/CameraSheet";
 import { Typewriter } from "@/components/askeasy/Typewriter";
-import { QuotaMeter } from "@/components/askeasy/QuotaMeter";
 import { UpgradeDialog } from "@/components/askeasy/UpgradeDialog";
 import { AccountMenu } from "@/components/askeasy/AccountMenu";
 import {
@@ -16,6 +15,7 @@ import {
   useSettings,
   useUsage,
   useAuthUser,
+  useI18n,
   sendToAI,
   quotaCheck,
   modelTier,
@@ -33,6 +33,8 @@ function Home() {
   const { messages, addMessage, updateMessage, clear } = useConversation();
   const { usage, bump, resetUsage } = useUsage();
   const user = useAuthUser();
+  const t = useI18n(settings);
+  const navigate = useNavigate();
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [cameraOpen, setCameraOpen] = useState(false);
@@ -53,6 +55,19 @@ function Home() {
 
   const isPro = user ? serverIsPro : settings.isPro;
 
+  // Domain routing: askindia.io visitors land on onboarding first (unless they
+  // already picked India Mode, meaning they've completed onboarding).
+  useEffect(() => {
+    if (!hydrated || typeof window === "undefined") return;
+    const host = window.location.hostname.toLowerCase();
+    const isIndiaDomain = host.includes("askindia");
+    const seen = window.localStorage.getItem("askeasy.indiaOnboardSeen") === "1";
+    if (isIndiaDomain && !settings.indiaMode && !seen) {
+      window.localStorage.setItem("askeasy.indiaOnboardSeen", "1");
+      navigate({ to: "/india" });
+    }
+  }, [hydrated, settings.indiaMode, navigate]);
+
   // Cloud sync on login
   useEffect(() => {
     if (!user) { setServerIsPro(false); return; }
@@ -62,7 +77,6 @@ function Home() {
         const me = await fetchMe();
         if (cancelled) return;
         setServerIsPro(!!me.profile.is_pro);
-        // hydrate usage counters from server (overrides local)
         resetUsage();
         if (me.usage.text) bump("text", me.usage.text);
         if (me.usage.media) bump("media", me.usage.media);
@@ -71,7 +85,6 @@ function Home() {
         const rows = await fetchMessages();
         if (cancelled) return;
         if (rows.length) {
-          // wipe local and replace with server messages
           clear();
           for (const r of rows) {
             addMessage({
@@ -151,15 +164,23 @@ function Home() {
 
   if (!hydrated) return <div className="min-h-dvh bg-background" />;
 
+  const welcomeText = settings.name
+    ? t("welcome.name", { name: settings.name })
+    : user?.name
+      ? t("welcome.name", { name: user.name.split(" ")[0] })
+      : t("welcome");
+
   return (
     <main className="relative flex min-h-dvh flex-col overflow-hidden">
       <div
         aria-hidden
         className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full opacity-50 blur-3xl transition-opacity duration-700"
-        style={{ background: "radial-gradient(circle, oklch(0.8 0.12 300 / 0.5), transparent 70%)" }}
+        style={{ background: settings.indiaMode
+          ? "radial-gradient(circle, rgba(255,153,51,0.35), transparent 70%)"
+          : "radial-gradient(circle, oklch(0.8 0.12 300 / 0.5), transparent 70%)" }}
       />
 
-      {/* Top bar — New · (spacer) · Account · Settings */}
+      {/* Top bar */}
       <header className="relative z-30 flex items-center justify-between gap-2 px-4 pt-5">
         <button
           onClick={() => {
@@ -171,14 +192,14 @@ function Home() {
           title="New conversation"
         >
           <Plus className="h-3.5 w-3.5" />
-          New
+          {t("new")}
         </button>
 
         <div className="flex items-center gap-2">
           <AccountMenu />
           <button
             onClick={() => setSettingsOpen(true)}
-            aria-label="Settings"
+            aria-label={t("settings")}
             className="glass flex h-9 w-9 items-center justify-center rounded-full text-foreground/70 transition hover:text-foreground"
           >
             <Settings2 className="h-4 w-4" />
@@ -202,18 +223,18 @@ function Home() {
           </div>
           <div className="animate-fade-up mt-10 space-y-4" style={{ animationDelay: "0.3s" }}>
             <h1 className="font-display text-[2.75rem] font-medium leading-[1.05] tracking-[-0.035em] text-foreground sm:text-6xl">
-              Welcome{settings.name ? `, ${settings.name}` : user?.name ? `, ${user.name.split(" ")[0]}` : ""}
+              {welcomeText}
             </h1>
             <p className="mx-auto flex min-h-[1.6em] max-w-md items-baseline justify-center gap-2 text-lg font-light tracking-tight text-foreground/70 sm:text-xl">
-              <span>I can</span>
+              <span>{t("tagline")}</span>
               <Typewriter
                 phrases={[
-                  "answer anything, instantly.",
-                  "summarize a long report.",
-                  "draft that email for you.",
-                  "explain it like you're five.",
-                  "plan your next big idea.",
-                  "turn thoughts into words.",
+                  t("typewriter.1"),
+                  t("typewriter.2"),
+                  t("typewriter.3"),
+                  t("typewriter.4"),
+                  t("typewriter.5"),
+                  t("typewriter.6"),
                 ]}
                 className="font-medium"
               />
@@ -222,7 +243,7 @@ function Home() {
         </section>
       )}
 
-      {/* Composer */}
+      {/* Composer — nothing rendered above the input other than page content */}
       <div
         className={
           "z-10 px-4 pb-6 pt-4 " +
@@ -241,10 +262,9 @@ function Home() {
           onRemoveAttachment={(id) => setPendingAttachments((prev) => prev.filter((att) => att.id !== id))}
           onActivityChange={handleActivity}
         />
-        <QuotaMeter usage={usage} isPro={isPro} onUpgrade={() => openUpgrade()} />
         {!hasConversation && (
           <p className="mt-2 text-center text-[11px] text-muted-foreground/70">
-            AskEasy can make mistakes. Verify important info.
+            {t("footer.disclaimer")}
           </p>
         )}
       </div>
@@ -255,6 +275,7 @@ function Home() {
         settings={settings}
         update={update}
         isProEffective={isPro}
+        usage={usage}
         onUpgrade={() => { setSettingsOpen(false); openUpgrade(); }}
         onClearConversation={() => {
           clear();
