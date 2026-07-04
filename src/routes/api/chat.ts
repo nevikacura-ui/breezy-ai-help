@@ -134,20 +134,29 @@ export const Route = createFileRoute("/api/chat")({
             },
             body: JSON.stringify({
               model: mapped.model,
-              messages: [
-                {
-                  role: "system",
+              messages: (() => {
+                const langCode = body.language;
+                const langName = langCode ? LANG_NAMES[langCode] : undefined;
+                const script = langCode ? LANG_SCRIPTS[langCode] : undefined;
+                const wantsLang = !!langName && langCode !== "en";
+                const langLine = wantsLang
+                  ? ` OUTPUT LANGUAGE RULE (non-negotiable): You MUST write every response entirely in ${langName}${script ? ` using ${script} script` : ""}. This applies even when the user's question is in English, Hindi, or any other language — translate your answer into ${langName} before replying. Do not answer in English. Do not mix languages. Keep proper nouns and code identifiers as-is.`
+                  : "";
+                const sys = {
+                  role: "system" as const,
                   content:
                     "You are AskEasy, a warm, concise, helpful assistant. Answer clearly using markdown when useful." +
-                    (body.language && body.language !== "en" && LANG_NAMES[body.language]
-                      ? ` IMPORTANT: Always reply in ${LANG_NAMES[body.language]}, using its native script, regardless of the language the user writes in. Keep proper nouns as-is.`
-                      : ""),
-                },
-                ...messages.map((m) => ({
-                  role: m.role,
-                  content: m.content,
-                })),
-              ],
+                    langLine,
+                };
+                const mapped = messages.map((m) => ({ role: m.role, content: m.content }));
+                if (wantsLang && mapped.length > 0) {
+                  const last = mapped[mapped.length - 1];
+                  if (last.role === "user") {
+                    last.content = `${last.content}\n\n[Reply strictly in ${langName}${script ? ` (${script} script)` : ""}.]`;
+                  }
+                }
+                return [sys, ...mapped];
+              })(),
             }),
           },
         );
