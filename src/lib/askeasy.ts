@@ -28,7 +28,7 @@ const MESSAGES_KEY = "askeasy.messages.v1";
 
 const DEFAULT_SETTINGS: Settings = {
   name: "",
-  darkMode: true,
+  darkMode: false,
   smartMode: true,
   voiceEnabled: true,
   openRouterModel: "openrouter/auto",
