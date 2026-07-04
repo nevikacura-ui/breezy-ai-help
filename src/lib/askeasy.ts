@@ -31,7 +31,7 @@ const DEFAULT_SETTINGS: Settings = {
   darkMode: false,
   smartMode: true,
   voiceEnabled: true,
-  openRouterModel: "openrouter/auto",
+  openRouterModel: "askeasy/smart",
 };
 
 function readJSON<T>(key: string, fallback: T): T {
