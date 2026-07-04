@@ -323,6 +323,8 @@ export function Composer({
               ref={textareaRef}
               value={text}
               onChange={(e) => setText(e.target.value)}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
