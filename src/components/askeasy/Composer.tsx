@@ -303,19 +303,45 @@ export function Composer({
                   : "inset 0 0 0 1px color-mix(in oklab, white 6%, transparent), 0 30px 80px -30px oklch(0 0 0 / 0.6)",
           }}
         >
-          <Bubble
-            size={28}
-            state={bubbleState}
-            interactive
-            ariaLabel={recording ? "Stop recording" : "Open actions — hold to talk"}
-            onPointerDown={onBubbleDown}
-            onPointerUp={onBubbleUp}
-            onPointerLeave={clearLongPress}
-            onPointerCancel={clearLongPress}
-            onClick={onBubbleClick}
-            onContextMenu={(e) => e.preventDefault()}
-            className="ml-1"
-          />
+          {indiaMode ? (
+            <button
+              type="button"
+              aria-label={recording ? "Stop recording" : "Open actions — hold to talk"}
+              onPointerDown={onBubbleDown}
+              onPointerUp={onBubbleUp}
+              onPointerLeave={clearLongPress}
+              onPointerCancel={clearLongPress}
+              onClick={onBubbleClick}
+              onContextMenu={(e) => e.preventDefault()}
+              className="ml-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-transform duration-200 hover:scale-105 active:scale-95"
+            >
+              <img
+                src={tricolorRing.url}
+                alt=""
+                draggable={false}
+                className={
+                  "h-8 w-8 select-none " +
+                  (bubbleState === "thinking" || bubbleState === "listening"
+                    ? "animate-spin [animation-duration:2.4s]"
+                    : "")
+                }
+              />
+            </button>
+          ) : (
+            <Bubble
+              size={28}
+              state={bubbleState}
+              interactive
+              ariaLabel={recording ? "Stop recording" : "Open actions — hold to talk"}
+              onPointerDown={onBubbleDown}
+              onPointerUp={onBubbleUp}
+              onPointerLeave={clearLongPress}
+              onPointerCancel={clearLongPress}
+              onClick={onBubbleClick}
+              onContextMenu={(e) => e.preventDefault()}
+              className="ml-1"
+            />
+          )}
 
 
           {recording ? (
