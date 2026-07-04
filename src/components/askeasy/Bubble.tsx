@@ -45,7 +45,8 @@ export const Bubble = forwardRef<HTMLButtonElement, BubbleProps>(function Bubble
   const spin =
     state === "thinking" ? "2.4s" : state === "listening" ? "3s" : state === "active" ? "5s" : "9s";
 
-  const scale = state === "active" ? 1.06 : state === "listening" ? 1.04 : 1;
+  const scale = state === "active" ? 1.05 : state === "listening" ? 1.03 : 1;
+
 
   // Premium palette — molten gold / champagne, refined jewel tones
   const gradient =
@@ -71,11 +72,11 @@ export const Bubble = forwardRef<HTMLButtonElement, BubbleProps>(function Bubble
     >
       {/* Soft outer halo */}
       <span
-        className="absolute -inset-[3px] rounded-full blur-[6px]"
+        className="absolute -inset-[2px] rounded-full blur-[4px]"
         style={{
           background: glowGradient,
           animation: `bubble-spin ${spin} linear infinite`,
-          opacity: state === "idle" ? 0.35 : 0.6,
+          opacity: state === "idle" ? 0.3 : 0.5,
         }}
       />
       {/* Thin premium hollow ring */}
@@ -85,11 +86,12 @@ export const Bubble = forwardRef<HTMLButtonElement, BubbleProps>(function Bubble
           background: gradient,
           animation: `bubble-spin ${spin} linear infinite`,
           WebkitMask:
-            "radial-gradient(circle, transparent 58%, black 60%, black 96%, transparent 100%)",
-          mask: "radial-gradient(circle, transparent 58%, black 60%, black 96%, transparent 100%)",
+            "radial-gradient(circle, transparent 66%, black 68%, black 86%, transparent 88%)",
+          mask: "radial-gradient(circle, transparent 66%, black 68%, black 86%, transparent 88%)",
           filter: "saturate(0.9) brightness(1.05)",
         }}
       />
+
     </span>
   );
 

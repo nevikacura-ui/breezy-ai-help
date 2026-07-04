@@ -297,7 +297,7 @@ export function Composer({
           }}
         >
           <Bubble
-            size={32}
+            size={28}
             state={bubbleState}
             interactive
             ariaLabel={recording ? "Stop recording" : "Open actions — hold to talk"}
@@ -309,6 +309,7 @@ export function Composer({
             onContextMenu={(e) => e.preventDefault()}
             className="ml-1"
           />
+
 
           {recording ? (
             <div className="flex flex-1 items-center gap-2 text-sm text-foreground/80">
