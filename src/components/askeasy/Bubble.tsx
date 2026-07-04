@@ -45,7 +45,8 @@ export const Bubble = forwardRef<HTMLButtonElement, BubbleProps>(function Bubble
   const spin =
     state === "thinking" ? "2.4s" : state === "listening" ? "3s" : state === "active" ? "5s" : "9s";
 
-  const scale = state === "active" ? 1.06 : state === "listening" ? 1.04 : 1;
+  const scale = state === "active" ? 1.05 : state === "listening" ? 1.03 : 1;
+
 
   // Premium palette — molten gold / champagne, refined jewel tones
   const gradient =
