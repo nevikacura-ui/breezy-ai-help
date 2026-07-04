@@ -66,6 +66,7 @@ const DEFAULT_SETTINGS: Settings = {
   isPro: false,
   indiaMode: false,
   language: "en",
+  indiaOnboarded: false,
 };
 
 const DEFAULT_USAGE: Usage = { text: 0, media: 0, voice: 0 };
