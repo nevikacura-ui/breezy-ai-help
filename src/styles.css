@@ -178,3 +178,14 @@
   background-clip: text;
   color: transparent;
 }
+
+/* Orb: blend into light backgrounds so its dark video edges don't show; keep dark mode untouched */
+.orb-video { mix-blend-mode: screen; }
+:where(.dark) .orb-video { mix-blend-mode: normal; }
+
+/* Caret blink for typewriter */
+@keyframes caret-blink {
+  0%, 45% { opacity: 1; }
+  55%, 100% { opacity: 0; }
+}
+@utility animate-caret { animation: caret-blink 1s steps(1, end) infinite; }
