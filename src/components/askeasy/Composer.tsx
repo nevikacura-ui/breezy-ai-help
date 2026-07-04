@@ -15,6 +15,7 @@ type Props = {
   onActivityChange?: (state: { focused: boolean; hasInput: boolean }) => void;
   placeholder?: string;
   thinkingLabel?: string;
+  indiaMode?: boolean;
 };
 
 const LONG_PRESS_MS = 450;
