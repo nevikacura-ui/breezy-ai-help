@@ -120,15 +120,32 @@ export function useConversation() {
 }
 
 /**
- * Placeholder for AI wiring. Replace this with a call to your backend / OpenRouter.
- * The UI already handles user input, attachments, streaming state, and error display.
+ * Sends the conversation to the /api/chat server route which proxies OpenRouter.
+ * Free tier: Gemini Flash / GPT-4o-mini. Pro tier: GPT-4o.
  */
-export async function sendToAI(_args: {
+export async function sendToAI(args: {
   messages: Message[];
   settings: Settings;
   signal?: AbortSignal;
 }): Promise<string> {
-  // Simulate typing so the UI feels alive until AI is wired.
-  await new Promise((r) => setTimeout(r, 900));
-  return "AskEasy isn't wired to a model yet. Add your OpenRouter API key in Settings and connect `sendToAI` in `src/lib/askeasy.ts` to your backend.";
+  const res = await fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    signal: args.signal,
+    body: JSON.stringify({
+      model: args.settings.openRouterModel,
+      messages: args.messages.map((m) => ({
+        role: m.role,
+        content: m.content,
+      })),
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text().catch(() => "");
+    throw new Error(`Chat failed (${res.status}): ${err.slice(0, 200)}`);
+  }
+
+  const data = (await res.json()) as { reply?: string };
+  return data.reply ?? "";
 }

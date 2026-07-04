@@ -1,0 +1,109 @@
+import { createFileRoute } from "@tanstack/react-router";
+
+// Map friendly tier IDs → OpenRouter model slugs.
+// Free tier: kept cheap on purpose (Gemini Flash + GPT-4o-mini).
+// Pro tier: higher-cost, higher-capability models.
+const MODEL_MAP: Record<string, { model: string; tier: "free" | "pro" }> = {
+  "askeasy/smart": { model: "google/gemini-2.5-flash", tier: "free" },
+  "askeasy/eco": { model: "openai/gpt-4o-mini", tier: "free" },
+  "askeasy/ultra": { model: "openai/gpt-4o", tier: "pro" },
+};
+
+type ChatMessage = {
+  role: "user" | "assistant" | "system";
+  content: string;
+};
+
+type ChatRequestBody = {
+  messages?: ChatMessage[];
+  model?: string;
+};
+
+export const Route = createFileRoute("/api/chat")({
+  server: {
+    handlers: {
+      POST: async ({ request }) => {
+        const apiKey = process.env.OPENROUTER_API_KEY;
+        if (!apiKey) {
+          return new Response(
+            JSON.stringify({ error: "OPENROUTER_API_KEY is not configured" }),
+            { status: 500, headers: { "Content-Type": "application/json" } },
+          );
+        }
+
+        let body: ChatRequestBody;
+        try {
+          body = (await request.json()) as ChatRequestBody;
+        } catch {
+          return new Response(JSON.stringify({ error: "Invalid JSON" }), {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+
+        const modelId = body.model ?? "askeasy/smart";
+        const mapped = MODEL_MAP[modelId] ?? MODEL_MAP["askeasy/smart"];
+
+        const messages = Array.isArray(body.messages) ? body.messages : [];
+        if (messages.length === 0) {
+          return new Response(JSON.stringify({ error: "messages required" }), {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+
+        const upstream = await fetch(
+          "https://openrouter.ai/api/v1/chat/completions",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${apiKey}`,
+              "Content-Type": "application/json",
+              "HTTP-Referer": "https://askeasy.lovable.app",
+              "X-Title": "AskEasy",
+            },
+            body: JSON.stringify({
+              model: mapped.model,
+              messages: [
+                {
+                  role: "system",
+                  content:
+                    "You are AskEasy, a warm, concise, helpful assistant. Answer clearly using markdown when useful.",
+                },
+                ...messages.map((m) => ({
+                  role: m.role,
+                  content: m.content,
+                })),
+              ],
+            }),
+          },
+        );
+
+        if (!upstream.ok) {
+          const errText = await upstream.text();
+          return new Response(
+            JSON.stringify({
+              error: "Upstream error",
+              status: upstream.status,
+              detail: errText.slice(0, 500),
+            }),
+            {
+              status: upstream.status,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
+        }
+
+        const data = (await upstream.json()) as {
+          choices?: { message?: { content?: string } }[];
+        };
+        const reply = data.choices?.[0]?.message?.content ?? "";
+
+        return new Response(
+          JSON.stringify({ reply, model: mapped.model, tier: mapped.tier }),
+          { headers: { "Content-Type": "application/json" } },
+        );
+      },
+    },
+  },
+});
