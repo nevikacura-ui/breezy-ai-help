@@ -299,10 +299,13 @@ function Home() {
         <Composer
           onSend={send}
           disabled={thinking}
-          voiceEnabled={settings.voiceEnabled}
+          onOpenCamera={() => setCameraOpen(true)}
           externalAttachments={pendingAttachments}
+          onAddAttachments={(a) =>
+            setPendingAttachments((prev) => [...prev, ...a])
+          }
           onRemoveAttachment={(id) =>
-            setPendingAttachments((prev) => prev.filter((a) => a.id !== id))
+            setPendingAttachments((prev) => prev.filter((att) => att.id !== id))
           }
         />
         {!hasConversation && (
