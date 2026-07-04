@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowUp, FileUp, Camera, Mic, Square, X } from "lucide-react";
 import type { Attachment } from "@/lib/askeasy";
 import { Bubble } from "./Bubble";
+import tricolorRing from "@/assets/tricolor-ring.png.asset.json";
 
 type Props = {
   onSend: (text: string, attachments: Attachment[]) => void;
