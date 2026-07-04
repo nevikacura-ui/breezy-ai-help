@@ -1,22 +1,29 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Settings2, Plus } from "lucide-react";
+import { toast } from "sonner";
 import { Orb } from "@/components/askeasy/Orb";
 import { Composer } from "@/components/askeasy/Composer";
 import { SettingsSheet } from "@/components/askeasy/SettingsSheet";
 import { CameraSheet } from "@/components/askeasy/CameraSheet";
 import { Typewriter } from "@/components/askeasy/Typewriter";
+import { ModelPill } from "@/components/askeasy/ModelPill";
 import {
   useConversation,
   useSettings,
+  useUsage,
   sendToAI,
+  quotaCheck,
+  modelTier,
   type Attachment,
   type Message,
+  type ModelId,
 } from "@/lib/askeasy";
 
 export const Route = createFileRoute("/")({
   component: Home,
 });
+
 
 function Home() {
   const { settings, update, hydrated } = useSettings();
