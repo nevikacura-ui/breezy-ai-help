@@ -199,6 +199,21 @@ function Home() {
         </button>
 
         <div className="flex items-center gap-2">
+          {settings.indiaMode && (() => {
+            const active = LANGUAGES.find((l) => l.code === settings.language);
+            if (!active) return null;
+            return (
+              <button
+                onClick={() => setSettingsOpen(true)}
+                className="glass flex h-9 items-center gap-1.5 rounded-full px-2.5 text-[12px] font-medium text-foreground/80 transition hover:text-foreground"
+                title={`Language: ${active.label}`}
+                aria-label={`Language: ${active.label}. Change in settings.`}
+              >
+                <img src={tricolorRing.url} alt="" draggable={false} className="h-4 w-4 select-none" />
+                <span className="max-w-[110px] truncate">{active.native}</span>
+              </button>
+            );
+          })()}
           <AccountMenu />
           <button
             onClick={() => setSettingsOpen(true)}
