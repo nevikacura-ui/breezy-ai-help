@@ -133,12 +133,23 @@ function Home() {
             <Orb size={220} intense active={orbActive} energized={orbEnergized} />
           </div>
 
-          <div className="animate-fade-up mt-10 space-y-3" style={{ animationDelay: "0.3s" }}>
-            <h1 className="font-display text-[2.5rem] leading-none tracking-tight text-foreground sm:text-6xl">
+          <div className="animate-fade-up mt-10 space-y-4" style={{ animationDelay: "0.3s" }}>
+            <h1 className="font-display text-[2.75rem] font-medium leading-[1.05] tracking-[-0.035em] text-foreground sm:text-6xl">
               Welcome{settings.name ? `, ${settings.name}` : ", Nevika"}
             </h1>
-            <p className="animate-shimmer text-gradient mx-auto max-w-md text-lg font-light tracking-wide sm:text-xl">
-              Ask anything. The easy way.
+            <p className="mx-auto flex min-h-[1.6em] max-w-md items-baseline justify-center gap-2 text-lg font-light tracking-tight text-foreground/70 sm:text-xl">
+              <span>I can</span>
+              <Typewriter
+                phrases={[
+                  "answer anything, instantly.",
+                  "summarize a long report.",
+                  "draft that email for you.",
+                  "explain it like you're five.",
+                  "plan your next big idea.",
+                  "turn thoughts into words.",
+                ]}
+                className="font-medium"
+              />
             </p>
           </div>
         </section>
