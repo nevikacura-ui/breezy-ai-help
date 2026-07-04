@@ -104,6 +104,19 @@ function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
+  // Full client-side reset whenever India Mode transitions from on → off.
+  const prevIndiaMode = useRef(settings.indiaMode);
+  useEffect(() => {
+    if (!hydrated) return;
+    if (prevIndiaMode.current && !settings.indiaMode) {
+      clear();
+      if (user) clearMsgs().catch(() => {});
+      setPendingAttachments([]);
+      setThinking(false);
+    }
+    prevIndiaMode.current = settings.indiaMode;
+  }, [settings.indiaMode, hydrated, clear, clearMsgs, user]);
+
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, thinking]);
