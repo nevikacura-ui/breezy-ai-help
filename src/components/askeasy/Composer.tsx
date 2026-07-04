@@ -40,6 +40,7 @@ export function Composer({
   onActivityChange,
   placeholder,
   thinkingLabel,
+  indiaMode,
 }: Props) {
   const [text, setText] = useState("");
   const [focused, setFocused] = useState(false);
