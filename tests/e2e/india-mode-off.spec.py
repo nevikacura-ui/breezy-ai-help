@@ -111,7 +111,9 @@ async def main():
         local, session, html_class = state["local"], state["session"], state["htmlClass"]
 
         # Cached messages + India-scoped drafts must be gone.
-        assert MESSAGES_KEY not in local, f"messages should be cleared, got {local.get(MESSAGES_KEY)!r}"
+        # useConversation re-persists an empty array after clear(); either absent or "[]" is OK.
+        assert local.get(MESSAGES_KEY, "[]") in ("[]", None), \
+            f"messages should be cleared, got {local.get(MESSAGES_KEY)!r}"
         for k in [
             "askeasy.india.lastLang",
             "askeasy.language.override",
