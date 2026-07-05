@@ -100,7 +100,7 @@ async def main():
         await india_switch.click()
 
         # Toast should appear.
-        toast = page.get_by_text("India Mode off", exact=False)
+        toast = page.get_by_text("India Mode off", exact=False).first
         await expect(toast).to_be_visible(timeout=3000)
         await page.screenshot(path=str(SCREENSHOTS / "3_toast.png"))
 
