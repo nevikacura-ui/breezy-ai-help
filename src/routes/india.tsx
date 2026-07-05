@@ -1,9 +1,12 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
 import { ArrowRight, Sparkles } from "lucide-react";
 import ringAsset from "@/assets/tricolor-ring.png.asset.json";
 import { LANGUAGES, type LangCode, t as tr } from "@/lib/i18n";
-import { useSettings } from "@/lib/askeasy";
+import { useSettings, useAuthUser, resetIndiaModeArtifacts } from "@/lib/askeasy";
+import { clearMessages } from "@/lib/pro.functions";
 
 export const Route = createFileRoute("/india")({
   head: () => ({
