@@ -24,9 +24,26 @@ export const Route = createFileRoute("/india")({
 function IndiaOnboarding() {
   const navigate = useNavigate();
   const { update, hydrated } = useSettings();
+  const user = useAuthUser();
+  const clearMsgs = useServerFn(clearMessages);
   const [selected, setSelected] = useState<LangCode>("hi");
 
   if (!hydrated) return <div className="min-h-dvh bg-white" />;
+
+  const disableIndiaMode = async () => {
+    // Wipe local India-scoped artifacts (drafts, cached msgs, language override).
+    resetIndiaModeArtifacts();
+    // Wipe server-side conversation history for the signed-in user.
+    if (user) {
+      try { await clearMsgs(); } catch { /* best-effort */ }
+    }
+    update({ indiaMode: false, language: "en", indiaOnboarded: true });
+    toast.success("India Mode off", {
+      description: "Language, chat, and drafts reset to English.",
+      duration: 1800,
+    });
+  };
+
 
   const heading = tr(selected, "onboard.title");
   const sub = tr(selected, "onboard.subtitle");
