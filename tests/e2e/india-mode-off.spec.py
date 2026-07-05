@@ -88,7 +88,8 @@ async def main():
         assert "india" in html_class, f"expected india class before toggle, got {html_class!r}"
 
         # Open Settings sheet.
-        await page.get_by_role("button", name="Settings").click()
+        # aria-label is localized (Gujarati in this seed) — target the icon instead.
+        await page.locator("button:has(svg.lucide-settings-2)").click()
         await page.wait_for_timeout(300)
         await page.screenshot(path=str(SCREENSHOTS / "2_settings_open.png"))
 
