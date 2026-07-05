@@ -1,9 +1,12 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
 import { ArrowRight, Sparkles } from "lucide-react";
 import ringAsset from "@/assets/tricolor-ring.png.asset.json";
 import { LANGUAGES, type LangCode, t as tr } from "@/lib/i18n";
-import { useSettings } from "@/lib/askeasy";
+import { useSettings, useAuthUser, resetIndiaModeArtifacts } from "@/lib/askeasy";
+import { clearMessages } from "@/lib/pro.functions";
 
 export const Route = createFileRoute("/india")({
   head: () => ({
@@ -21,9 +24,26 @@ export const Route = createFileRoute("/india")({
 function IndiaOnboarding() {
   const navigate = useNavigate();
   const { update, hydrated } = useSettings();
+  const user = useAuthUser();
+  const clearMsgs = useServerFn(clearMessages);
   const [selected, setSelected] = useState<LangCode>("hi");
 
   if (!hydrated) return <div className="min-h-dvh bg-white" />;
+
+  const disableIndiaMode = async () => {
+    // Wipe local India-scoped artifacts (drafts, cached msgs, language override).
+    resetIndiaModeArtifacts();
+    // Wipe server-side conversation history for the signed-in user.
+    if (user) {
+      try { await clearMsgs(); } catch { /* best-effort */ }
+    }
+    update({ indiaMode: false, language: "en", indiaOnboarded: true });
+    toast.success("India Mode off", {
+      description: "Language, chat, and drafts reset to English.",
+      duration: 1800,
+    });
+  };
+
 
   const heading = tr(selected, "onboard.title");
   const sub = tr(selected, "onboard.subtitle");
@@ -98,7 +118,11 @@ function IndiaOnboarding() {
 
         <Link
           to="/"
-          onClick={() => update({ indiaMode: false, language: "en", indiaOnboarded: true })}
+          data-testid="continue-in-english"
+          onClick={(e) => {
+            e.preventDefault();
+            void disableIndiaMode().finally(() => navigate({ to: "/" }));
+          }}
           className="mt-4 text-[12px] text-foreground/50 hover:text-foreground/80"
         >
           Continue in English →
