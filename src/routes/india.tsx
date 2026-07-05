@@ -118,7 +118,11 @@ function IndiaOnboarding() {
 
         <Link
           to="/"
-          onClick={() => update({ indiaMode: false, language: "en", indiaOnboarded: true })}
+          data-testid="continue-in-english"
+          onClick={(e) => {
+            e.preventDefault();
+            void disableIndiaMode().finally(() => navigate({ to: "/" }));
+          }}
           className="mt-4 text-[12px] text-foreground/50 hover:text-foreground/80"
         >
           Continue in English →
