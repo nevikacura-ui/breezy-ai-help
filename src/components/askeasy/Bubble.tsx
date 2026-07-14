@@ -38,11 +38,16 @@ export const Bubble = forwardRef<HTMLButtonElement, BubbleProps>(function Bubble
     className = "",
     interactive = false,
     ariaLabel,
+    ariaExpanded,
+    ariaHasPopup,
+    ariaPressed,
     onPointerDown,
     onPointerUp,
     onPointerLeave,
     onPointerCancel,
     onClick,
+    onKeyDown,
+    onKeyUp,
     onContextMenu,
     disabled,
   },
@@ -52,6 +57,7 @@ export const Bubble = forwardRef<HTMLButtonElement, BubbleProps>(function Bubble
     state === "thinking" ? "2.4s" : state === "listening" ? "3s" : state === "active" ? "5s" : "9s";
 
   const scale = state === "active" ? 1.05 : state === "listening" ? 1.03 : 1;
+
 
 
   // Premium palette — molten gold / champagne, refined jewel tones
