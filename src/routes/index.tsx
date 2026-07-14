@@ -281,7 +281,9 @@ function Home() {
             ))}
           </div>
         </section>
+      ) : (
         <section className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 text-center">
+
           {/* Ambient concentric rings behind the orb — voice-visualizer vibe */}
           <div className="relative flex items-center justify-center">
             <div
