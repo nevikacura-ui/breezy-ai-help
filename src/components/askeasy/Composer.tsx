@@ -193,6 +193,46 @@ export function Composer({
     setMenuOpen((v) => !v);
   };
 
+  // Keyboard: Enter/Space click already fires onClick. Hold Space to record.
+  const spaceHeldRef = useRef(false);
+  const onBubbleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape" && menuOpen) {
+      e.preventDefault();
+      setMenuOpen(false);
+      return;
+    }
+    if (e.key === " " && !e.repeat && !recording && !disabled) {
+      // Prevent default click-on-space so we can implement hold-to-talk
+      e.preventDefault();
+      spaceHeldRef.current = true;
+      onBubbleDown();
+    }
+  };
+  const onBubbleKeyUp = (e: React.KeyboardEvent) => {
+    if (e.key === " " && spaceHeldRef.current) {
+      e.preventDefault();
+      spaceHeldRef.current = false;
+      if (recording) {
+        stopRecording();
+      } else {
+        // Short press → treat as click (toggle menu)
+        clearLongPress();
+        onBubbleClick();
+      }
+    }
+  };
+
+  // Close menu on Escape from anywhere in composer
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [menuOpen]);
+
+
   const bubbleState = disabled
     ? "thinking"
     : recording
@@ -224,16 +264,18 @@ export function Composer({
                 </div>
               )}
               <button
+                type="button"
                 onClick={() =>
                   a === voiceAttachment
                     ? setVoiceAttachment(null)
                     : onRemoveAttachment(a.id)
                 }
-                className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-background"
-                aria-label="Remove"
+                className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-background outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                aria-label={`Remove ${a.type === "image" ? "image" : a.type === "audio" ? "voice note" : a.name ?? "attachment"}`}
               >
-                <X className="h-3 w-3" />
+                <X className="h-3 w-3" aria-hidden="true" />
               </button>
+
             </div>
           ))}
         </div>
@@ -243,12 +285,14 @@ export function Composer({
         {/* Bubble menu */}
         {menuOpen && (
           <>
-            <button
-              aria-label="Close"
-              className="fixed inset-0 z-10 cursor-default"
+            <div
+              aria-hidden="true"
+              className="fixed inset-0 z-10"
               onClick={() => setMenuOpen(false)}
             />
             <div
+              role="menu"
+              aria-label="Composer actions"
               className="glass animate-fade-up absolute bottom-full left-2 z-20 mb-3 w-56 rounded-2xl p-1.5 shadow-[0_20px_60px_-20px_oklch(0.2_0.05_280/0.45)]"
               style={{ animationDuration: "0.25s" }}
             >
@@ -271,11 +315,12 @@ export function Composer({
                 }}
               />
               <div className="mt-1 border-t border-foreground/10 px-3 py-2 text-[11px] text-muted-foreground">
-                Hold the ring to talk
+                Hold the ring to talk (or hold Space when focused)
               </div>
             </div>
           </>
         )}
+
 
         <input
           ref={fileInputRef}
@@ -309,13 +354,18 @@ export function Composer({
             <button
               type="button"
               aria-label={recording ? "Stop recording" : "Open actions — hold to talk"}
+              aria-expanded={menuOpen}
+              aria-haspopup="menu"
+              aria-pressed={recording}
               onPointerDown={onBubbleDown}
               onPointerUp={onBubbleUp}
               onPointerLeave={clearLongPress}
               onPointerCancel={clearLongPress}
               onClick={onBubbleClick}
+              onKeyDown={onBubbleKeyDown}
+              onKeyUp={onBubbleKeyUp}
               onContextMenu={(e) => e.preventDefault()}
-              className="ml-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-transform duration-200 hover:scale-105 active:scale-95"
+              className="ml-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full outline-none transition-transform duration-200 hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               <img
                 src={tricolorRing.url}
@@ -335,19 +385,29 @@ export function Composer({
               state={bubbleState}
               interactive
               ariaLabel={recording ? "Stop recording" : "Open actions — hold to talk"}
+              ariaExpanded={menuOpen}
+              ariaHasPopup="menu"
+              ariaPressed={recording}
               onPointerDown={onBubbleDown}
               onPointerUp={onBubbleUp}
               onPointerLeave={clearLongPress}
               onPointerCancel={clearLongPress}
               onClick={onBubbleClick}
+              onKeyDown={onBubbleKeyDown}
+              onKeyUp={onBubbleKeyUp}
               onContextMenu={(e) => e.preventDefault()}
               className="ml-1"
             />
           )}
 
 
+
           {recording ? (
-            <div className="flex flex-1 items-center gap-2 text-sm text-foreground/80">
+            <div
+              className="flex flex-1 items-center gap-2 text-sm text-foreground/80"
+              role="status"
+              aria-live="polite"
+            >
               <img
                 src={tricolorRing.url}
                 alt=""
@@ -359,6 +419,7 @@ export function Composer({
                 tap ring to stop
               </span>
             </div>
+
           ) : (
             <textarea
               ref={textareaRef}
@@ -389,28 +450,31 @@ export function Composer({
           >
             {recording ? (
               <button
+                type="button"
                 onClick={stopRecording}
-                className="flex h-10 w-[72px] items-center justify-center gap-1 rounded-full bg-destructive text-white shadow-lg"
-                aria-label="Stop"
+                className="flex h-10 w-[72px] items-center justify-center gap-1 rounded-full bg-destructive text-white shadow-lg outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                aria-label="Stop recording"
               >
-                <Square className="h-3.5 w-3.5 fill-current" />
+                <Square className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
                 <span className="text-[13px] font-semibold">Stop</span>
               </button>
             ) : (
               <button
-                aria-label="Send"
+                type="button"
+                aria-label="Send message"
                 onClick={submit}
                 disabled={!hasContent || disabled}
-                className="flex h-10 w-[72px] items-center justify-center gap-1 rounded-full text-white shadow-lg transition-transform duration-200 hover:scale-[1.03] disabled:opacity-40"
+                className="flex h-10 w-[72px] items-center justify-center gap-1 rounded-full text-white shadow-lg outline-none transition-transform duration-200 hover:scale-[1.03] focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-40"
                 style={{
                   background: "var(--send-gradient)",
                   transform: hasContent ? "scale(1)" : "scale(0.6)",
                 }}
               >
                 <span className="text-[13px] font-semibold tracking-wide">Go</span>
-                <ArrowUp className="h-4 w-4" strokeWidth={2.6} />
+                <ArrowUp className="h-4 w-4" strokeWidth={2.6} aria-hidden="true" />
               </button>
             )}
+
           </div>
         </div>
       </div>
@@ -431,9 +495,11 @@ function MenuRow({
 }) {
   return (
     <button
+      role="menuitem"
       onClick={onClick}
-      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-foreground/5"
+      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left outline-none transition hover:bg-foreground/5 focus-visible:bg-foreground/10 focus-visible:ring-2 focus-visible:ring-primary"
     >
+
       <span className="flex h-8 w-8 items-center justify-center rounded-full bg-foreground/10 text-foreground">
         {icon}
       </span>

@@ -8,14 +8,20 @@ type BubbleProps = {
   className?: string;
   interactive?: boolean;
   ariaLabel?: string;
+  ariaExpanded?: boolean;
+  ariaHasPopup?: boolean | "menu" | "dialog";
+  ariaPressed?: boolean;
   onPointerDown?: (e: React.PointerEvent<HTMLButtonElement>) => void;
   onPointerUp?: (e: React.PointerEvent<HTMLButtonElement>) => void;
   onPointerLeave?: (e: React.PointerEvent<HTMLButtonElement>) => void;
   onPointerCancel?: (e: React.PointerEvent<HTMLButtonElement>) => void;
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLButtonElement>) => void;
+  onKeyUp?: (e: React.KeyboardEvent<HTMLButtonElement>) => void;
   onContextMenu?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   disabled?: boolean;
 };
+
 
 /**
  * Iridescent animated ring/bubble. Pure CSS — no assets.
@@ -32,11 +38,16 @@ export const Bubble = forwardRef<HTMLButtonElement, BubbleProps>(function Bubble
     className = "",
     interactive = false,
     ariaLabel,
+    ariaExpanded,
+    ariaHasPopup,
+    ariaPressed,
     onPointerDown,
     onPointerUp,
     onPointerLeave,
     onPointerCancel,
     onClick,
+    onKeyDown,
+    onKeyUp,
     onContextMenu,
     disabled,
   },
@@ -46,6 +57,7 @@ export const Bubble = forwardRef<HTMLButtonElement, BubbleProps>(function Bubble
     state === "thinking" ? "2.4s" : state === "listening" ? "3s" : state === "active" ? "5s" : "9s";
 
   const scale = state === "active" ? 1.05 : state === "listening" ? 1.03 : 1;
+
 
 
   // Premium palette — molten gold / champagne, refined jewel tones
@@ -111,16 +123,22 @@ export const Bubble = forwardRef<HTMLButtonElement, BubbleProps>(function Bubble
       ref={ref}
       type="button"
       aria-label={ariaLabel}
+      aria-expanded={ariaExpanded}
+      aria-haspopup={ariaHasPopup}
+      aria-pressed={ariaPressed}
       disabled={disabled}
       onPointerDown={onPointerDown}
       onPointerUp={onPointerUp}
       onPointerLeave={onPointerLeave}
       onPointerCancel={onPointerCancel}
       onClick={onClick}
+      onKeyDown={onKeyDown}
+      onKeyUp={onKeyUp}
       onContextMenu={onContextMenu}
       className={
-        "relative inline-flex shrink-0 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 disabled:opacity-50 " +
+        "relative inline-flex shrink-0 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50 " +
         className
+
       }
       style={{ width: size, height: size, touchAction: "none" }}
     >
