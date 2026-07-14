@@ -337,7 +337,7 @@ export function Composer({
         <div
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
-          className="flex items-center gap-3 rounded-full py-2 pl-2 pr-2 backdrop-blur-xl transition-all duration-500"
+          className="flex items-center gap-2 rounded-full py-2 pl-2 pr-2 backdrop-blur-xl transition-all duration-500 sm:gap-3"
           style={{
             background: "color-mix(in oklab, oklch(0.08 0.005 160) 82%, transparent)",
             boxShadow: disabled
