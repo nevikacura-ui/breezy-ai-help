@@ -226,41 +226,42 @@ function Home() {
     <main className="relative flex min-h-dvh flex-col overflow-hidden">
       <div
         aria-hidden
-        className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full opacity-40 blur-3xl transition-opacity duration-700"
+        className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full opacity-30 blur-3xl transition-opacity duration-700"
         style={{ background: settings.indiaMode
           ? "radial-gradient(circle, rgba(255,153,51,0.35), transparent 70%)"
-          : "radial-gradient(circle, oklch(0.78 0.22 145 / 0.35), transparent 70%)" }}
+          : "radial-gradient(circle, oklch(0.65 0.2 255 / 0.35), transparent 70%)" }}
       />
 
 
-      {/* Top bar */}
-      <header className="relative z-30 flex items-center justify-between gap-2 px-4 pt-5">
+      {/* Top bar — hamburger • Listening title • edit */}
+      <header className="relative z-30 grid grid-cols-[auto_1fr_auto] items-center gap-2 px-4 pt-5">
         <button
-          onClick={() => {
-            clearConversation();
-          }}
-          className="glass flex h-9 items-center gap-1.5 rounded-full px-3 text-[13px] font-medium text-foreground/80 transition hover:text-foreground"
-          title="New conversation"
+          onClick={() => setSettingsOpen(true)}
+          aria-label={t("settings")}
+          className="glass flex h-10 w-10 items-center justify-center rounded-full text-foreground/80 transition hover:text-foreground"
         >
-          <Plus className="h-3.5 w-3.5" />
-          {t("new")}
+          <Settings2 className="h-4 w-4" />
         </button>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center gap-2 text-[13px] font-medium tracking-wide text-foreground/85">
+          <span className={"h-1.5 w-1.5 rounded-full " + (thinking ? "bg-primary animate-pulse" : "bg-primary/70")} />
+          {thinking ? "Thinking" : "Listening"}
+        </div>
+
+        <div className="flex items-center gap-2 justify-self-end">
           {settings.indiaMode && (() => {
             const active = LANGUAGES.find((l) => l.code === settings.language);
             if (!active) return null;
-            return (
-              <QuickLanguagePicker active={active} onSelect={selectLanguage} />
-            );
+            return <QuickLanguagePicker active={active} onSelect={selectLanguage} />;
           })()}
           <AccountMenu />
           <button
-            onClick={() => setSettingsOpen(true)}
-            aria-label={t("settings")}
-            className="glass flex h-9 w-9 items-center justify-center rounded-full text-foreground/70 transition hover:text-foreground"
+            onClick={clearConversation}
+            aria-label={t("new")}
+            title={t("new")}
+            className="glass flex h-10 w-10 items-center justify-center rounded-full text-foreground/80 transition hover:text-foreground"
           >
-            <Settings2 className="h-4 w-4" />
+            <Plus className="h-4 w-4" />
           </button>
         </div>
       </header>
@@ -282,30 +283,42 @@ function Home() {
           </div>
         </section>
       ) : (
-        <section className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 text-center">
+        <section className="relative z-10 flex flex-1 flex-col items-center px-6 pt-6 text-center">
 
-          {/* Ambient concentric rings behind the orb — voice-visualizer vibe */}
-          <div className="relative flex items-center justify-center">
+          {/* Orb sphere — dark gradient globe with waveform, on subtle disc */}
+          <div className="relative mt-4 flex items-center justify-center">
             <div
               aria-hidden
-              className="absolute h-[380px] w-[380px] rounded-full border border-primary/10 animate-pulse-soft"
-              style={{ animationDuration: "4s" }}
+              className="absolute h-[280px] w-[280px] rounded-full border border-white/[0.04]"
             />
             <div
               aria-hidden
-              className="absolute h-[300px] w-[300px] rounded-full border border-primary/15 animate-pulse-soft"
-              style={{ animationDuration: "3s", animationDelay: "0.4s" }}
+              className="absolute h-[220px] w-[220px] rounded-full border border-white/[0.06]"
             />
-            <div className="animate-fade-in animate-breathe relative" style={{ animationDelay: "0.1s" }}>
-              <Orb size={220} intense active={orbActive} energized={orbEnergized} />
+            <div
+              aria-hidden
+              className="absolute h-[180px] w-[180px] rounded-full"
+              style={{
+                background:
+                  "radial-gradient(circle at 50% 45%, oklch(0.22 0.02 260) 0%, oklch(0.06 0.005 260) 55%, transparent 75%)",
+                boxShadow: "inset 0 -20px 40px rgba(0,0,0,0.6), 0 20px 60px rgba(0,0,0,0.5)",
+              }}
+            />
+            <div className="animate-fade-in relative" style={{ animationDelay: "0.1s" }}>
+              <Orb size={140} intense active={orbActive} energized={orbEnergized} />
             </div>
           </div>
 
-          <div className="animate-fade-up mt-12 space-y-3" style={{ animationDelay: "0.3s" }}>
-            <h1 className="font-display text-[2.25rem] font-light leading-[1.05] tracking-[-0.04em] text-foreground sm:text-[3.25rem]">
+          <p className="animate-fade-up mt-6 text-[13px] text-muted-foreground/80" style={{ animationDelay: "0.2s" }}>
+            Hold for manual control
+          </p>
+
+          {/* Welcome heading */}
+          <div className="animate-fade-up mt-8 space-y-2" style={{ animationDelay: "0.3s" }}>
+            <h1 className="font-display text-[2rem] font-light leading-[1.05] tracking-[-0.03em] text-foreground sm:text-[2.5rem]">
               {welcomeText}
             </h1>
-            <p className="mx-auto flex min-h-[1.6em] max-w-md items-baseline justify-center gap-2 text-[15px] font-light tracking-tight text-muted-foreground sm:text-base">
+            <p className="mx-auto flex min-h-[1.6em] max-w-md items-baseline justify-center gap-2 text-[14px] font-light tracking-tight text-muted-foreground">
               <span>{t("tagline")}</span>
               <Typewriter
                 phrases={[
@@ -319,12 +332,30 @@ function Home() {
                 className="font-medium text-foreground/85"
               />
             </p>
-            <div className="pt-3 text-[11px] uppercase tracking-[0.32em] text-muted-foreground/60">
-              Hold the ring · tap to type
+          </div>
+
+          {/* Quick action chips — mirrors reference "Make a Todo / Make a reminder / See All" */}
+          <div className="animate-fade-up mt-8 w-full max-w-md" style={{ animationDelay: "0.4s" }}>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {[
+                "Draft an email",
+                "Explain a topic",
+                "Summarize a link",
+                "Brainstorm ideas",
+              ].map((label) => (
+                <button
+                  key={label}
+                  onClick={() => send(label, [])}
+                  className="glass rounded-full px-3.5 py-1.5 text-[12.5px] font-medium text-foreground/85 transition hover:bg-white/[0.06] hover:text-foreground"
+                >
+                  {label}
+                </button>
+              ))}
             </div>
           </div>
         </section>
       )}
+
 
       {/* Composer — nothing rendered above the input other than page content */}
 
