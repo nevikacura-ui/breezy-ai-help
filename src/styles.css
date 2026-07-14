@@ -64,28 +64,30 @@
 }
 
 .dark {
-  --background: oklch(0.04 0.005 260);
+  --background: oklch(0.02 0 0);
   --foreground: oklch(0.98 0.003 250);
-  --card: oklch(0.09 0.008 260);
+  --card: oklch(0.06 0.005 160);
   --card-foreground: oklch(0.98 0.003 250);
-  --popover: oklch(0.09 0.008 260);
+  --popover: oklch(0.06 0.005 160);
   --popover-foreground: oklch(0.98 0.003 250);
-  --primary: oklch(0.98 0.003 250);
-  --primary-foreground: oklch(0.09 0.008 260);
-  --secondary: oklch(0.14 0.01 260);
+  --primary: oklch(0.8 0.24 145);
+  --primary-foreground: oklch(0.05 0.01 160);
+  --secondary: oklch(0.11 0.008 160);
   --secondary-foreground: oklch(0.98 0.003 250);
-  --muted: oklch(0.14 0.01 260);
-  --muted-foreground: oklch(0.68 0.02 260);
-  --accent: oklch(0.18 0.02 280);
+  --muted: oklch(0.11 0.008 160);
+  --muted-foreground: oklch(0.7 0.02 160);
+  --accent: oklch(0.18 0.06 150);
   --accent-foreground: oklch(0.98 0.003 250);
   --border: oklch(1 0 0 / 8%);
   --input: oklch(1 0 0 / 10%);
-  --ring: oklch(0.55 0.06 280);
+  --ring: oklch(0.8 0.24 145);
 
-  --glass-bg: color-mix(in oklab, oklch(0.08 0.006 260) 72%, transparent);
-  --glass-border: color-mix(in oklab, white 6%, transparent);
-  --page-gradient: radial-gradient(120% 80% at 50% 0%, oklch(0.09 0.015 265) 0%, oklch(0.03 0.005 260) 70%);
+  --glass-bg: color-mix(in oklab, oklch(0.04 0.005 160) 75%, transparent);
+  --glass-border: color-mix(in oklab, oklch(0.8 0.24 145) 20%, transparent);
+  --send-gradient: linear-gradient(135deg, oklch(0.82 0.24 145), oklch(0.7 0.2 155));
+  --page-gradient: radial-gradient(120% 80% at 50% 0%, oklch(0.08 0.03 150) 0%, oklch(0.015 0 0) 70%);
 }
+
 
 /* India Mode — tricolor theme (crisp white base, saffron primary, India green accent) */
 .india {
