@@ -264,16 +264,18 @@ export function Composer({
                 </div>
               )}
               <button
+                type="button"
                 onClick={() =>
                   a === voiceAttachment
                     ? setVoiceAttachment(null)
                     : onRemoveAttachment(a.id)
                 }
-                className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-background"
-                aria-label="Remove"
+                className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-background outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                aria-label={`Remove ${a.type === "image" ? "image" : a.type === "audio" ? "voice note" : a.name ?? "attachment"}`}
               >
-                <X className="h-3 w-3" />
+                <X className="h-3 w-3" aria-hidden="true" />
               </button>
+
             </div>
           ))}
         </div>
