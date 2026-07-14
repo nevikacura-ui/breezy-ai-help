@@ -8,14 +8,20 @@ type BubbleProps = {
   className?: string;
   interactive?: boolean;
   ariaLabel?: string;
+  ariaExpanded?: boolean;
+  ariaHasPopup?: boolean | "menu" | "dialog";
+  ariaPressed?: boolean;
   onPointerDown?: (e: React.PointerEvent<HTMLButtonElement>) => void;
   onPointerUp?: (e: React.PointerEvent<HTMLButtonElement>) => void;
   onPointerLeave?: (e: React.PointerEvent<HTMLButtonElement>) => void;
   onPointerCancel?: (e: React.PointerEvent<HTMLButtonElement>) => void;
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLButtonElement>) => void;
+  onKeyUp?: (e: React.KeyboardEvent<HTMLButtonElement>) => void;
   onContextMenu?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   disabled?: boolean;
 };
+
 
 /**
  * Iridescent animated ring/bubble. Pure CSS — no assets.
