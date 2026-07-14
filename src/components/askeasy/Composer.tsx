@@ -401,7 +401,11 @@ export function Composer({
 
 
           {recording ? (
-            <div className="flex flex-1 items-center gap-2 text-sm text-foreground/80">
+            <div
+              className="flex flex-1 items-center gap-2 text-sm text-foreground/80"
+              role="status"
+              aria-live="polite"
+            >
               <img
                 src={tricolorRing.url}
                 alt=""
@@ -413,6 +417,7 @@ export function Composer({
                 tap ring to stop
               </span>
             </div>
+
           ) : (
             <textarea
               ref={textareaRef}
