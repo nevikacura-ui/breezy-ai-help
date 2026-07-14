@@ -292,17 +292,19 @@ export function Composer({
         <div
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
-          className="glass flex items-center gap-3 rounded-full py-2 pl-2 pr-2 shadow-[0_30px_80px_-30px_oklch(0_0_0/0.6)] transition-all duration-500"
+          className="flex items-center gap-3 rounded-full py-2 pl-2 pr-2 backdrop-blur-xl transition-all duration-500"
           style={{
+            background: "color-mix(in oklab, oklch(0.08 0.005 160) 82%, transparent)",
             boxShadow: disabled
-              ? "inset 0 0 0 1px oklch(0.72 0.22 30 / 0.35), 0 24px 70px -22px oklch(0.7 0.2 30 / 0.35)"
+              ? "inset 0 0 0 1px oklch(0.78 0.22 145 / 0.35), 0 24px 70px -30px oklch(0.78 0.22 145 / 0.25)"
               : recording
-                ? "inset 0 0 0 1px oklch(0.7 0.24 25 / 0.4), 0 24px 70px -22px oklch(0.7 0.24 25 / 0.35)"
+                ? "inset 0 0 0 1px oklch(0.7 0.24 25 / 0.4), 0 24px 70px -30px oklch(0.7 0.24 25 / 0.3)"
                 : focused
-                  ? "inset 0 0 0 1px oklch(0.75 0.16 40 / 0.35), 0 28px 80px -24px oklch(0.7 0.18 30 / 0.4)"
-                  : "inset 0 0 0 1px color-mix(in oklab, white 6%, transparent), 0 30px 80px -30px oklch(0 0 0 / 0.6)",
+                  ? "inset 0 0 0 1px oklch(0.78 0.22 145 / 0.35), 0 24px 70px -30px oklch(0.78 0.22 145 / 0.3)"
+                  : "inset 0 0 0 1px oklch(1 0 0 / 0.06), 0 20px 60px -30px oklch(0 0 0 / 0.9)",
           }}
         >
+
           {indiaMode ? (
             <button
               type="button"
