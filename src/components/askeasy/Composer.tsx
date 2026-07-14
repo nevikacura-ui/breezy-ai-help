@@ -352,13 +352,18 @@ export function Composer({
             <button
               type="button"
               aria-label={recording ? "Stop recording" : "Open actions — hold to talk"}
+              aria-expanded={menuOpen}
+              aria-haspopup="menu"
+              aria-pressed={recording}
               onPointerDown={onBubbleDown}
               onPointerUp={onBubbleUp}
               onPointerLeave={clearLongPress}
               onPointerCancel={clearLongPress}
               onClick={onBubbleClick}
+              onKeyDown={onBubbleKeyDown}
+              onKeyUp={onBubbleKeyUp}
               onContextMenu={(e) => e.preventDefault()}
-              className="ml-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-transform duration-200 hover:scale-105 active:scale-95"
+              className="ml-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full outline-none transition-transform duration-200 hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               <img
                 src={tricolorRing.url}
@@ -378,15 +383,21 @@ export function Composer({
               state={bubbleState}
               interactive
               ariaLabel={recording ? "Stop recording" : "Open actions — hold to talk"}
+              ariaExpanded={menuOpen}
+              ariaHasPopup="menu"
+              ariaPressed={recording}
               onPointerDown={onBubbleDown}
               onPointerUp={onBubbleUp}
               onPointerLeave={clearLongPress}
               onPointerCancel={clearLongPress}
               onClick={onBubbleClick}
+              onKeyDown={onBubbleKeyDown}
+              onKeyUp={onBubbleKeyUp}
               onContextMenu={(e) => e.preventDefault()}
               className="ml-1"
             />
           )}
+
 
 
           {recording ? (
