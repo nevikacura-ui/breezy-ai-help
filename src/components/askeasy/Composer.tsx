@@ -404,7 +404,7 @@ export function Composer({
 
           {recording ? (
             <div
-              className="flex flex-1 items-center gap-2 text-sm text-foreground/80"
+              className="flex min-w-0 flex-1 items-center gap-2 text-sm text-foreground/80"
               role="status"
               aria-live="polite"
             >
@@ -414,8 +414,8 @@ export function Composer({
                 draggable={false}
                 className="h-5 w-5 shrink-0 select-none animate-spin [animation-duration:1.6s]"
               />
-              Listening… {formatTime(recordSeconds)}
-              <span className="ml-1 text-[11px] text-muted-foreground">
+              <span className="truncate">Listening… {formatTime(recordSeconds)}</span>
+              <span className="ml-1 hidden text-[11px] text-muted-foreground sm:inline">
                 tap ring to stop
               </span>
             </div>
@@ -436,18 +436,19 @@ export function Composer({
               placeholder={disabled ? (thinkingLabel ?? "Thinking…") : (placeholder ?? "Ask anything…")}
               rows={1}
               disabled={disabled}
-              className="flex-1 resize-none bg-transparent py-1.5 text-[16px] leading-6 text-foreground placeholder:text-muted-foreground/70 focus:outline-none disabled:opacity-60"
+              className="min-w-0 flex-1 resize-none bg-transparent py-1.5 text-[16px] leading-6 text-foreground placeholder:text-muted-foreground/70 focus:outline-none disabled:opacity-60"
             />
           )}
 
           {/* Go button — appears only when there's input */}
           <div
-            className="overflow-hidden transition-all duration-300"
+            className="shrink-0 overflow-hidden transition-all duration-300"
             style={{
-              width: hasContent || recording ? 76 : 0,
+              width: hasContent || recording ? 68 : 0,
               opacity: hasContent || recording ? 1 : 0,
             }}
           >
+
             {recording ? (
               <button
                 type="button"
