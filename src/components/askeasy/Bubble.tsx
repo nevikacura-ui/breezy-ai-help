@@ -123,16 +123,22 @@ export const Bubble = forwardRef<HTMLButtonElement, BubbleProps>(function Bubble
       ref={ref}
       type="button"
       aria-label={ariaLabel}
+      aria-expanded={ariaExpanded}
+      aria-haspopup={ariaHasPopup}
+      aria-pressed={ariaPressed}
       disabled={disabled}
       onPointerDown={onPointerDown}
       onPointerUp={onPointerUp}
       onPointerLeave={onPointerLeave}
       onPointerCancel={onPointerCancel}
       onClick={onClick}
+      onKeyDown={onKeyDown}
+      onKeyUp={onKeyUp}
       onContextMenu={onContextMenu}
       className={
-        "relative inline-flex shrink-0 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 disabled:opacity-50 " +
+        "relative inline-flex shrink-0 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50 " +
         className
+
       }
       style={{ width: size, height: size, touchAction: "none" }}
     >
