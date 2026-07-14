@@ -283,42 +283,58 @@ function Home() {
           </div>
         </section>
       ) : (
-        <section className="relative z-10 flex flex-1 flex-col items-center px-6 pt-6 text-center">
+        <section className="relative z-10 flex flex-1 flex-col items-center px-6 pt-4 text-center">
 
-          {/* Orb sphere — dark gradient globe with waveform, on subtle disc */}
-          <div className="relative mt-4 flex items-center justify-center">
+          {/* Orb sphere — dark gradient globe on subtle disc with radiating rings */}
+          <div className="relative mt-10 flex h-[320px] w-[320px] items-center justify-center">
+            {/* Radiating rings */}
             <div
               aria-hidden
-              className="absolute h-[280px] w-[280px] rounded-full border border-white/[0.04]"
+              className="animate-ring-radiate absolute h-[200px] w-[200px] rounded-full border border-primary/25"
+              style={{ animationDelay: "0s" }}
             />
             <div
               aria-hidden
-              className="absolute h-[220px] w-[220px] rounded-full border border-white/[0.06]"
+              className="animate-ring-radiate absolute h-[200px] w-[200px] rounded-full border border-primary/20"
+              style={{ animationDelay: "1.3s" }}
             />
             <div
               aria-hidden
-              className="absolute h-[180px] w-[180px] rounded-full"
+              className="animate-ring-radiate absolute h-[200px] w-[200px] rounded-full border border-primary/15"
+              style={{ animationDelay: "2.6s" }}
+            />
+            {/* Static concentric outlines */}
+            <div aria-hidden className="absolute h-[300px] w-[300px] rounded-full border border-white/[0.04]" />
+            <div aria-hidden className="absolute h-[240px] w-[240px] rounded-full border border-white/[0.06]" />
+            {/* Sphere disc */}
+            <div
+              aria-hidden
+              className="animate-breathe absolute h-[200px] w-[200px] rounded-full"
               style={{
                 background:
-                  "radial-gradient(circle at 50% 45%, oklch(0.22 0.02 260) 0%, oklch(0.06 0.005 260) 55%, transparent 75%)",
-                boxShadow: "inset 0 -20px 40px rgba(0,0,0,0.6), 0 20px 60px rgba(0,0,0,0.5)",
+                  "radial-gradient(circle at 50% 42%, oklch(0.28 0.05 260) 0%, oklch(0.08 0.008 260) 55%, transparent 78%)",
+                boxShadow:
+                  "inset 0 -24px 50px rgba(0,0,0,0.7), 0 30px 80px oklch(0.5 0.2 255 / 0.18)",
               }}
             />
             <div className="animate-fade-in relative" style={{ animationDelay: "0.1s" }}>
-              <Orb size={140} intense active={orbActive} energized={orbEnergized} />
+              <Orb size={160} intense active={orbActive} energized={orbEnergized} />
             </div>
           </div>
 
-          <p className="animate-fade-up mt-6 text-[13px] text-muted-foreground/80" style={{ animationDelay: "0.2s" }}>
+          <p
+            className="animate-fade-up mt-4 text-[12px] uppercase tracking-[0.3em] text-muted-foreground/70"
+            style={{ animationDelay: "0.2s" }}
+          >
             Hold for manual control
           </p>
 
           {/* Welcome heading */}
-          <div className="animate-fade-up mt-8 space-y-2" style={{ animationDelay: "0.3s" }}>
-            <h1 className="font-display text-[2rem] font-light leading-[1.05] tracking-[-0.03em] text-foreground sm:text-[2.5rem]">
+          <div className="animate-fade-up mt-10 space-y-3" style={{ animationDelay: "0.3s" }}>
+            <h1 className="font-display text-[2.5rem] font-light leading-[1] tracking-[-0.035em] text-foreground sm:text-[3rem]">
               {welcomeText}
             </h1>
-            <p className="mx-auto flex min-h-[1.6em] max-w-md items-baseline justify-center gap-2 text-[14px] font-light tracking-tight text-muted-foreground">
+            <p className="mx-auto flex min-h-[1.6em] max-w-md items-baseline justify-center gap-2 text-[14.5px] font-light tracking-tight text-muted-foreground">
               <span>{t("tagline")}</span>
               <Typewriter
                 phrases={[
@@ -329,10 +345,11 @@ function Home() {
                   t("typewriter.5"),
                   t("typewriter.6"),
                 ]}
-                className="font-medium text-foreground/85"
+                className="font-medium text-foreground/90"
               />
             </p>
           </div>
+
 
           {/* Quick action chips — mirrors reference "Make a Todo / Make a reminder / See All" */}
           <div className="animate-fade-up mt-8 w-full max-w-md" style={{ animationDelay: "0.4s" }}>
