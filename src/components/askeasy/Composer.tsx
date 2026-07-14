@@ -193,6 +193,46 @@ export function Composer({
     setMenuOpen((v) => !v);
   };
 
+  // Keyboard: Enter/Space click already fires onClick. Hold Space to record.
+  const spaceHeldRef = useRef(false);
+  const onBubbleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape" && menuOpen) {
+      e.preventDefault();
+      setMenuOpen(false);
+      return;
+    }
+    if (e.key === " " && !e.repeat && !recording && !disabled) {
+      // Prevent default click-on-space so we can implement hold-to-talk
+      e.preventDefault();
+      spaceHeldRef.current = true;
+      onBubbleDown();
+    }
+  };
+  const onBubbleKeyUp = (e: React.KeyboardEvent) => {
+    if (e.key === " " && spaceHeldRef.current) {
+      e.preventDefault();
+      spaceHeldRef.current = false;
+      if (recording) {
+        stopRecording();
+      } else {
+        // Short press → treat as click (toggle menu)
+        clearLongPress();
+        onBubbleClick();
+      }
+    }
+  };
+
+  // Close menu on Escape from anywhere in composer
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [menuOpen]);
+
+
   const bubbleState = disabled
     ? "thinking"
     : recording
