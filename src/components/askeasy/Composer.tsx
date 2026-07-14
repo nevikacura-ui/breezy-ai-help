@@ -283,12 +283,14 @@ export function Composer({
         {/* Bubble menu */}
         {menuOpen && (
           <>
-            <button
-              aria-label="Close"
-              className="fixed inset-0 z-10 cursor-default"
+            <div
+              aria-hidden="true"
+              className="fixed inset-0 z-10"
               onClick={() => setMenuOpen(false)}
             />
             <div
+              role="menu"
+              aria-label="Composer actions"
               className="glass animate-fade-up absolute bottom-full left-2 z-20 mb-3 w-56 rounded-2xl p-1.5 shadow-[0_20px_60px_-20px_oklch(0.2_0.05_280/0.45)]"
               style={{ animationDuration: "0.25s" }}
             >
@@ -311,11 +313,12 @@ export function Composer({
                 }}
               />
               <div className="mt-1 border-t border-foreground/10 px-3 py-2 text-[11px] text-muted-foreground">
-                Hold the ring to talk
+                Hold the ring to talk (or hold Space when focused)
               </div>
             </div>
           </>
         )}
+
 
         <input
           ref={fileInputRef}
