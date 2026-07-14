@@ -226,11 +226,12 @@ function Home() {
     <main className="relative flex min-h-dvh flex-col overflow-hidden">
       <div
         aria-hidden
-        className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full opacity-50 blur-3xl transition-opacity duration-700"
+        className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full opacity-40 blur-3xl transition-opacity duration-700"
         style={{ background: settings.indiaMode
           ? "radial-gradient(circle, rgba(255,153,51,0.35), transparent 70%)"
-          : "radial-gradient(circle, oklch(0.8 0.12 300 / 0.5), transparent 70%)" }}
+          : "radial-gradient(circle, oklch(0.78 0.22 145 / 0.35), transparent 70%)" }}
       />
+
 
       {/* Top bar */}
       <header className="relative z-30 flex items-center justify-between gap-2 px-4 pt-5">
