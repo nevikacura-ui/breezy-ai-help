@@ -453,7 +453,7 @@ export function Composer({
               <button
                 type="button"
                 onClick={stopRecording}
-                className="flex h-10 w-[72px] items-center justify-center gap-1 rounded-full bg-destructive text-white shadow-lg outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                className="flex h-10 w-16 items-center justify-center gap-1 rounded-full bg-destructive text-white shadow-lg outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:w-[72px]"
                 aria-label="Stop recording"
               >
                 <Square className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
@@ -465,7 +465,7 @@ export function Composer({
                 aria-label="Send message"
                 onClick={submit}
                 disabled={!hasContent || disabled}
-                className="flex h-10 w-[72px] items-center justify-center gap-1 rounded-full text-white shadow-lg outline-none transition-transform duration-200 hover:scale-[1.03] focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-40"
+                className="flex h-10 w-16 items-center justify-center gap-1 rounded-full text-white shadow-lg outline-none transition-transform duration-200 hover:scale-[1.03] focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-40 sm:w-[72px]"
                 style={{
                   background: "var(--send-gradient)",
                   transform: hasContent ? "scale(1)" : "scale(0.6)",
@@ -475,6 +475,7 @@ export function Composer({
                 <ArrowUp className="h-4 w-4" strokeWidth={2.6} aria-hidden="true" />
               </button>
             )}
+
 
           </div>
         </div>
