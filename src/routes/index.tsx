@@ -324,9 +324,10 @@ function Home() {
             </div>
           </div>
         </section>
-
+      )}
 
       {/* Composer — nothing rendered above the input other than page content */}
+
       <div
         className={
           "z-10 px-4 pb-6 pt-4 " +
