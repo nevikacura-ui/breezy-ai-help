@@ -283,14 +283,29 @@ function Home() {
         </section>
       ) : (
         <section className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 text-center">
-          <div className="animate-fade-in animate-breathe" style={{ animationDelay: "0.1s" }}>
-            <Orb size={220} intense active={orbActive} energized={orbEnergized} />
+
+          {/* Ambient concentric rings behind the orb — voice-visualizer vibe */}
+          <div className="relative flex items-center justify-center">
+            <div
+              aria-hidden
+              className="absolute h-[380px] w-[380px] rounded-full border border-primary/10 animate-pulse-soft"
+              style={{ animationDuration: "4s" }}
+            />
+            <div
+              aria-hidden
+              className="absolute h-[300px] w-[300px] rounded-full border border-primary/15 animate-pulse-soft"
+              style={{ animationDuration: "3s", animationDelay: "0.4s" }}
+            />
+            <div className="animate-fade-in animate-breathe relative" style={{ animationDelay: "0.1s" }}>
+              <Orb size={220} intense active={orbActive} energized={orbEnergized} />
+            </div>
           </div>
-          <div className="animate-fade-up mt-10 space-y-4" style={{ animationDelay: "0.3s" }}>
-            <h1 className="font-display text-[2.75rem] font-medium leading-[1.05] tracking-[-0.035em] text-foreground sm:text-6xl">
+
+          <div className="animate-fade-up mt-12 space-y-3" style={{ animationDelay: "0.3s" }}>
+            <h1 className="font-display text-[2.25rem] font-light leading-[1.05] tracking-[-0.04em] text-foreground sm:text-[3.25rem]">
               {welcomeText}
             </h1>
-            <p className="mx-auto flex min-h-[1.6em] max-w-md items-baseline justify-center gap-2 text-lg font-light tracking-tight text-foreground/70 sm:text-xl">
+            <p className="mx-auto flex min-h-[1.6em] max-w-md items-baseline justify-center gap-2 text-[15px] font-light tracking-tight text-muted-foreground sm:text-base">
               <span>{t("tagline")}</span>
               <Typewriter
                 phrases={[
@@ -301,14 +316,18 @@ function Home() {
                   t("typewriter.5"),
                   t("typewriter.6"),
                 ]}
-                className="font-medium"
+                className="font-medium text-foreground/85"
               />
             </p>
+            <div className="pt-3 text-[11px] uppercase tracking-[0.32em] text-muted-foreground/60">
+              Hold the ring · tap to type
+            </div>
           </div>
         </section>
       )}
 
       {/* Composer — nothing rendered above the input other than page content */}
+
       <div
         className={
           "z-10 px-4 pb-6 pt-4 " +
