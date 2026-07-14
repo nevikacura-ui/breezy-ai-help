@@ -450,28 +450,31 @@ export function Composer({
           >
             {recording ? (
               <button
+                type="button"
                 onClick={stopRecording}
-                className="flex h-10 w-[72px] items-center justify-center gap-1 rounded-full bg-destructive text-white shadow-lg"
-                aria-label="Stop"
+                className="flex h-10 w-[72px] items-center justify-center gap-1 rounded-full bg-destructive text-white shadow-lg outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                aria-label="Stop recording"
               >
-                <Square className="h-3.5 w-3.5 fill-current" />
+                <Square className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
                 <span className="text-[13px] font-semibold">Stop</span>
               </button>
             ) : (
               <button
-                aria-label="Send"
+                type="button"
+                aria-label="Send message"
                 onClick={submit}
                 disabled={!hasContent || disabled}
-                className="flex h-10 w-[72px] items-center justify-center gap-1 rounded-full text-white shadow-lg transition-transform duration-200 hover:scale-[1.03] disabled:opacity-40"
+                className="flex h-10 w-[72px] items-center justify-center gap-1 rounded-full text-white shadow-lg outline-none transition-transform duration-200 hover:scale-[1.03] focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-40"
                 style={{
                   background: "var(--send-gradient)",
                   transform: hasContent ? "scale(1)" : "scale(0.6)",
                 }}
               >
                 <span className="text-[13px] font-semibold tracking-wide">Go</span>
-                <ArrowUp className="h-4 w-4" strokeWidth={2.6} />
+                <ArrowUp className="h-4 w-4" strokeWidth={2.6} aria-hidden="true" />
               </button>
             )}
+
           </div>
         </div>
       </div>
