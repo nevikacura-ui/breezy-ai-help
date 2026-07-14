@@ -490,9 +490,11 @@ function MenuRow({
 }) {
   return (
     <button
+      role="menuitem"
       onClick={onClick}
-      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-foreground/5"
+      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left outline-none transition hover:bg-foreground/5 focus-visible:bg-foreground/10 focus-visible:ring-2 focus-visible:ring-primary"
     >
+
       <span className="flex h-8 w-8 items-center justify-center rounded-full bg-foreground/10 text-foreground">
         {icon}
       </span>
