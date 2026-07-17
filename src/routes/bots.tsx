@@ -276,7 +276,7 @@ function BotListRow({ bot }: { bot: Bot }) {
   const isVoice = bot.id === "news-ani";
   return (
     <Link
-      to="/bots/$botId"
+      to="/chat/$botId"
       params={{ botId: bot.id }}
       className="flex items-center gap-3 rounded-2xl border p-2.5 transition-all active:scale-[0.99]"
       style={{ background: "#fff", borderColor: "color-mix(in oklab, var(--ink) 10%, transparent)" }}
