@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Settings as SettingsIcon, RotateCcw, ThumbsUp, ThumbsDown, Send, Square, Mic, EyeOff, Trash2, Smile } from "lucide-react";
+import { ArrowLeft, Settings as SettingsIcon, RotateCcw, ThumbsUp, ThumbsDown, Send, Square, Mic, EyeOff, Trash2, Smile, Paperclip, FileText, X, Loader2 } from "lucide-react";
 import { getBotById, useCustomBots, useOnboarding, ONBOARDING_CATEGORIES, type Bot } from "@/lib/bots";
 import { BotAvatar } from "@/components/askeasy/BotAvatar";
 import {
@@ -10,7 +10,9 @@ import {
 } from "@/lib/askeasy";
 import { SettingsSheet } from "@/components/askeasy/SettingsSheet";
 import { LANG_ENGLISH_NAME, LANGUAGES, isRTL, t, detectLanguage, type LangCode } from "@/lib/i18n";
+import { extractPdfText, buildDocContext, type PdfDoc } from "@/lib/pdf";
 import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/chat/$botId")({
   head: ({ params }) => ({
