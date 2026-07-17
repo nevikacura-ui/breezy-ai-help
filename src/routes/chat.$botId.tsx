@@ -535,9 +535,78 @@ function BotChat() {
               </div>
             );
           })()}
-          <div className="flex items-center gap-2 rounded-full py-1.5 pl-4 pr-1.5"
-            style={{ background: "color-mix(in oklab, var(--cream) 8%, transparent)", border: "1px solid color-mix(in oklab, var(--cream) 12%, transparent)" }}>
+
+          {/* Attached documents */}
+          {docs.length > 0 && (
+            <div className="mb-2 flex flex-wrap gap-1.5">
+              {docs.map((d) => (
+                <span
+                  key={d.id}
+                  className="flex max-w-[220px] items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px]"
+                  style={{ background: "color-mix(in oklab, var(--cream) 10%, transparent)", border: "1px solid color-mix(in oklab, var(--cream) 16%, transparent)" }}
+                  title={`${d.name} — ${d.pages} pages`}
+                >
+                  <FileText className="h-3 w-3 shrink-0" />
+                  <span className="truncate">{d.name}</span>
+                  <span className="opacity-60">· {d.pages}p</span>
+                  <button
+                    onClick={() => setDocs((prev) => prev.filter((x) => x.id !== d.id))}
+                    aria-label="Remove document"
+                    className="ml-0.5 opacity-70 hover:opacity-100"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
           <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/pdf,.pdf"
+            multiple
+            className="hidden"
+            onChange={async (e) => {
+              const files = Array.from(e.target.files ?? []);
+              e.target.value = "";
+              if (files.length === 0) return;
+              setUploadingDoc(true);
+              try {
+                for (const file of files) {
+                  if (file.size > 20 * 1024 * 1024) {
+                    toast.error(`${file.name} is over 20MB.`);
+                    continue;
+                  }
+                  const doc = await extractPdfText(file);
+                  if (!doc.text.trim()) {
+                    toast.error(`${file.name}: no readable text (scanned PDF?)`);
+                    continue;
+                  }
+                  setDocs((prev) => [...prev, doc]);
+                  toast.success(`${file.name} added — ask me anything about it.`);
+                }
+              } catch (err) {
+                toast.error(`Couldn't read PDF: ${(err as Error).message}`);
+              } finally {
+                setUploadingDoc(false);
+              }
+            }}
+          />
+
+          <div className="flex items-center gap-2 rounded-full py-1.5 pl-2 pr-1.5"
+            style={{ background: "color-mix(in oklab, var(--cream) 8%, transparent)", border: "1px solid color-mix(in oklab, var(--cream) 12%, transparent)" }}>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploadingDoc}
+            aria-label="Attach PDF"
+            className="flex h-9 w-9 items-center justify-center rounded-full transition disabled:opacity-50"
+            style={{ background: "color-mix(in oklab, var(--cream) 10%, transparent)", color: "var(--cream)" }}
+          >
+            {uploadingDoc ? <Loader2 className="h-4 w-4 animate-spin" /> : <Paperclip className="h-4 w-4" />}
+          </button>
+
             ref={inputRef}
             value={input}
             onChange={(e) => {
