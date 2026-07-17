@@ -39,62 +39,70 @@
   --color-ink: var(--ink);
 }
 
-/* Ink & Butter — cream/ink surfaces with butter-yellow primary + lavender accent */
+/* Ink & Butter — Dribbble-matched palette */
 :root {
   --radius: 1.5rem;
 
-  --cream: #f5f1e8;
-  --ink: #0f0f10;
-  --butter: #ffe066;
-  --lavender: #c9a0dc;
+  /* Core tokens — warmer cream, softer ink, richer butter */
+  --cream: #efe6d2;
+  --cream-soft: #f6efdf;
+  --ink: #141416;
+  --ink-soft: #26262a;
+  --butter: #ffd84d;
+  --butter-deep: #f5b800;
+  --lavender: #c8b5e8;
+  --pink: #ffc6d3;
+  --mint: #bde9c9;
+  --peach: #ffcfa8;
 
-  --background: #f5f1e8;
-  --foreground: #0f0f10;
+  --background: var(--cream);
+  --foreground: var(--ink);
   --card: #ffffff;
-  --card-foreground: #0f0f10;
+  --card-foreground: var(--ink);
   --popover: #ffffff;
-  --popover-foreground: #0f0f10;
-  --primary: #ffe066;
-  --primary-foreground: #0f0f10;
-  --secondary: #c9a0dc;
-  --secondary-foreground: #0f0f10;
-  --muted: #ede8dc;
-  --muted-foreground: #6b6a63;
-  --accent: #c9a0dc;
-  --accent-foreground: #0f0f10;
+  --popover-foreground: var(--ink);
+  --primary: var(--butter);
+  --primary-foreground: var(--ink);
+  --secondary: var(--lavender);
+  --secondary-foreground: var(--ink);
+  --muted: #e6ddc9;
+  --muted-foreground: #6a655a;
+  --accent: var(--lavender);
+  --accent-foreground: var(--ink);
   --destructive: oklch(0.6 0.22 27);
-  --border: color-mix(in oklab, #0f0f10 12%, transparent);
-  --input: color-mix(in oklab, #0f0f10 14%, transparent);
-  --ring: #ffe066;
+  --border: color-mix(in oklab, var(--ink) 10%, transparent);
+  --input: color-mix(in oklab, var(--ink) 14%, transparent);
+  --ring: var(--butter);
 
   --glass-bg: color-mix(in oklab, #ffffff 82%, transparent);
-  --glass-border: color-mix(in oklab, #0f0f10 12%, transparent);
-  --send-gradient: linear-gradient(135deg, #ffe066, #f7c948);
-  --page-gradient: radial-gradient(120% 80% at 50% 0%, #faf7ee 0%, #f5f1e8 60%);
+  --glass-border: color-mix(in oklab, var(--ink) 12%, transparent);
+  --send-gradient: linear-gradient(135deg, #ffe066, #f5b800);
+  --page-gradient: radial-gradient(120% 80% at 50% 0%, var(--cream-soft) 0%, var(--cream) 60%);
 }
 
 .dark {
-  --background: #0f0f10;
-  --foreground: #f5f1e8;
-  --card: #1a1a1c;
-  --card-foreground: #f5f1e8;
-  --popover: #1a1a1c;
-  --popover-foreground: #f5f1e8;
-  --primary: #ffe066;
-  --primary-foreground: #0f0f10;
-  --secondary: #c9a0dc;
-  --secondary-foreground: #0f0f10;
-  --muted: #1a1a1c;
-  --muted-foreground: color-mix(in oklab, #f5f1e8 55%, transparent);
-  --accent: #c9a0dc;
-  --accent-foreground: #0f0f10;
-  --border: color-mix(in oklab, #f5f1e8 12%, transparent);
-  --input: color-mix(in oklab, #f5f1e8 14%, transparent);
-  --ring: #ffe066;
+  /* Dark surfaces read as warm ink, not pure black */
+  --background: #0d0d0f;
+  --foreground: #f2ead6;
+  --card: #17171a;
+  --card-foreground: #f2ead6;
+  --popover: #17171a;
+  --popover-foreground: #f2ead6;
+  --primary: var(--butter);
+  --primary-foreground: var(--ink);
+  --secondary: var(--lavender);
+  --secondary-foreground: var(--ink);
+  --muted: #1c1c20;
+  --muted-foreground: color-mix(in oklab, #f2ead6 58%, transparent);
+  --accent: var(--lavender);
+  --accent-foreground: var(--ink);
+  --border: color-mix(in oklab, #f2ead6 10%, transparent);
+  --input: color-mix(in oklab, #f2ead6 14%, transparent);
+  --ring: var(--butter);
 
-  --glass-bg: color-mix(in oklab, #1a1a1c 78%, transparent);
-  --glass-border: color-mix(in oklab, #f5f1e8 10%, transparent);
-  --page-gradient: radial-gradient(120% 80% at 50% 0%, #17171a 0%, #0a0a0b 70%);
+  --glass-bg: color-mix(in oklab, #17171a 78%, transparent);
+  --glass-border: color-mix(in oklab, #f2ead6 10%, transparent);
+  --page-gradient: radial-gradient(120% 80% at 50% 0%, #16161a 0%, #08080a 70%);
 }
 
 @layer base {
@@ -121,9 +129,17 @@
 
 @utility font-display {
   font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.03em;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 0.95;
 }
+
+/* Dribbble-matched fluid type scale */
+@utility text-hero    { font-family: var(--font-display); font-weight: 800; font-size: clamp(2rem, 6vw, 2.75rem); letter-spacing: -0.04em; line-height: 0.95; }
+@utility text-title   { font-family: var(--font-display); font-weight: 800; font-size: 1.5rem;   letter-spacing: -0.03em; line-height: 1.05; }
+@utility text-section { font-family: var(--font-display); font-weight: 700; font-size: 1.15rem;  letter-spacing: -0.02em; line-height: 1.1; }
+@utility text-label   { font-family: var(--font-sans);    font-weight: 700; font-size: 0.72rem;  letter-spacing: 0.14em;  text-transform: uppercase; }
+@utility text-meta    { font-family: var(--font-sans);    font-weight: 500; font-size: 0.72rem;  letter-spacing: 0.01em; opacity: 0.65; }
 
 @utility glass {
   background: var(--glass-bg);
