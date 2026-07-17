@@ -21,6 +21,8 @@ type Props = {
   onClearConversation: () => void;
   onUpgrade: () => void;
   onSelectLanguage: (code: LangCode) => void;
+  /** Optional override for which language is shown as active (per-bot). */
+  activeLanguage?: LangCode;
   isProEffective: boolean;
   usage: Usage;
 };
