@@ -108,6 +108,12 @@
 @layer base {
   * { border-color: var(--color-border); }
   html, body, #root { height: 100%; }
+  :root { --text-scale: 1; }
+  html { font-size: calc(16px * var(--text-scale)); }
+  html.font-dyslexic, html.font-dyslexic body {
+    font-family: "Atkinson Hyperlegible", "Comic Sans MS", "Verdana", sans-serif !important;
+    letter-spacing: 0.01em;
+  }
   body {
     background: var(--page-gradient);
     color: var(--color-foreground);
@@ -126,6 +132,7 @@
     *, *::before, *::after { transition-duration: 0ms !important; }
   }
 }
+
 
 @utility font-display {
   font-family: var(--font-display);
