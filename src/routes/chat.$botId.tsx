@@ -230,7 +230,14 @@ function BotChat() {
   }
 
   const mascotClass = listening ? "mascot-listen" : (thinking || input.length > 0 ? "" : "mascot-idle");
-  const suggestedQuickChips = ["Explain simpler", "Give an example", `In ${langName}`];
+  const suggestedQuickChips = buildFallbackChips({
+    persona: settings.persona,
+    warmth: settings.warmth,
+    categories: categoryLabels,
+    langName,
+    currentLangCode: settings.language,
+  });
+
 
   return (
     <main
