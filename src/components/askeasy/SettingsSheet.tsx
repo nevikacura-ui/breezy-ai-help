@@ -40,9 +40,10 @@ const MODEL_ICON: Record<ModelId, React.ReactNode> = {
 };
 
 export function SettingsSheet({
-  open, onOpenChange, settings, update, onClearConversation, onUpgrade, onSelectLanguage, isProEffective, usage,
+  open, onOpenChange, settings, update, onClearConversation, onUpgrade, onSelectLanguage, activeLanguage, isProEffective, usage,
 }: Props) {
   const currentModel = settings.openRouterModel as ModelId;
+  const currentLang: LangCode = activeLanguage ?? settings.language;
   const daysLeft = trialDaysLeft(settings);
   const inTrial = trialActive(settings);
 
