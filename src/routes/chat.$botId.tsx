@@ -58,11 +58,15 @@ function BotChat() {
   const [reactionKey, setReactionKey] = useState(0);
   const [detectedLang, setDetectedLang] = useState<LangCode | null>(null);
   const [dismissedLangs, setDismissedLangs] = useState<Set<LangCode>>(new Set());
+  const [docs, setDocs] = useState<PdfDoc[]>([]);
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const reactionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
 
   // Idle → nap after inactivity (resets on any activity below)
   const bumpActivity = useCallback(() => {
