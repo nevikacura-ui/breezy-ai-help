@@ -385,7 +385,7 @@ function UsageTile({ icon, label, used, of }: { icon: React.ReactNode; label: st
   );
 }
 
-function Row({ label, hint, checked, onChange }: { label: string; hint: string; checked: boolean; onChange: (v: boolean) => void }) {
+function Row({ label, hint, checked, onChange }: { label: React.ReactNode; hint: string; checked: boolean; onChange: (v: boolean) => void }) {
   return (
     <div className="flex items-start justify-between gap-4">
       <div>
@@ -396,3 +396,4 @@ function Row({ label, hint, checked, onChange }: { label: string; hint: string; 
     </div>
   );
 }
+
