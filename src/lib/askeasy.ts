@@ -225,7 +225,11 @@ export function personalityPrompt(s: Settings): string {
   bits.push(`Tone: ${warmthLabel}.`);
 
   if (s.aboutMe.length) {
-    bits.push(`Remember about the user: ${s.aboutMe.slice(0, 6).join("; ")}. Weave in only when relevant; don't force it.`);
+    bits.push(
+      `About the user (their own words, keep private): ${s.aboutMe.slice(0, 5).map((x) => `"${x}"`).join(", ")}. ` +
+      `Reference these naturally when relevant — an example, an analogy, a tailored suggestion, a follow-up question. ` +
+      `Never list them back verbatim, never announce "based on your preferences", and don't force a reference into every reply.`
+    );
   }
 
   if (s.mood === "down") {
