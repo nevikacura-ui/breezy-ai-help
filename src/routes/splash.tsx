@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useOnboarding } from "@/lib/bots";
-import mascot from "@/assets/bots/mascot.png";
+import easy from "@/assets/bots/easy.png";
 
 export const Route = createFileRoute("/splash")({
   head: () => ({
