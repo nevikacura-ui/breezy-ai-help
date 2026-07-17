@@ -30,6 +30,12 @@ function Onboarding() {
   const { settings, update: updateSettings } = useSettings();
   const [step, setStep] = useState<Step>(0);
   const [selected, setSelected] = useState<Set<string>>(new Set(state.categories));
+  const [voiceState, setVoiceState] = useState<"idle" | "loading" | "playing" | "error">("idle");
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => () => {
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ""; }
+  }, []);
 
   const canContinue = useMemo(() => {
     if (step === 0) return true; // persona has a default
