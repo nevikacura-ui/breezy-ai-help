@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Bell, Grid3x3, SlidersHorizontal, Star, Plus, Sparkles } from "lucide-react";
+import { Bell, Settings2, SlidersHorizontal, Star, Plus, Sparkles } from "lucide-react";
 import {
   PRESET_BOTS,
   CATEGORY_LABELS,
@@ -9,7 +9,6 @@ import {
   type Bot,
   type BotCategory,
 } from "@/lib/bots";
-import { BottomNav } from "@/components/askeasy/BottomNav";
 import { SettingsSheet } from "@/components/askeasy/SettingsSheet";
 import { BotAvatar, preloadBotAvatars } from "@/components/askeasy/BotAvatar";
 import { useAuthUser, useSettings, useUsage } from "@/lib/askeasy";
@@ -57,17 +56,18 @@ function BotsHome() {
 
   return (
     <main
-      className="relative min-h-dvh overflow-x-hidden pb-28"
+      className="relative min-h-dvh overflow-x-hidden pb-6"
       style={{ background: "var(--ink)", color: "var(--cream)" }}
     >
       {/* Header */}
       <header className="flex items-center justify-between px-5 pt-6">
         <button
+          onClick={() => setSettingsOpen(true)}
           className="flex h-10 w-10 items-center justify-center rounded-full"
           style={{ background: "color-mix(in oklab, var(--cream) 8%, transparent)" }}
-          aria-label="Categories"
+          aria-label="Settings"
         >
-          <Grid3x3 className="h-5 w-5" />
+          <Settings2 className="h-5 w-5" />
         </button>
         <div className="flex items-center gap-1.5">
           <Sparkles className="h-4 w-4" style={{ color: "var(--butter)" }} />
@@ -212,8 +212,6 @@ function BotsHome() {
           </Link>
         </div>
       </section>
-
-      <BottomNav onSettings={() => setSettingsOpen(true)} />
 
       <SettingsSheet
         open={settingsOpen}
