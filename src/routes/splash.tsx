@@ -6,8 +6,8 @@ import mascot from "@/assets/bots/mascot.png";
 export const Route = createFileRoute("/splash")({
   head: () => ({
     meta: [
-      { title: "AskEasy — Personalized AI chatbots" },
-      { name: "description", content: "Discover a world of personalized AI companions. Chat, learn, cook, code — every bot tuned for how you talk." },
+      { title: "Askeasy — Meet Easy" },
+      { name: "description", content: "Meet Easy, your cute AI companion. Ask anything, learn, create, and chat — the easy way." },
     ],
   }),
   component: Splash,
