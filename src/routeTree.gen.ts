@@ -19,6 +19,7 @@ import { Route as ChatBotIdRouteImport } from './routes/chat.$botId'
 import { Route as BotsNewRouteImport } from './routes/bots.new'
 import { Route as BotsBotIdRouteImport } from './routes/bots.$botId'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as ApiBotGenerateRouteImport } from './routes/api/bot-generate'
 import { Route as ApiPublicCashfreeWebhookRouteImport } from './routes/api/public/cashfree-webhook'
 
 const SplashRoute = SplashRouteImport.update({
@@ -71,6 +72,11 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiBotGenerateRoute = ApiBotGenerateRouteImport.update({
+  id: '/api/bot-generate',
+  path: '/api/bot-generate',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicCashfreeWebhookRoute =
   ApiPublicCashfreeWebhookRouteImport.update({
     id: '/api/public/cashfree-webhook',
@@ -84,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/bots': typeof BotsRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/splash': typeof SplashRoute
+  '/api/bot-generate': typeof ApiBotGenerateRoute
   '/api/chat': typeof ApiChatRoute
   '/bots/$botId': typeof BotsBotIdRoute
   '/bots/new': typeof BotsNewRoute
@@ -97,6 +104,7 @@ export interface FileRoutesByTo {
   '/bots': typeof BotsRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/splash': typeof SplashRoute
+  '/api/bot-generate': typeof ApiBotGenerateRoute
   '/api/chat': typeof ApiChatRoute
   '/bots/$botId': typeof BotsBotIdRoute
   '/bots/new': typeof BotsNewRoute
@@ -111,6 +119,7 @@ export interface FileRoutesById {
   '/bots': typeof BotsRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/splash': typeof SplashRoute
+  '/api/bot-generate': typeof ApiBotGenerateRoute
   '/api/chat': typeof ApiChatRoute
   '/bots/$botId': typeof BotsBotIdRoute
   '/bots/new': typeof BotsNewRoute
@@ -126,6 +135,7 @@ export interface FileRouteTypes {
     | '/bots'
     | '/onboarding'
     | '/splash'
+    | '/api/bot-generate'
     | '/api/chat'
     | '/bots/$botId'
     | '/bots/new'
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/bots'
     | '/onboarding'
     | '/splash'
+    | '/api/bot-generate'
     | '/api/chat'
     | '/bots/$botId'
     | '/bots/new'
@@ -152,6 +163,7 @@ export interface FileRouteTypes {
     | '/bots'
     | '/onboarding'
     | '/splash'
+    | '/api/bot-generate'
     | '/api/chat'
     | '/bots/$botId'
     | '/bots/new'
@@ -166,6 +178,7 @@ export interface RootRouteChildren {
   BotsRoute: typeof BotsRouteWithChildren
   OnboardingRoute: typeof OnboardingRoute
   SplashRoute: typeof SplashRoute
+  ApiBotGenerateRoute: typeof ApiBotGenerateRoute
   ApiChatRoute: typeof ApiChatRoute
   ChatBotIdRoute: typeof ChatBotIdRoute
   UpgradeSuccessRoute: typeof UpgradeSuccessRoute
@@ -244,6 +257,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/bot-generate': {
+      id: '/api/bot-generate'
+      path: '/api/bot-generate'
+      fullPath: '/api/bot-generate'
+      preLoaderRoute: typeof ApiBotGenerateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/cashfree-webhook': {
       id: '/api/public/cashfree-webhook'
       path: '/api/public/cashfree-webhook'
@@ -272,6 +292,7 @@ const rootRouteChildren: RootRouteChildren = {
   BotsRoute: BotsRouteWithChildren,
   OnboardingRoute: OnboardingRoute,
   SplashRoute: SplashRoute,
+  ApiBotGenerateRoute: ApiBotGenerateRoute,
   ApiChatRoute: ApiChatRoute,
   ChatBotIdRoute: ChatBotIdRoute,
   UpgradeSuccessRoute: UpgradeSuccessRoute,
