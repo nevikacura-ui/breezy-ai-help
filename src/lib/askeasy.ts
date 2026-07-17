@@ -120,6 +120,7 @@ const DEFAULT_SETTINGS: Settings = {
   privateMode: false,
   reduceMotion: false,
   voiceRate: 1,
+  focusMode: false,
 };
 
 
