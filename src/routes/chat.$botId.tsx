@@ -176,13 +176,30 @@ function BotChat() {
           <div className="font-display text-[1.05rem]">{bot.name}</div>
         </div>
         <button
+          onClick={() => setSettingsOpen(true)}
           className="flex h-10 w-10 items-center justify-center rounded-full"
           style={{ background: "color-mix(in oklab, var(--cream) 8%, transparent)" }}
-          aria-label="More"
+          aria-label="Settings"
         >
-          <MoreHorizontal className="h-5 w-5" />
+          <SettingsIcon className="h-5 w-5" />
         </button>
       </header>
+
+      <SettingsSheet
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+        settings={settings}
+        update={update}
+        isProEffective={!!user}
+        usage={usage}
+        onUpgrade={() => setSettingsOpen(false)}
+        onClearConversation={() => {
+          try { window.localStorage.removeItem(chatKey(bot.id)); } catch { /* noop */ }
+          setMessages([{ id: "g", role: "assistant", content: bot.greeting, createdAt: Date.now() }]);
+          setSettingsOpen(false);
+        }}
+        onSelectLanguage={(code) => update({ language: code })}
+      />
 
       {/* Messages */}
       <section ref={scrollRef} className="flex-1 overflow-y-auto px-4 pb-40 pt-5">
