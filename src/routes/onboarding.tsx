@@ -61,6 +61,39 @@ function Onboarding() {
     });
   };
 
+  const playSample = async (id: Persona) => {
+    // If already playing, stop.
+    if (audioRef.current && voiceState === "playing") {
+      audioRef.current.pause();
+      audioRef.current.src = "";
+      setVoiceState("idle");
+      return;
+    }
+    const sample = VOICE_SAMPLES[id];
+    const rate = PERSONA_PRESETS[id].voiceRate;
+    setVoiceState("loading");
+    try {
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: sample.text, voiceRate: rate, instructions: sample.instructions }),
+      });
+      if (!res.ok) throw new Error(await res.text().catch(() => "TTS failed"));
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.onended = () => { setVoiceState("idle"); URL.revokeObjectURL(url); };
+      audio.onerror = () => { setVoiceState("error"); URL.revokeObjectURL(url); };
+      await audio.play();
+      setVoiceState("playing");
+      if ("vibrate" in navigator) navigator.vibrate?.(15);
+    } catch {
+      setVoiceState("error");
+      setTimeout(() => setVoiceState("idle"), 1800);
+    }
+  };
+
   const handleContinue = () => {
     if (step === 0) { setStep(1); return; }
     if (step === 1) {
