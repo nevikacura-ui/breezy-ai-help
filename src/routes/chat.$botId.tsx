@@ -376,7 +376,7 @@ function BotChat() {
           ))}
           {thinking && (
             <div className="flex items-center gap-2 opacity-70">
-              <div className={mascotClass}><BotAvatar bot={bot} size={32} eager emojiSize={15} /></div>
+              <Mascot size={32} />
               <div className="flex items-center gap-1 rounded-2xl px-3 py-2"
                 style={{ background: "color-mix(in oklab, var(--cream) 8%, transparent)" }}>
                 <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-current" />
