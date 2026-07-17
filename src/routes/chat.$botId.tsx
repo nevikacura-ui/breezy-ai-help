@@ -25,7 +25,10 @@ function BotChat() {
   const nav = useNavigate();
   const { bots: customBots } = useCustomBots();
   const bot = getBotById(botId, customBots);
-  const { settings } = useSettings();
+  const { settings, update } = useSettings();
+  const { usage } = useUsage();
+  const user = useAuthUser();
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const { state: onboarding } = useOnboarding();
 
   const [messages, setMessages] = useState<Message[]>([]);
