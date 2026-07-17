@@ -405,6 +405,44 @@ function Onboarding() {
               />
             </span>
           </button>
+
+          {/* Reduce Motion toggle */}
+          <button
+            onClick={() => updateSettings({ reduceMotion: !settings.reduceMotion })}
+            className="mt-2.5 flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left transition-all active:scale-[0.99]"
+            style={{
+              background: settings.reduceMotion
+                ? "color-mix(in oklab, var(--butter) 16%, transparent)"
+                : "color-mix(in oklab, var(--cream) 8%, transparent)",
+              border: settings.reduceMotion
+                ? "1px solid color-mix(in oklab, var(--butter) 40%, transparent)"
+                : "1px solid color-mix(in oklab, var(--cream) 12%, transparent)",
+            }}
+            aria-pressed={settings.reduceMotion}
+          >
+            <span className="text-xl leading-none" aria-hidden>🌙</span>
+            <div className="min-w-0 flex-1">
+              <div className="text-[13.5px] font-semibold">Reduce Motion</div>
+              <div className="text-[11px] opacity-60">Slow mascot animations for a calmer experience.</div>
+            </div>
+            <span
+              className="relative h-6 w-11 rounded-full transition-colors"
+              style={{
+                background: settings.reduceMotion
+                  ? "var(--butter)"
+                  : "color-mix(in oklab, var(--cream) 20%, transparent)",
+              }}
+              aria-hidden
+            >
+              <span
+                className="absolute top-0.5 h-5 w-5 rounded-full transition-all"
+                style={{
+                  left: settings.reduceMotion ? "22px" : "2px",
+                  background: settings.reduceMotion ? "var(--ink)" : "var(--cream)",
+                }}
+              />
+            </span>
+          </button>
         </section>
       )}
 

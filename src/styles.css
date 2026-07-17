@@ -328,3 +328,20 @@
   animation: mascot-zzz 2.4s ease-out infinite;
   pointer-events: none;
 }
+
+/* Reduce motion — slow mascot loops, disable one-shot bounces, hide zzz.
+   Honors both user opt-in (.reduce-motion) and OS-level prefers-reduced-motion. */
+.reduce-motion .mascot-idle,
+.reduce-motion .mascot-listen,
+.reduce-motion .mascot-tilt,
+.reduce-motion .mascot-nap,
+.reduce-motion .mascot-comfort,
+.reduce-motion .mascot-eyelid { animation-duration: 12s !important; }
+.reduce-motion .mascot-excited,
+.reduce-motion .mascot-curious { animation: none !important; transform: none !important; }
+.reduce-motion .mascot-zzz { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mascot-excited, .mascot-curious { animation: none !important; transform: none !important; }
+  .mascot-zzz { display: none !important; }
+}
