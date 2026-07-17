@@ -213,8 +213,6 @@ function BotsHome() {
         </div>
       </section>
 
-      <BottomNav onSettings={() => setSettingsOpen(true)} />
-
       <SettingsSheet
         open={settingsOpen}
         onOpenChange={setSettingsOpen}
