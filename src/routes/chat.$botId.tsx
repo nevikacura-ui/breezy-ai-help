@@ -100,7 +100,7 @@ function BotChat() {
       const reply = await sendToAI({
         messages: [...messages, userMsg],
         settings,
-        system: bot.systemPrompt,
+        system: systemPrompt,
         signal: controller.signal,
       });
       setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "assistant", content: reply, createdAt: Date.now() }]);
@@ -134,7 +134,7 @@ function BotChat() {
       const reply = await sendToAI({
         messages: messages.filter((m) => m.role !== "assistant" || m !== messages[messages.length - 1]),
         settings,
-        system: bot.systemPrompt,
+        system: systemPrompt,
       });
       setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "assistant", content: reply, createdAt: Date.now() }]);
     } catch {
