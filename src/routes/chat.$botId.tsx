@@ -50,9 +50,41 @@ function BotChat() {
   const [hydrated, setHydrated] = useState(false);
   const [confetti, setConfetti] = useState(false);
   const [askMood, setAskMood] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [napping, setNapping] = useState(false);
+  const [reaction, setReaction] = useState<null | "excited" | "curious" | "comfort">(null);
+  const [reactionKey, setReactionKey] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reactionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Idle → nap after inactivity (resets on any activity below)
+  const bumpActivity = useCallback(() => {
+    if (napping) setNapping(false);
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    idleTimerRef.current = setTimeout(() => setNapping(true), 22000);
+  }, [napping]);
+  useEffect(() => { bumpActivity(); return () => { if (idleTimerRef.current) clearTimeout(idleTimerRef.current); }; }, [bumpActivity]);
+
+  // Detect tone of the most recent user message → trigger a one-shot reaction
+  const detectTone = (text: string): "excited" | "curious" | "comfort" | null => {
+    const t = text.trim();
+    if (!t) return null;
+    if (/(sad|tired|lonely|upset|hurt|anxious|worried|stressed|cry|😢|😭|🥺|💔)/i.test(t)) return "comfort";
+    if (/[!]{1,}|amazing|awesome|yay|wow|love it|🎉|🥳|😄|😁/i.test(t)) return "excited";
+    if (/\?\s*$|why|how|what|when|where|who|which/i.test(t)) return "curious";
+    return null;
+  };
+  const triggerReaction = useCallback((tone: ReturnType<typeof detectTone>) => {
+    if (!tone) return;
+    if (reactionTimerRef.current) clearTimeout(reactionTimerRef.current);
+    setReaction(tone);
+    setReactionKey((k) => k + 1);
+    const dur = tone === "comfort" ? 2800 : 1400;
+    reactionTimerRef.current = setTimeout(() => setReaction(null), dur);
+  }, []);
 
   const categoryLabels = useMemo(
     () =>
