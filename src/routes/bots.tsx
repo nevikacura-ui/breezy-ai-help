@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Bell, Grid3x3, SlidersHorizontal, Star, Plus, Sparkles } from "lucide-react";
 import {
   PRESET_BOTS,
@@ -11,6 +11,7 @@ import {
 } from "@/lib/bots";
 import { BottomNav } from "@/components/askeasy/BottomNav";
 import { SettingsSheet } from "@/components/askeasy/SettingsSheet";
+import { BotAvatar, preloadBotAvatars } from "@/components/askeasy/BotAvatar";
 import { useAuthUser, useSettings, useUsage } from "@/lib/askeasy";
 import easy from "@/assets/bots/easy.png";
 
@@ -48,6 +49,11 @@ function BotsHome() {
     if (activeCategory === "all") return allBots;
     return allBots.filter((b) => b.category === activeCategory);
   }, [allBots, activeCategory]);
+
+  // Warm avatar decode cache once so the hub + chat feel instant.
+  useEffect(() => {
+    preloadBotAvatars(allBots.map((b) => b.avatar));
+  }, [allBots]);
 
   return (
     <main
@@ -224,32 +230,6 @@ function BotsHome() {
   );
 }
 
-function BotAvatar({ bot, size = 48 }: { bot: Bot; size?: number }) {
-  const bg =
-    bot.accent === "butter"
-      ? "linear-gradient(135deg,#ffe58a,#ffc107)"
-      : bot.accent === "lavender"
-        ? "linear-gradient(135deg,#dfc4ee,#b487d3)"
-        : bot.accent === "pink"
-          ? "linear-gradient(135deg,#ffd6e0,#ff9ec4)"
-          : bot.accent === "mint"
-            ? "linear-gradient(135deg,#c6f0d5,#7ecfa1)"
-            : bot.accent === "ink"
-              ? "linear-gradient(135deg,#2a2a2e,#0f0f10)"
-              : "linear-gradient(135deg,#fff6dd,#f2e2b4)";
-  return (
-    <div
-      className="relative flex items-center justify-center overflow-hidden rounded-full"
-      style={{ width: size, height: size, background: bg }}
-    >
-      {bot.avatar ? (
-        <img src={bot.avatar} alt="" className="h-full w-full object-cover" width={size} height={size} loading="lazy" />
-      ) : (
-        <span className="text-[22px]" aria-hidden>{bot.emoji ?? "🤖"}</span>
-      )}
-    </div>
-  );
-}
 
 function BotFeatureCard({ bot }: { bot: Bot }) {
   return (
@@ -263,7 +243,7 @@ function BotFeatureCard({ bot }: { bot: Bot }) {
       }}
     >
       <div className="relative mx-auto">
-        <BotAvatar bot={bot} size={68} />
+        <BotAvatar bot={bot} size={68} eager />
         {bot.tier === "pro" ? null : (
           <span
             className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px]"

@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ChevronLeft, MoreHorizontal, Star } from "lucide-react";
 import { getBotById, PRESET_BOTS, useCustomBots } from "@/lib/bots";
+import { BotAvatar } from "@/components/askeasy/BotAvatar";
 
 export const Route = createFileRoute("/bots/$botId")({
   head: ({ params }) => {
@@ -67,23 +68,8 @@ function BotDetail() {
 
         <div className="flex flex-col items-center text-center">
           <div className="relative">
-            <div
-              className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full"
-              style={{
-                background:
-                  bot.accent === "butter" ? "linear-gradient(135deg,#ffe58a,#ffc107)"
-                    : bot.accent === "lavender" ? "linear-gradient(135deg,#dfc4ee,#b487d3)"
-                      : bot.accent === "pink" ? "linear-gradient(135deg,#ffd6e0,#ff9ec4)"
-                        : bot.accent === "mint" ? "linear-gradient(135deg,#c6f0d5,#7ecfa1)"
-                          : "linear-gradient(135deg,#fff6dd,#f2e2b4)",
-              }}
-            >
-              {bot.avatar ? (
-                <img src={bot.avatar} alt="" className="h-full w-full object-cover" width={96} height={96} />
-              ) : (
-                <span className="text-[40px]">{bot.emoji ?? "🤖"}</span>
-              )}
-            </div>
+            <BotAvatar bot={bot} size={96} eager emojiSize={40} />
+
             <span
               className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full text-[11px]"
               style={{ background: "#22c55e", color: "white" }}
