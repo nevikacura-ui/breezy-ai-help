@@ -54,6 +54,8 @@ function BotChat() {
   const [napping, setNapping] = useState(false);
   const [reaction, setReaction] = useState<null | "excited" | "curious" | "comfort">(null);
   const [reactionKey, setReactionKey] = useState(0);
+  const [detectedLang, setDetectedLang] = useState<LangCode | null>(null);
+  const [dismissedLangs, setDismissedLangs] = useState<Set<LangCode>>(new Set());
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
