@@ -113,7 +113,7 @@ function NewBot() {
     };
     addBot(bot);
     toast.success(`${bot.name} created`);
-    nav({ to: "/bots/$botId", params: { botId: bot.id } });
+    nav({ to: "/chat/$botId", params: { botId: bot.id } });
   };
 
   return (

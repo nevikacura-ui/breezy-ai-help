@@ -234,7 +234,7 @@ function BotsHome() {
 function BotFeatureCard({ bot }: { bot: Bot }) {
   return (
     <Link
-      to="/bots/$botId"
+      to="/chat/$botId"
       params={{ botId: bot.id }}
       className="animate-tile-in flex flex-col overflow-hidden rounded-3xl border p-3 transition-all active:scale-[0.98]"
       style={{
@@ -276,7 +276,7 @@ function BotListRow({ bot }: { bot: Bot }) {
   const isVoice = bot.id === "news-ani";
   return (
     <Link
-      to="/bots/$botId"
+      to="/chat/$botId"
       params={{ botId: bot.id }}
       className="flex items-center gap-3 rounded-2xl border p-2.5 transition-all active:scale-[0.99]"
       style={{ background: "#fff", borderColor: "color-mix(in oklab, var(--ink) 10%, transparent)" }}
