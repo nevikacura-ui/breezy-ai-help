@@ -271,19 +271,19 @@ const ONBOARDING_DEFAULT: OnboardingState = {
   categories: [],
 };
 
-export const ONBOARDING_CATEGORIES: { id: string; label: string; emoji: string; tone: "butter" | "lavender" | "cream" }[] = [
-  { id: "love", label: "Love", emoji: "💜", tone: "lavender" },
+export const ONBOARDING_CATEGORIES: { id: string; label: string; emoji: string; tone: "butter" | "lavender" | "cream" | "pink" | "mint" | "peach" }[] = [
+  { id: "love", label: "Love", emoji: "💜", tone: "pink" },
   { id: "learn", label: "Learn", emoji: "🎓", tone: "lavender" },
-  { id: "friend", label: "Friend", emoji: "🌟", tone: "cream" },
-  { id: "music", label: "Music", emoji: "🎵", tone: "cream" },
-  { id: "beauty", label: "Beauty", emoji: "💄", tone: "lavender" },
+  { id: "friend", label: "Friend", emoji: "🌟", tone: "butter" },
+  { id: "music", label: "Music", emoji: "🎵", tone: "mint" },
+  { id: "beauty", label: "Beauty", emoji: "💄", tone: "pink" },
   { id: "shopping", label: "Shopping", emoji: "🛍️", tone: "lavender" },
-  { id: "art", label: "Art", emoji: "🎨", tone: "cream" },
-  { id: "education", label: "Education", emoji: "📚", tone: "lavender" },
-  { id: "fashion", label: "Fashion", emoji: "👗", tone: "cream" },
-  { id: "co", label: "Co", emoji: "🤝", tone: "cream" },
+  { id: "art", label: "Art", emoji: "🎨", tone: "peach" },
+  { id: "education", label: "Education", emoji: "📚", tone: "cream" },
+  { id: "fashion", label: "Fashion", emoji: "👗", tone: "pink" },
+  { id: "co", label: "Coding", emoji: "💻", tone: "mint" },
   { id: "peace", label: "Peace", emoji: "☮️", tone: "cream" },
-  { id: "technology", label: "Technology", emoji: "⚙️", tone: "lavender" },
+  { id: "technology", label: "Tech", emoji: "⚙️", tone: "lavender" },
 ];
 
 export function useOnboarding() {
