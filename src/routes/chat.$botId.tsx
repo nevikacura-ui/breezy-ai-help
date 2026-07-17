@@ -9,7 +9,7 @@ import {
   type Message, type Mood,
 } from "@/lib/askeasy";
 import { SettingsSheet } from "@/components/askeasy/SettingsSheet";
-import { LANG_ENGLISH_NAME } from "@/lib/i18n";
+import { LANG_ENGLISH_NAME, isRTL, t } from "@/lib/i18n";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/chat/$botId")({
@@ -499,9 +499,10 @@ function BotChat() {
             onKeyDown={(e) => { bumpActivity(); if (e.key === "Enter") send(); }}
             onFocus={() => { setFocused(true); bumpActivity(); }}
             onBlur={() => setFocused(false)}
-            placeholder={transcribing ? "Transcribing…" : listening ? "Listening… release to send, drag away to cancel" : "Type your question…"}
+            placeholder={transcribing ? "…" : listening ? "…" : t(settings.language, "compose.placeholder")}
             className="flex-1 bg-transparent py-2.5 text-[14.5px] outline-none placeholder:opacity-40"
             style={{ color: "var(--cream)" }}
+            dir={isRTL(settings.language) ? "rtl" : "ltr"}
           />
           {/* Hold-to-talk mic */}
           <button
