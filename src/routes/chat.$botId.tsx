@@ -50,9 +50,41 @@ function BotChat() {
   const [hydrated, setHydrated] = useState(false);
   const [confetti, setConfetti] = useState(false);
   const [askMood, setAskMood] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [napping, setNapping] = useState(false);
+  const [reaction, setReaction] = useState<null | "excited" | "curious" | "comfort">(null);
+  const [reactionKey, setReactionKey] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reactionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Idle → nap after inactivity (resets on any activity below)
+  const bumpActivity = useCallback(() => {
+    if (napping) setNapping(false);
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    idleTimerRef.current = setTimeout(() => setNapping(true), 22000);
+  }, [napping]);
+  useEffect(() => { bumpActivity(); return () => { if (idleTimerRef.current) clearTimeout(idleTimerRef.current); }; }, [bumpActivity]);
+
+  // Detect tone of the most recent user message → trigger a one-shot reaction
+  const detectTone = (text: string): "excited" | "curious" | "comfort" | null => {
+    const t = text.trim();
+    if (!t) return null;
+    if (/(sad|tired|lonely|upset|hurt|anxious|worried|stressed|cry|😢|😭|🥺|💔)/i.test(t)) return "comfort";
+    if (/[!]{1,}|amazing|awesome|yay|wow|love it|🎉|🥳|😄|😁/i.test(t)) return "excited";
+    if (/\?\s*$|why|how|what|when|where|who|which/i.test(t)) return "curious";
+    return null;
+  };
+  const triggerReaction = useCallback((tone: ReturnType<typeof detectTone>) => {
+    if (!tone) return;
+    if (reactionTimerRef.current) clearTimeout(reactionTimerRef.current);
+    setReaction(tone);
+    setReactionKey((k) => k + 1);
+    const dur = tone === "comfort" ? 2800 : 1400;
+    reactionTimerRef.current = setTimeout(() => setReaction(null), dur);
+  }, []);
 
   const categoryLabels = useMemo(
     () =>
@@ -130,6 +162,8 @@ function BotChat() {
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setThinking(true);
+    bumpActivity();
+    triggerReaction(detectTone(userMsg.content));
     const controller = new AbortController();
     abortRef.current = controller;
     try {
@@ -229,7 +263,28 @@ function BotChat() {
     );
   }
 
-  const mascotClass = listening ? "mascot-listen" : (thinking || input.length > 0 ? "" : "mascot-idle");
+  const mascotClass = listening
+    ? "mascot-listen"
+    : thinking
+      ? "mascot-curious"
+      : reaction === "excited"
+        ? "mascot-excited"
+        : reaction === "curious"
+          ? "mascot-curious"
+          : reaction === "comfort"
+            ? "mascot-comfort"
+            : (focused || input.length > 0)
+              ? "mascot-tilt"
+              : napping
+                ? "mascot-nap"
+                : "mascot-idle";
+  const Mascot = ({ size = 32 }: { size?: number }) => (
+    <span key={`${reactionKey}-${mascotClass}`} className={`mascot-wrap ${mascotClass} ${napping ? "napping" : ""}`}>
+      <BotAvatar bot={bot} size={size} eager emojiSize={Math.round(size * 0.47)} />
+      <span className="mascot-eyelid" aria-hidden />
+      {napping && <span className="mascot-zzz" aria-hidden>z</span>}
+    </span>
+  );
   const suggestedQuickChips = buildFallbackChips({
     persona: settings.persona,
     warmth: settings.warmth,
@@ -256,9 +311,7 @@ function BotChat() {
           Bots
         </button>
         <div className="flex items-center gap-2">
-          <div className={mascotClass}>
-            <BotAvatar bot={bot} size={32} eager emojiSize={15} />
-          </div>
+          <Mascot size={32} />
           <div className="font-display text-[1rem]">{bot.name}</div>
           {settings.privateMode && <EyeOff className="h-3.5 w-3.5 opacity-60" aria-label="Private" />}
         </div>
@@ -323,7 +376,7 @@ function BotChat() {
           ))}
           {thinking && (
             <div className="flex items-center gap-2 opacity-70">
-              <div className={mascotClass}><BotAvatar bot={bot} size={32} eager emojiSize={15} /></div>
+              <Mascot size={32} />
               <div className="flex items-center gap-1 rounded-2xl px-3 py-2"
                 style={{ background: "color-mix(in oklab, var(--cream) 8%, transparent)" }}>
                 <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-current" />
@@ -357,8 +410,10 @@ function BotChat() {
           <input
             ref={inputRef}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") send(); }}
+            onChange={(e) => { setInput(e.target.value); bumpActivity(); }}
+            onKeyDown={(e) => { bumpActivity(); if (e.key === "Enter") send(); }}
+            onFocus={() => { setFocused(true); bumpActivity(); }}
+            onBlur={() => setFocused(false)}
             placeholder={listening ? "Listening…" : "Type your question…"}
             className="flex-1 bg-transparent py-2.5 text-[14.5px] outline-none placeholder:opacity-40"
             style={{ color: "var(--cream)" }}
