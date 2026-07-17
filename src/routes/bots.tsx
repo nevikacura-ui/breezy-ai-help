@@ -50,6 +50,11 @@ function BotsHome() {
     return allBots.filter((b) => b.category === activeCategory);
   }, [allBots, activeCategory]);
 
+  // Warm avatar decode cache once so the hub + chat feel instant.
+  useEffect(() => {
+    preloadBotAvatars(allBots.map((b) => b.avatar));
+  }, [allBots]);
+
   return (
     <main
       className="relative min-h-dvh overflow-x-hidden pb-28"
