@@ -18,6 +18,7 @@ import { Route as UpgradeSuccessRouteImport } from './routes/upgrade.success'
 import { Route as ChatBotIdRouteImport } from './routes/chat.$botId'
 import { Route as BotsNewRouteImport } from './routes/bots.new'
 import { Route as BotsBotIdRouteImport } from './routes/bots.$botId'
+import { Route as ApiTtsRouteImport } from './routes/api/tts'
 import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiBotGenerateRouteImport } from './routes/api/bot-generate'
@@ -68,6 +69,11 @@ const BotsBotIdRoute = BotsBotIdRouteImport.update({
   path: '/$botId',
   getParentRoute: () => BotsRoute,
 } as any)
+const ApiTtsRoute = ApiTtsRouteImport.update({
+  id: '/api/tts',
+  path: '/api/tts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiTranscribeRoute = ApiTranscribeRouteImport.update({
   id: '/api/transcribe',
   path: '/api/transcribe',
@@ -99,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/api/bot-generate': typeof ApiBotGenerateRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
+  '/api/tts': typeof ApiTtsRoute
   '/bots/$botId': typeof BotsBotIdRoute
   '/bots/new': typeof BotsNewRoute
   '/chat/$botId': typeof ChatBotIdRoute
@@ -114,6 +121,7 @@ export interface FileRoutesByTo {
   '/api/bot-generate': typeof ApiBotGenerateRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
+  '/api/tts': typeof ApiTtsRoute
   '/bots/$botId': typeof BotsBotIdRoute
   '/bots/new': typeof BotsNewRoute
   '/chat/$botId': typeof ChatBotIdRoute
@@ -130,6 +138,7 @@ export interface FileRoutesById {
   '/api/bot-generate': typeof ApiBotGenerateRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
+  '/api/tts': typeof ApiTtsRoute
   '/bots/$botId': typeof BotsBotIdRoute
   '/bots/new': typeof BotsNewRoute
   '/chat/$botId': typeof ChatBotIdRoute
@@ -147,6 +156,7 @@ export interface FileRouteTypes {
     | '/api/bot-generate'
     | '/api/chat'
     | '/api/transcribe'
+    | '/api/tts'
     | '/bots/$botId'
     | '/bots/new'
     | '/chat/$botId'
@@ -162,6 +172,7 @@ export interface FileRouteTypes {
     | '/api/bot-generate'
     | '/api/chat'
     | '/api/transcribe'
+    | '/api/tts'
     | '/bots/$botId'
     | '/bots/new'
     | '/chat/$botId'
@@ -177,6 +188,7 @@ export interface FileRouteTypes {
     | '/api/bot-generate'
     | '/api/chat'
     | '/api/transcribe'
+    | '/api/tts'
     | '/bots/$botId'
     | '/bots/new'
     | '/chat/$botId'
@@ -193,6 +205,7 @@ export interface RootRouteChildren {
   ApiBotGenerateRoute: typeof ApiBotGenerateRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiTranscribeRoute: typeof ApiTranscribeRoute
+  ApiTtsRoute: typeof ApiTtsRoute
   ChatBotIdRoute: typeof ChatBotIdRoute
   UpgradeSuccessRoute: typeof UpgradeSuccessRoute
   ApiPublicCashfreeWebhookRoute: typeof ApiPublicCashfreeWebhookRoute
@@ -263,6 +276,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BotsBotIdRouteImport
       parentRoute: typeof BotsRoute
     }
+    '/api/tts': {
+      id: '/api/tts'
+      path: '/api/tts'
+      fullPath: '/api/tts'
+      preLoaderRoute: typeof ApiTtsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/transcribe': {
       id: '/api/transcribe'
       path: '/api/transcribe'
@@ -315,6 +335,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiBotGenerateRoute: ApiBotGenerateRoute,
   ApiChatRoute: ApiChatRoute,
   ApiTranscribeRoute: ApiTranscribeRoute,
+  ApiTtsRoute: ApiTtsRoute,
   ChatBotIdRoute: ChatBotIdRoute,
   UpgradeSuccessRoute: UpgradeSuccessRoute,
   ApiPublicCashfreeWebhookRoute: ApiPublicCashfreeWebhookRoute,

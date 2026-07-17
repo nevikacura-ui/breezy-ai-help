@@ -1,9 +1,16 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { ChevronLeft } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ChevronLeft, Volume2, Loader2, Square } from "lucide-react";
 import { ONBOARDING_CATEGORIES, useOnboarding } from "@/lib/bots";
 import { LANGUAGES, type LangCode } from "@/lib/i18n";
 import { useSettings, PERSONAS, PERSONA_PRESETS, type Persona } from "@/lib/askeasy";
+
+const VOICE_SAMPLES: Record<Persona, { text: string; instructions: string }> = {
+  kid:   { text: "Hi there, superstar! I'm Easy — your friendly buddy. Ready to have some fun?", instructions: "Speak like a cheerful, gentle friend for a young child. Warm, playful, and clear. Smile through your voice." },
+  teen:  { text: "Yo! I'm Easy — your quick-thinking sidekick. Let's make cool stuff together.", instructions: "Speak casually and upbeat, like a friendly older sibling. Confident, quick, and fun." },
+  adult: { text: "Hello, I'm Easy — your everyday assistant. Ask me anything, the easy way.", instructions: "Speak warmly and naturally, like a calm, capable helper. Clear and friendly." },
+  elder: { text: "Hello there. I'm Easy — your patient helper. Take your time; I'm right here.", instructions: "Speak slowly, warmly, and clearly, with gentle pacing and kind reassurance." },
+};
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({
@@ -23,6 +30,12 @@ function Onboarding() {
   const { settings, update: updateSettings } = useSettings();
   const [step, setStep] = useState<Step>(0);
   const [selected, setSelected] = useState<Set<string>>(new Set(state.categories));
+  const [voiceState, setVoiceState] = useState<"idle" | "loading" | "playing" | "error">("idle");
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => () => {
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ""; }
+  }, []);
 
   const canContinue = useMemo(() => {
     if (step === 0) return true; // persona has a default
@@ -46,6 +59,39 @@ function Onboarding() {
       textScale: preset.textScale,
       voiceRate: preset.voiceRate,
     });
+  };
+
+  const playSample = async (id: Persona) => {
+    // If already playing, stop.
+    if (audioRef.current && voiceState === "playing") {
+      audioRef.current.pause();
+      audioRef.current.src = "";
+      setVoiceState("idle");
+      return;
+    }
+    const sample = VOICE_SAMPLES[id];
+    const rate = PERSONA_PRESETS[id].voiceRate;
+    setVoiceState("loading");
+    try {
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: sample.text, voiceRate: rate, instructions: sample.instructions }),
+      });
+      if (!res.ok) throw new Error(await res.text().catch(() => "TTS failed"));
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.onended = () => { setVoiceState("idle"); URL.revokeObjectURL(url); };
+      audio.onerror = () => { setVoiceState("error"); URL.revokeObjectURL(url); };
+      await audio.play();
+      setVoiceState("playing");
+      if ("vibrate" in navigator) navigator.vibrate?.(15);
+    } catch {
+      setVoiceState("error");
+      setTimeout(() => setVoiceState("idle"), 1800);
+    }
   };
 
   const handleContinue = () => {
@@ -143,6 +189,34 @@ function Onboarding() {
                 </button>
               );
             })}
+          </div>
+
+          {/* Try my voice */}
+          <div className="mt-6 flex flex-col items-center gap-2">
+            <button
+              onClick={() => playSample(settings.persona)}
+              disabled={voiceState === "loading"}
+              className="flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition-all active:scale-[0.97] disabled:opacity-60"
+              style={{
+                background: "color-mix(in oklab, var(--butter) 18%, transparent)",
+                color: "var(--butter)",
+                border: "1px solid color-mix(in oklab, var(--butter) 30%, transparent)",
+              }}
+              aria-live="polite"
+            >
+              {voiceState === "loading" ? (
+                <><Loader2 className="h-4 w-4 animate-spin" /> Warming up…</>
+              ) : voiceState === "playing" ? (
+                <><Square className="h-4 w-4 fill-current" /> Stop</>
+              ) : voiceState === "error" ? (
+                <><Volume2 className="h-4 w-4" /> Try again</>
+              ) : (
+                <><Volume2 className="h-4 w-4" /> Try my voice</>
+              )}
+            </button>
+            <p className="text-[11px] opacity-50">
+              Sample at {PERSONA_PRESETS[settings.persona].voiceRate.toFixed(2)}× · {PERSONAS.find(p => p.id === settings.persona)?.label} tone
+            </p>
           </div>
         </section>
       ) : step === 1 ? (
