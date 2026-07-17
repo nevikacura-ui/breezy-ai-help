@@ -9,7 +9,8 @@ const MODEL_MAP: Record<string, { model: string; tier: "free" | "pro" }> = {
 };
 
 type ChatMessage = { role: "user" | "assistant" | "system"; content: string };
-type ChatRequestBody = { messages?: ChatMessage[]; model?: string; language?: string };
+type ChatRequestBody = { messages?: ChatMessage[]; model?: string; language?: string; system?: string };
+
 
 const LANG_NAMES: Record<string, string> = {
   en: "English", es: "Spanish", fr: "French", de: "German", pt: "Portuguese",
@@ -101,12 +102,14 @@ export const Route = createFileRoute("/api/chat")({
           ? ` OUTPUT LANGUAGE RULE (non-negotiable): Write every response entirely in ${langName}${script ? ` using ${script}` : ""}. Even if the user types in English, translate your answer into ${langName}. Do not mix languages. Keep proper nouns and code identifiers as-is.`
           : " OUTPUT LANGUAGE RULE: Reply in English.";
 
+        const persona = (body.system ?? "").trim();
         const sys: ChatMessage = {
           role: "system",
           content:
-            "You are AskEasy, a warm, concise, helpful assistant. Answer clearly using markdown when useful." +
+            (persona || "You are AskEasy, a warm, concise, helpful assistant. Answer clearly using markdown when useful.") +
             langLine,
         };
+
 
         const history = messages.map((m) => ({ role: m.role, content: m.content }));
         if (wantsLang && history.length > 0) {

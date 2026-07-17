@@ -9,12 +9,33 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SplashRouteImport } from './routes/splash'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as BotsRouteImport } from './routes/bots'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UpgradeSuccessRouteImport } from './routes/upgrade.success'
+import { Route as ChatBotIdRouteImport } from './routes/chat.$botId'
+import { Route as BotsNewRouteImport } from './routes/bots.new'
+import { Route as BotsBotIdRouteImport } from './routes/bots.$botId'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiPublicCashfreeWebhookRouteImport } from './routes/api/public/cashfree-webhook'
 
+const SplashRoute = SplashRouteImport.update({
+  id: '/splash',
+  path: '/splash',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BotsRoute = BotsRouteImport.update({
+  id: '/bots',
+  path: '/bots',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -29,6 +50,21 @@ const UpgradeSuccessRoute = UpgradeSuccessRouteImport.update({
   id: '/upgrade/success',
   path: '/upgrade/success',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ChatBotIdRoute = ChatBotIdRouteImport.update({
+  id: '/chat/$botId',
+  path: '/chat/$botId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BotsNewRoute = BotsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => BotsRoute,
+} as any)
+const BotsBotIdRoute = BotsBotIdRouteImport.update({
+  id: '/$botId',
+  path: '/$botId',
+  getParentRoute: () => BotsRoute,
 } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
@@ -45,14 +81,26 @@ const ApiPublicCashfreeWebhookRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/bots': typeof BotsRouteWithChildren
+  '/onboarding': typeof OnboardingRoute
+  '/splash': typeof SplashRoute
   '/api/chat': typeof ApiChatRoute
+  '/bots/$botId': typeof BotsBotIdRoute
+  '/bots/new': typeof BotsNewRoute
+  '/chat/$botId': typeof ChatBotIdRoute
   '/upgrade/success': typeof UpgradeSuccessRoute
   '/api/public/cashfree-webhook': typeof ApiPublicCashfreeWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/bots': typeof BotsRouteWithChildren
+  '/onboarding': typeof OnboardingRoute
+  '/splash': typeof SplashRoute
   '/api/chat': typeof ApiChatRoute
+  '/bots/$botId': typeof BotsBotIdRoute
+  '/bots/new': typeof BotsNewRoute
+  '/chat/$botId': typeof ChatBotIdRoute
   '/upgrade/success': typeof UpgradeSuccessRoute
   '/api/public/cashfree-webhook': typeof ApiPublicCashfreeWebhookRoute
 }
@@ -60,7 +108,13 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/bots': typeof BotsRouteWithChildren
+  '/onboarding': typeof OnboardingRoute
+  '/splash': typeof SplashRoute
   '/api/chat': typeof ApiChatRoute
+  '/bots/$botId': typeof BotsBotIdRoute
+  '/bots/new': typeof BotsNewRoute
+  '/chat/$botId': typeof ChatBotIdRoute
   '/upgrade/success': typeof UpgradeSuccessRoute
   '/api/public/cashfree-webhook': typeof ApiPublicCashfreeWebhookRoute
 }
@@ -69,21 +123,39 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/bots'
+    | '/onboarding'
+    | '/splash'
     | '/api/chat'
+    | '/bots/$botId'
+    | '/bots/new'
+    | '/chat/$botId'
     | '/upgrade/success'
     | '/api/public/cashfree-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/bots'
+    | '/onboarding'
+    | '/splash'
     | '/api/chat'
+    | '/bots/$botId'
+    | '/bots/new'
+    | '/chat/$botId'
     | '/upgrade/success'
     | '/api/public/cashfree-webhook'
   id:
     | '__root__'
     | '/'
     | '/auth'
+    | '/bots'
+    | '/onboarding'
+    | '/splash'
     | '/api/chat'
+    | '/bots/$botId'
+    | '/bots/new'
+    | '/chat/$botId'
     | '/upgrade/success'
     | '/api/public/cashfree-webhook'
   fileRoutesById: FileRoutesById
@@ -91,13 +163,38 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  BotsRoute: typeof BotsRouteWithChildren
+  OnboardingRoute: typeof OnboardingRoute
+  SplashRoute: typeof SplashRoute
   ApiChatRoute: typeof ApiChatRoute
+  ChatBotIdRoute: typeof ChatBotIdRoute
   UpgradeSuccessRoute: typeof UpgradeSuccessRoute
   ApiPublicCashfreeWebhookRoute: typeof ApiPublicCashfreeWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/splash': {
+      id: '/splash'
+      path: '/splash'
+      fullPath: '/splash'
+      preLoaderRoute: typeof SplashRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bots': {
+      id: '/bots'
+      path: '/bots'
+      fullPath: '/bots'
+      preLoaderRoute: typeof BotsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -119,6 +216,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UpgradeSuccessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/chat/$botId': {
+      id: '/chat/$botId'
+      path: '/chat/$botId'
+      fullPath: '/chat/$botId'
+      preLoaderRoute: typeof ChatBotIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bots/new': {
+      id: '/bots/new'
+      path: '/new'
+      fullPath: '/bots/new'
+      preLoaderRoute: typeof BotsNewRouteImport
+      parentRoute: typeof BotsRoute
+    }
+    '/bots/$botId': {
+      id: '/bots/$botId'
+      path: '/$botId'
+      fullPath: '/bots/$botId'
+      preLoaderRoute: typeof BotsBotIdRouteImport
+      parentRoute: typeof BotsRoute
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -136,10 +254,26 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface BotsRouteChildren {
+  BotsBotIdRoute: typeof BotsBotIdRoute
+  BotsNewRoute: typeof BotsNewRoute
+}
+
+const BotsRouteChildren: BotsRouteChildren = {
+  BotsBotIdRoute: BotsBotIdRoute,
+  BotsNewRoute: BotsNewRoute,
+}
+
+const BotsRouteWithChildren = BotsRoute._addFileChildren(BotsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  BotsRoute: BotsRouteWithChildren,
+  OnboardingRoute: OnboardingRoute,
+  SplashRoute: SplashRoute,
   ApiChatRoute: ApiChatRoute,
+  ChatBotIdRoute: ChatBotIdRoute,
   UpgradeSuccessRoute: UpgradeSuccessRoute,
   ApiPublicCashfreeWebhookRoute: ApiPublicCashfreeWebhookRoute,
 }

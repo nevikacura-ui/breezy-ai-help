@@ -240,6 +240,7 @@ export async function sendToAI(args: {
   messages: Message[];
   settings: Settings;
   signal?: AbortSignal;
+  system?: string;
 }): Promise<string> {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   try {
@@ -257,6 +258,7 @@ export async function sendToAI(args: {
     body: JSON.stringify({
       model: args.settings.openRouterModel,
       language: args.settings.language,
+      system: args.system,
       messages: args.messages.map((m) => ({ role: m.role, content: m.content })),
     }),
   });
@@ -268,6 +270,7 @@ export async function sendToAI(args: {
   const data = (await res.json()) as { reply?: string };
   return data.reply ?? "";
 }
+
 
 // -------- Auth session --------
 export type AuthUser = { id: string; email?: string; name?: string; avatar?: string } | null;
