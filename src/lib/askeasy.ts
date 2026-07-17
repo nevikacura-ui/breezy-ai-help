@@ -19,6 +19,8 @@ export type Message = {
 };
 
 export type Theme = "light" | "dark" | "system";
+export type Persona = "kid" | "teen" | "adult" | "elder";
+export type Mood = "great" | "good" | "meh" | "down" | null;
 
 export type Settings = {
   name: string;
@@ -29,6 +31,23 @@ export type Settings = {
   language: LangCode;
   /** Timestamp (ms) when the user first switched to a non-English language. */
   trialStartedAt: number | null;
+
+  // Personalization
+  persona: Persona;
+  /** 0=professional, 50=friendly, 100=playful */
+  warmth: number;
+  /** Free-form facts the bot should remember: "loves cricket", etc. */
+  aboutMe: string[];
+  mood: Mood;
+  /** ISO date (YYYY-MM-DD) of last active day for streaks */
+  lastActiveDate: string | null;
+  streakDays: number;
+  firstMessageDone: boolean;
+
+  // Accessibility & privacy
+  textScale: number; // 0.9 .. 1.35
+  dyslexiaFont: boolean;
+  privateMode: boolean;
 };
 
 export type ModelId = "askeasy/smart" | "askeasy/eco" | "askeasy/ultra";
@@ -46,6 +65,13 @@ export const MODELS: ModelInfo[] = [
   { id: "askeasy/ultra", label: "Ultra", hint: "Deep reasoning · Pro",     tier: "pro"  },
 ];
 
+export const PERSONAS: { id: Persona; label: string; emoji: string; hint: string }[] = [
+  { id: "kid",   label: "Kid",     emoji: "🎈", hint: "Simple words, playful, safe" },
+  { id: "teen",  label: "Teen",    emoji: "🎧", hint: "Casual, upbeat, quick" },
+  { id: "adult", label: "Grown-up",emoji: "☕", hint: "Balanced, clear, direct" },
+  { id: "elder", label: "Elder",   emoji: "🌿", hint: "Large text, slow, patient" },
+];
+
 export const FREE_LIMITS = { text: 5, media: 2, voice: 2 } as const;
 export const TRIAL_DAYS = 3;
 export const TRIAL_MS = TRIAL_DAYS * 24 * 60 * 60 * 1000;
@@ -56,7 +82,7 @@ export function modelTier(id: string): "free" | "pro" {
   return MODELS.find((m) => m.id === id)?.tier ?? "free";
 }
 
-export const SETTINGS_KEY = "askeasy.settings.v5";
+export const SETTINGS_KEY = "askeasy.settings.v6";
 export const MESSAGES_KEY = "askeasy.messages.v1";
 export const USAGE_KEY = "askeasy.usage.v1";
 
@@ -68,7 +94,18 @@ const DEFAULT_SETTINGS: Settings = {
   isPro: false,
   language: "en",
   trialStartedAt: null,
+  persona: "adult",
+  warmth: 60,
+  aboutMe: [],
+  mood: null,
+  lastActiveDate: null,
+  streakDays: 0,
+  firstMessageDone: false,
+  textScale: 1,
+  dyslexiaFont: false,
+  privateMode: false,
 };
+
 
 const DEFAULT_USAGE: Usage = { text: 0, media: 0, voice: 0 };
 
