@@ -243,7 +243,7 @@ function BotFeatureCard({ bot }: { bot: Bot }) {
       }}
     >
       <div className="relative mx-auto">
-        <BotAvatar bot={bot} size={68} />
+        <BotAvatar bot={bot} size={68} eager />
         {bot.tier === "pro" ? null : (
           <span
             className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px]"
