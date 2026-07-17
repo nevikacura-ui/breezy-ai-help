@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ChevronLeft, MoreHorizontal, Star } from "lucide-react";
 import { getBotById, PRESET_BOTS, useCustomBots } from "@/lib/bots";
+import { BotAvatar } from "@/components/askeasy/BotAvatar";
 
 export const Route = createFileRoute("/bots/$botId")({
   head: ({ params }) => {
