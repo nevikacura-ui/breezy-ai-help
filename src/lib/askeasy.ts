@@ -19,6 +19,8 @@ export type Message = {
 };
 
 export type Theme = "light" | "dark" | "system";
+export type Persona = "kid" | "teen" | "adult" | "elder";
+export type Mood = "great" | "good" | "meh" | "down" | null;
 
 export type Settings = {
   name: string;
@@ -29,6 +31,23 @@ export type Settings = {
   language: LangCode;
   /** Timestamp (ms) when the user first switched to a non-English language. */
   trialStartedAt: number | null;
+
+  // Personalization
+  persona: Persona;
+  /** 0=professional, 50=friendly, 100=playful */
+  warmth: number;
+  /** Free-form facts the bot should remember: "loves cricket", etc. */
+  aboutMe: string[];
+  mood: Mood;
+  /** ISO date (YYYY-MM-DD) of last active day for streaks */
+  lastActiveDate: string | null;
+  streakDays: number;
+  firstMessageDone: boolean;
+
+  // Accessibility & privacy
+  textScale: number; // 0.9 .. 1.35
+  dyslexiaFont: boolean;
+  privateMode: boolean;
 };
 
 export type ModelId = "askeasy/smart" | "askeasy/eco" | "askeasy/ultra";
@@ -46,6 +65,13 @@ export const MODELS: ModelInfo[] = [
   { id: "askeasy/ultra", label: "Ultra", hint: "Deep reasoning · Pro",     tier: "pro"  },
 ];
 
+export const PERSONAS: { id: Persona; label: string; emoji: string; hint: string }[] = [
+  { id: "kid",   label: "Kid",     emoji: "🎈", hint: "Simple words, playful, safe" },
+  { id: "teen",  label: "Teen",    emoji: "🎧", hint: "Casual, upbeat, quick" },
+  { id: "adult", label: "Grown-up",emoji: "☕", hint: "Balanced, clear, direct" },
+  { id: "elder", label: "Elder",   emoji: "🌿", hint: "Large text, slow, patient" },
+];
+
 export const FREE_LIMITS = { text: 5, media: 2, voice: 2 } as const;
 export const TRIAL_DAYS = 3;
 export const TRIAL_MS = TRIAL_DAYS * 24 * 60 * 60 * 1000;
@@ -56,7 +82,7 @@ export function modelTier(id: string): "free" | "pro" {
   return MODELS.find((m) => m.id === id)?.tier ?? "free";
 }
 
-export const SETTINGS_KEY = "askeasy.settings.v5";
+export const SETTINGS_KEY = "askeasy.settings.v6";
 export const MESSAGES_KEY = "askeasy.messages.v1";
 export const USAGE_KEY = "askeasy.usage.v1";
 
@@ -68,7 +94,18 @@ const DEFAULT_SETTINGS: Settings = {
   isPro: false,
   language: "en",
   trialStartedAt: null,
+  persona: "adult",
+  warmth: 60,
+  aboutMe: [],
+  mood: null,
+  lastActiveDate: null,
+  streakDays: 0,
+  firstMessageDone: false,
+  textScale: 1,
+  dyslexiaFont: false,
+  privateMode: false,
 };
+
 
 const DEFAULT_USAGE: Usage = { text: 0, media: 0, voice: 0 };
 
@@ -132,6 +169,13 @@ export function useSettings() {
     return () => mq.removeEventListener("change", applyTheme);
   }, [settings.theme]);
 
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const root = document.documentElement;
+    root.style.setProperty("--text-scale", String(settings.textScale ?? 1));
+    root.classList.toggle("font-dyslexic", !!settings.dyslexiaFont);
+  }, [settings.textScale, settings.dyslexiaFont]);
+
   const update = useCallback(
     (patch: Partial<Settings>) => setSettings((s) => ({ ...s, ...patch })),
     []
@@ -148,6 +192,65 @@ export function useI18n(_settings: Settings) {
   );
 }
 
+/** Build a prompt suffix that reflects persona, warmth, and remembered facts. */
+export function personalityPrompt(s: Settings): string {
+  const bits: string[] = [];
+  const nameBit = s.name ? `The user's name is ${s.name}. Greet warmly by name when it fits.` : "";
+  if (nameBit) bits.push(nameBit);
+
+  const personaMap: Record<Persona, string> = {
+    kid:   "Audience: a curious child (~6-11). Use short sentences (max ~12 words), simple words, playful analogies, occasional emoji. Never discuss violence, adult, or unsafe topics; gently redirect to safe alternatives.",
+    teen:  "Audience: a teenager. Be upbeat, casual, brief, and encouraging. Light emoji ok. Avoid lectures.",
+    adult: "Audience: an adult. Be clear, direct, and helpful. Skip filler.",
+    elder: "Audience: an older adult. Use larger conceptual chunks, gentle pacing, plain vocabulary, and step-by-step guidance. Confirm understanding at the end.",
+  };
+  bits.push(personaMap[s.persona]);
+
+  const warmthLabel =
+    s.warmth < 25 ? "very professional and concise"
+    : s.warmth < 55 ? "warm-professional, friendly but focused"
+    : s.warmth < 80 ? "friendly, encouraging, with light personality"
+    : "playful and enthusiastic with tasteful humor";
+  bits.push(`Tone: ${warmthLabel}.`);
+
+  if (s.aboutMe.length) {
+    bits.push(`Remember about the user: ${s.aboutMe.slice(0, 6).join("; ")}. Weave in only when relevant; don't force it.`);
+  }
+
+  if (s.mood === "down") {
+    bits.push("The user mentioned feeling down today. Lead with brief empathy before answering.");
+  } else if (s.mood === "great") {
+    bits.push("The user is in a great mood — match their energy.");
+  }
+
+  bits.push("Always end your reply with 2-3 short follow-up suggestions as a bullet list starting with the token `[FOLLOW-UPS]` on its own line, each under 6 words.");
+  return bits.join("\n");
+}
+
+/** Update the streak based on today's date. Returns { newStreak, changed }. */
+export function tickStreak(s: Settings): { streakDays: number; lastActiveDate: string; changed: boolean } {
+  const today = new Date().toISOString().slice(0, 10);
+  if (s.lastActiveDate === today) return { streakDays: s.streakDays, lastActiveDate: today, changed: false };
+  const y = new Date(); y.setDate(y.getDate() - 1);
+  const yesterday = y.toISOString().slice(0, 10);
+  const streakDays = s.lastActiveDate === yesterday ? s.streakDays + 1 : 1;
+  return { streakDays, lastActiveDate: today, changed: true };
+}
+
+/** Extract follow-up suggestions the model appended after `[FOLLOW-UPS]`. */
+export function splitFollowUps(reply: string): { body: string; followUps: string[] } {
+  const idx = reply.indexOf("[FOLLOW-UPS]");
+  if (idx < 0) return { body: reply.trim(), followUps: [] };
+  const body = reply.slice(0, idx).trim();
+  const tail = reply.slice(idx + "[FOLLOW-UPS]".length);
+  const followUps = tail
+    .split(/\r?\n/)
+    .map((l) => l.replace(/^[\s\-*•\d.]+/, "").trim())
+    .filter((l) => l.length > 0 && l.length < 60)
+    .slice(0, 3);
+  return { body, followUps };
+}
+
 export function useConversation() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [hydrated, setHydrated] = useState(false);
@@ -162,6 +265,7 @@ export function useConversation() {
     }
     setHydrated(true);
   }, []);
+
 
   useEffect(() => {
     if (!hydrated) return;
