@@ -120,7 +120,7 @@ function Onboarding() {
       setStep(2);
       return;
     }
-    update({ completed: true });
+    update({ completed: true, step: 0, draftCategories: [] });
     nav({ to: "/bots" });
   };
 
