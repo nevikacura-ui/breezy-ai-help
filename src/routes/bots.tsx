@@ -65,7 +65,7 @@ function BotsHome() {
         </button>
         <div className="flex items-center gap-1.5">
           <Sparkles className="h-4 w-4" style={{ color: "var(--butter)" }} />
-          <span className="font-display text-[1.1rem] tracking-tight">Chation</span>
+          <span className="font-display text-[1.1rem] tracking-tight">Askeasy</span>
         </div>
         <button
           className="relative flex h-10 w-10 items-center justify-center rounded-full"
