@@ -24,6 +24,7 @@ function BotChat() {
   const { bots: customBots } = useCustomBots();
   const bot = getBotById(botId, customBots);
   const { settings } = useSettings();
+  const { state: onboarding } = useOnboarding();
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -32,13 +33,46 @@ function BotChat() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
-  // Hydrate per-bot history
+  // Human-readable category labels the user picked in onboarding
+  const categoryLabels = useMemo(
+    () =>
+      onboarding.categories
+        .map((id) => ONBOARDING_CATEGORIES.find((c) => c.id === id)?.label)
+        .filter((x): x is string => !!x),
+    [onboarding.categories],
+  );
+
+  const langName = LANG_ENGLISH_NAME[settings.language] ?? "English";
+
+  // Build a system prompt augmented with onboarding context
+  const systemPrompt = useMemo(() => {
+    if (!bot) return "";
+    const bits: string[] = [bot.systemPrompt];
+    if (categoryLabels.length) {
+      bits.push(
+        `The user is especially interested in: ${categoryLabels.join(", ")}. Weave these interests into your replies when relevant.`,
+      );
+    }
+    bits.push(`Reply in ${langName} unless the user explicitly asks otherwise.`);
+    return bits.join("\n\n");
+  }, [bot, categoryLabels, langName]);
+
+  // Hydrate per-bot history + prefill first message
   useEffect(() => {
     if (!bot) return;
     try {
       const raw = window.localStorage.getItem(chatKey(bot.id));
-      if (raw) setMessages(JSON.parse(raw) as Message[]);
-      else setMessages([{ id: "g", role: "assistant", content: bot.greeting, createdAt: Date.now() }]);
+      if (raw) {
+        setMessages(JSON.parse(raw) as Message[]);
+      } else {
+        setMessages([{ id: "g", role: "assistant", content: bot.greeting, createdAt: Date.now() }]);
+        // Prefill an opening question tailored to the user's interests
+        const opener =
+          categoryLabels.length > 0
+            ? `Hey ${bot.name}! I'm into ${categoryLabels.slice(0, 3).join(", ")} — where should we start?`
+            : `Hey ${bot.name}, what can you help me with?`;
+        setInput(opener);
+      }
     } catch {
       setMessages([{ id: "g", role: "assistant", content: bot.greeting, createdAt: Date.now() }]);
     }
