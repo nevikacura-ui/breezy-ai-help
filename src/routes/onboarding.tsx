@@ -85,56 +85,75 @@ function Onboarding() {
             To give you a personalized experience, let us choose categories.
           </p>
 
-          {/* Scattered bubble pile */}
-          <div className="relative mt-8 h-[360px]">
+          {/* Scattered bubble cloud — Dribbble style */}
+          <div className="relative mt-8 h-[420px]">
             {ONBOARDING_CATEGORIES.map((c, i) => {
               const active = selected.has(c.id);
-              // Deterministic scatter positions
+              // Deterministic scatter with varied sizes
               const positions = [
-                { top: "6%", left: "40%", rot: -6 },
-                { top: "12%", left: "8%", rot: -14 },
-                { top: "20%", left: "62%", rot: 12 },
-                { top: "26%", left: "32%", rot: -4 },
-                { top: "36%", left: "8%", rot: 8 },
-                { top: "40%", left: "50%", rot: -10 },
-                { top: "48%", left: "22%", rot: 16 },
-                { top: "52%", left: "60%", rot: -6 },
-                { top: "60%", left: "6%", rot: -12 },
-                { top: "66%", left: "38%", rot: 6 },
-                { top: "72%", left: "62%", rot: -8 },
-                { top: "78%", left: "18%", rot: 10 },
+                { top: "2%",  left: "34%", rot: -6,  size: "lg" },
+                { top: "8%",  left: "4%",  rot: -14, size: "md" },
+                { top: "16%", left: "64%", rot: 10,  size: "md" },
+                { top: "24%", left: "26%", rot: -3,  size: "sm" },
+                { top: "32%", left: "56%", rot: -12, size: "lg" },
+                { top: "38%", left: "4%",  rot: 8,   size: "md" },
+                { top: "48%", left: "34%", rot: 4,   size: "md" },
+                { top: "54%", left: "64%", rot: -8,  size: "sm" },
+                { top: "62%", left: "6%",  rot: -6,  size: "lg" },
+                { top: "72%", left: "38%", rot: 9,   size: "sm" },
+                { top: "76%", left: "62%", rot: -10, size: "md" },
+                { top: "84%", left: "14%", rot: 6,   size: "md" },
               ];
               const p = positions[i % positions.length];
-              const bg =
-                active
-                  ? "var(--butter)"
-                  : c.tone === "lavender"
-                    ? "var(--lavender)"
-                    : "color-mix(in oklab, var(--cream) 90%, transparent)";
+              const toneMap: Record<string, string> = {
+                butter:   "#ffd86b",
+                lavender: "#d7c4ef",
+                cream:    "#f6ecd6",
+                pink:     "#ffc6d3",
+                mint:     "#bde9c9",
+                peach:    "#ffcfa8",
+              };
+              const bg = active ? "var(--ink)" : toneMap[c.tone];
+              const fg = active ? "var(--butter)" : "var(--ink)";
+              const sizeCls =
+                p.size === "lg" ? "px-4 py-2.5 text-[15px]" :
+                p.size === "md" ? "px-3.5 py-2 text-[13.5px]" :
+                "px-3 py-1.5 text-[12.5px]";
+              const iconSize =
+                p.size === "lg" ? "h-7 w-7 text-[15px]" :
+                p.size === "md" ? "h-6 w-6 text-[13px]" :
+                "h-5 w-5 text-[11px]";
               return (
                 <button
                   key={c.id}
                   onClick={() => toggle(c.id)}
-                  className="animate-tile-in absolute flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-2 text-[13.5px] font-semibold shadow-[0_8px_24px_-8px_rgba(0,0,0,0.35)] transition-all active:scale-95"
+                  className={`animate-tile-in absolute flex items-center gap-2 whitespace-nowrap rounded-full font-semibold shadow-[0_10px_28px_-10px_rgba(0,0,0,0.45)] transition-all active:scale-95 ${sizeCls}`}
                   style={{
                     top: p.top,
                     left: p.left,
                     transform: `rotate(${p.rot}deg)`,
                     background: bg,
-                    color: "var(--ink)",
-                    animationDelay: `${i * 40}ms`,
-                    outline: active ? "3px solid var(--ink)" : "none",
-                    outlineOffset: active ? "-3px" : undefined,
+                    color: fg,
+                    animationDelay: `${i * 45}ms`,
+                    border: active ? "2px solid var(--butter)" : "1px solid rgba(0,0,0,0.06)",
                   }}
                 >
-                  <span aria-hidden>{c.emoji}</span>
+                  <span
+                    className={`flex items-center justify-center rounded-full ${iconSize}`}
+                    style={{
+                      background: active ? "var(--butter)" : "rgba(255,255,255,0.7)",
+                    }}
+                    aria-hidden
+                  >
+                    {c.emoji}
+                  </span>
                   {c.label}
                 </button>
               );
             })}
           </div>
 
-          <p className="mt-2 text-center text-xs opacity-50">
+          <p className="mt-4 text-center text-xs opacity-50">
             {selected.size < 2 ? "Pick at least 2 to continue" : `${selected.size} selected`}
           </p>
         </section>
