@@ -94,7 +94,8 @@ function BotChat() {
     [onboarding.categories],
   );
 
-  const langName = LANG_ENGLISH_NAME[settings.language] ?? "English";
+  const effectiveLang = (bot && settings.botLanguages?.[bot.id]) || settings.language;
+  const langName = LANG_ENGLISH_NAME[effectiveLang] ?? "English";
 
   const systemPrompt = useMemo(() => {
     if (!bot) return "";
