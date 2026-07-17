@@ -344,32 +344,124 @@ function warmthLabel(v: number): string {
   return "Playful";
 }
 
+const ABOUT_SUGGESTIONS = [
+  "Prefers short, direct answers",
+  "Learning to cook Italian food",
+  "Runs 3× a week",
+  "Loves sci-fi books",
+  "Vegetarian",
+  "Works in product design",
+  "Explains best with examples",
+  "Parent of a toddler",
+];
+
+const MAX_ABOUT = 5;
+
 function AboutMe({ items, onChange }: { items: string[]; onChange: (v: string[]) => void }) {
   const [draft, setDraft] = useState("");
-  const add = () => {
-    const v = draft.trim();
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editDraft, setEditDraft] = useState("");
+  const atCap = items.length >= MAX_ABOUT;
+
+  const add = (raw?: string) => {
+    const v = (raw ?? draft).trim();
     if (!v) return;
-    onChange([...items, v].slice(0, 8));
+    if (items.some((x) => x.toLowerCase() === v.toLowerCase())) { setDraft(""); return; }
+    onChange([...items, v].slice(0, MAX_ABOUT));
     setDraft("");
   };
+
+  const commitEdit = (i: number) => {
+    const v = editDraft.trim();
+    if (!v) { onChange(items.filter((_, j) => j !== i)); }
+    else { onChange(items.map((x, j) => (j === i ? v : x))); }
+    setEditingIndex(null);
+    setEditDraft("");
+  };
+
+  const unusedSuggestions = ABOUT_SUGGESTIONS.filter(
+    (s) => !items.some((x) => x.toLowerCase() === s.toLowerCase())
+  ).slice(0, 4);
+
   return (
-    <div className="space-y-2">
+    <div className="space-y-2.5">
       <div className="flex flex-wrap gap-1.5">
-        {items.map((f, i) => (
-          <span key={i} className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-foreground/[0.04] px-2.5 py-1 text-[12px]">
-            {f}
-            <button onClick={() => onChange(items.filter((_, j) => j !== i))} aria-label="Remove"><X className="h-3 w-3" /></button>
-          </span>
-        ))}
-        {items.length === 0 && <span className="text-[11px] text-muted-foreground">No facts yet.</span>}
+        {items.map((f, i) =>
+          editingIndex === i ? (
+            <Input
+              key={i}
+              autoFocus
+              value={editDraft}
+              onChange={(e) => setEditDraft(e.target.value)}
+              onBlur={() => commitEdit(i)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") { e.preventDefault(); commitEdit(i); }
+                if (e.key === "Escape") { setEditingIndex(null); setEditDraft(""); }
+              }}
+              className="h-7 w-auto min-w-32 rounded-full px-2.5 text-[12px]"
+            />
+          ) : (
+            <span
+              key={i}
+              className="group inline-flex items-center gap-1 rounded-full border border-border/60 bg-foreground/[0.04] px-2.5 py-1 text-[12px]"
+            >
+              <button
+                type="button"
+                onClick={() => { setEditingIndex(i); setEditDraft(f); }}
+                className="max-w-[180px] truncate text-left hover:underline"
+                aria-label={`Edit preference: ${f}`}
+              >
+                {f}
+              </button>
+              <button
+                type="button"
+                onClick={() => onChange(items.filter((_, j) => j !== i))}
+                aria-label={`Remove preference: ${f}`}
+                className="opacity-60 hover:opacity-100"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          )
+        )}
+        {items.length === 0 && (
+          <span className="text-[11px] text-muted-foreground">No preferences yet — tap a suggestion or add your own.</span>
+        )}
       </div>
+
+      {!atCap && unusedSuggestions.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {unusedSuggestions.map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => add(s)}
+              className="inline-flex items-center gap-1 rounded-full border border-dashed border-border/60 px-2.5 py-1 text-[11px] text-muted-foreground hover:text-foreground hover:border-border"
+            >
+              <Plus className="h-3 w-3" />
+              {s}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="flex gap-1.5">
-        <Input value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(); } }} placeholder="e.g. loves cricket" className="h-9 text-[13px]" />
-        <Button size="sm" variant="outline" onClick={add}><Plus className="h-3.5 w-3.5" /></Button>
+        <Input
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
+          placeholder={atCap ? "Remove one to add another" : "e.g. loves cricket"}
+          disabled={atCap}
+          className="h-9 text-[13px]"
+        />
+        <Button size="sm" variant="outline" onClick={() => add()} disabled={atCap || !draft.trim()}>
+          <Plus className="h-3.5 w-3.5" />
+        </Button>
       </div>
     </div>
   );
 }
+
 
 
 
