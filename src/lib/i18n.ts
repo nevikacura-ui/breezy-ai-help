@@ -72,6 +72,41 @@ export function isRTL(code: LangCode): boolean {
   return code === "ar";
 }
 
+/**
+ * Cheap client-side language detection over the 10 supported languages.
+ * Returns null if the sample is too short or the guess is low-confidence.
+ * Uses Unicode-script signals first, then stopword frequency for Latin scripts.
+ */
+export function detectLanguage(text: string): LangCode | null {
+  const s = (text || "").trim();
+  if (s.length < 8) return null;
+
+  // Script-based (unambiguous for our set)
+  if (/[\u0600-\u06FF]/.test(s)) return "ar";
+  if (/[\u0900-\u097F]/.test(s)) return "hi";
+  if (/[\u3040-\u309F\u30A0-\u30FF]/.test(s)) return "ja"; // kana => JP
+  if (/[\u4E00-\u9FFF]/.test(s)) return "zh"; // Han only (no kana) => ZH
+
+  // Latin-script stopword scoring
+  const lower = " " + s.toLowerCase().replace(/[^a-záéíóúüñàâçèêëîïôùûœßäöü'\s]/g, " ") + " ";
+  const STOP: Record<Exclude<LangCode, "ar" | "hi" | "zh" | "ja">, string[]> = {
+    en: [" the ", " and ", " you ", " is ", " to ", " of ", " for ", " what ", " how ", " it "],
+    es: [" que ", " de ", " la ", " el ", " los ", " una ", " por ", " para ", " cómo ", " qué "],
+    fr: [" le ", " la ", " les ", " des ", " une ", " est ", " pour ", " avec ", " que ", " qu' "],
+    de: [" der ", " die ", " das ", " und ", " ist ", " nicht ", " mit ", " ein ", " ich ", " für "],
+    pt: [" que ", " não ", " para ", " uma ", " com ", " está ", " você ", " porque ", " como ", " isso "],
+    it: [" che ", " non ", " una ", " sono ", " per ", " con ", " gli ", " questo ", " come ", " molto "],
+  };
+  let best: LangCode | null = null;
+  let bestScore = 0;
+  for (const [code, words] of Object.entries(STOP) as [LangCode, string[]][]) {
+    let score = 0;
+    for (const w of words) if (lower.includes(w)) score++;
+    if (score > bestScore) { bestScore = score; best = code; }
+  }
+  return bestScore >= 2 ? best : null;
+}
+
 export function t(lang: LangCode, key: string, vars?: Record<string, string>): string {
   const k = key as UIKey;
   let out = DICT[lang]?.[k] ?? EN[k] ?? key;

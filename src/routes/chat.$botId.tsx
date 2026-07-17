@@ -9,7 +9,7 @@ import {
   type Message, type Mood,
 } from "@/lib/askeasy";
 import { SettingsSheet } from "@/components/askeasy/SettingsSheet";
-import { LANG_ENGLISH_NAME, isRTL, t } from "@/lib/i18n";
+import { LANG_ENGLISH_NAME, LANGUAGES, isRTL, t, detectLanguage, type LangCode } from "@/lib/i18n";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/chat/$botId")({
@@ -54,6 +54,8 @@ function BotChat() {
   const [napping, setNapping] = useState(false);
   const [reaction, setReaction] = useState<null | "excited" | "curious" | "comfort">(null);
   const [reactionKey, setReactionKey] = useState(0);
+  const [detectedLang, setDetectedLang] = useState<LangCode | null>(null);
+  const [dismissedLangs, setDismissedLangs] = useState<Set<LangCode>>(new Set());
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -496,12 +498,46 @@ function BotChat() {
       {/* Composer */}
       <div className="fixed inset-x-0 bottom-0 z-30 px-4 pb-5 pt-3"
         style={{ background: "linear-gradient(to top, var(--ink) 60%, transparent)" }}>
-        <div className="mx-auto flex max-w-lg items-center gap-2 rounded-full py-1.5 pl-4 pr-1.5"
-          style={{ background: "color-mix(in oklab, var(--cream) 8%, transparent)", border: "1px solid color-mix(in oklab, var(--cream) 12%, transparent)" }}>
+        <div className="mx-auto w-full max-w-lg">
+          {detectedLang && detectedLang !== effectiveLang && !dismissedLangs.has(detectedLang) && (() => {
+            const meta = LANGUAGES.find((l) => l.code === detectedLang);
+            if (!meta) return null;
+            return (
+              <div className="mb-2 flex items-center justify-center gap-2 animate-fade-up">
+                <button
+                  onClick={() => {
+                    update({ botLanguages: { ...(settings.botLanguages || {}), [bot.id]: detectedLang } });
+                    toast.success(`Replying in ${meta.label}`);
+                    setDetectedLang(null);
+                  }}
+                  className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-semibold"
+                  style={{ background: "var(--butter)", color: "var(--ink)" }}
+                >
+                  <span>{meta.flag}</span>
+                  Reply in {meta.native}
+                </button>
+                <button
+                  onClick={() => setDismissedLangs((prev) => new Set(prev).add(detectedLang))}
+                  className="rounded-full px-2 py-1 text-[11px] opacity-60 hover:opacity-100"
+                  aria-label="Dismiss language suggestion"
+                >
+                  Dismiss
+                </button>
+              </div>
+            );
+          })()}
+          <div className="flex items-center gap-2 rounded-full py-1.5 pl-4 pr-1.5"
+            style={{ background: "color-mix(in oklab, var(--cream) 8%, transparent)", border: "1px solid color-mix(in oklab, var(--cream) 12%, transparent)" }}>
           <input
             ref={inputRef}
             value={input}
-            onChange={(e) => { setInput(e.target.value); bumpActivity(); }}
+            onChange={(e) => {
+              const v = e.target.value;
+              setInput(v);
+              bumpActivity();
+              const guess = detectLanguage(v);
+              setDetectedLang(guess && guess !== effectiveLang ? guess : null);
+            }}
             onKeyDown={(e) => { bumpActivity(); if (e.key === "Enter") send(); }}
             onFocus={() => { setFocused(true); bumpActivity(); }}
             onBlur={() => setFocused(false)}
@@ -557,6 +593,7 @@ function BotChat() {
               <Send className="h-4 w-4" />
             </button>
           )}
+          </div>
         </div>
       </div>
 
