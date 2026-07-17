@@ -56,7 +56,7 @@ function BotsHome() {
 
   return (
     <main
-      className="relative min-h-dvh overflow-x-hidden pb-28"
+      className="relative min-h-dvh overflow-x-hidden pb-6"
       style={{ background: "var(--ink)", color: "var(--cream)" }}
     >
       {/* Header */}
