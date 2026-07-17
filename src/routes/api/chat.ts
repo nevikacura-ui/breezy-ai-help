@@ -9,7 +9,8 @@ const MODEL_MAP: Record<string, { model: string; tier: "free" | "pro" }> = {
 };
 
 type ChatMessage = { role: "user" | "assistant" | "system"; content: string };
-type ChatRequestBody = { messages?: ChatMessage[]; model?: string; language?: string };
+type ChatRequestBody = { messages?: ChatMessage[]; model?: string; language?: string; system?: string };
+
 
 const LANG_NAMES: Record<string, string> = {
   en: "English", es: "Spanish", fr: "French", de: "German", pt: "Portuguese",
