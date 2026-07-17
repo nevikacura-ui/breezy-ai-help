@@ -9,7 +9,7 @@ import {
   type Message, type Mood,
 } from "@/lib/askeasy";
 import { SettingsSheet } from "@/components/askeasy/SettingsSheet";
-import { LANG_ENGLISH_NAME, isRTL, t } from "@/lib/i18n";
+import { LANG_ENGLISH_NAME, LANGUAGES, isRTL, t, detectLanguage, type LangCode } from "@/lib/i18n";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/chat/$botId")({
