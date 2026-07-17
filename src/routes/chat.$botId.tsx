@@ -217,31 +217,116 @@ function BotChat() {
     }
   };
 
-  // Voice input (Web Speech API)
-  const recognitionRef = useRef<any>(null);
+  // Voice input — MediaRecorder + Gateway transcription (persona-aware).
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<BlobPart[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
+  const startedAtRef = useRef<number>(0);
+  const cancelRef = useRef<boolean>(false);
   const [listening, setListening] = useState(false);
-  const startListening = () => {
-    if (!settings.voiceEnabled) return toast.message("Voice input is off", { description: "Enable it in Settings." });
-    const SR = (typeof window !== "undefined" ? (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition : null);
-    if (!SR) return toast.message("Voice not supported here");
-    const rec = new SR();
-    rec.lang = settings.language === "en" ? "en-US" : settings.language;
-    rec.interimResults = true;
-    rec.continuous = false;
-    rec.onresult = (ev: any) => {
-      const txt = Array.from(ev.results).map((r: any) => r[0].transcript).join(" ");
-      setInput(txt);
-    };
-    rec.onend = () => setListening(false);
-    rec.onerror = () => setListening(false);
-    rec.start();
-    recognitionRef.current = rec;
-    setListening(true);
-    try { navigator.vibrate?.(10); } catch { /* noop */ }
+  const [transcribing, setTranscribing] = useState(false);
+
+  // Persona-tuned min duration: elders/kids get more grace before a release counts as cancel.
+  const MIN_MS: Record<string, number> = { kid: 500, teen: 300, adult: 350, elder: 700 };
+  const minHold = MIN_MS[settings.persona] ?? 350;
+
+  const cleanupStream = () => {
+    try { streamRef.current?.getTracks().forEach((t) => t.stop()); } catch { /* noop */ }
+    streamRef.current = null;
+    recorderRef.current = null;
+    chunksRef.current = [];
   };
-  const stopListening = () => {
-    try { recognitionRef.current?.stop(); } catch { /* noop */ }
-    setListening(false);
+
+  const startListening = async () => {
+    if (listening || transcribing) return;
+    if (!settings.voiceEnabled) return toast.message("Voice input is off", { description: "Enable it in Settings." });
+    if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+      return toast.message("Voice not supported here");
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+      });
+      streamRef.current = stream;
+      // Prefer webm/opus; Safari falls back to mp4.
+      const mime = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"].find(
+        (t) => (window as any).MediaRecorder?.isTypeSupported?.(t)
+      ) || "";
+      const rec = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+      recorderRef.current = rec;
+      chunksRef.current = [];
+      cancelRef.current = false;
+      rec.ondataavailable = (e) => { if (e.data && e.data.size > 0) chunksRef.current.push(e.data); };
+      rec.onstop = async () => {
+        const type = rec.mimeType || "audio/webm";
+        const blob = new Blob(chunksRef.current, { type });
+        cleanupStream();
+        setListening(false);
+        if (cancelRef.current) return;
+        if (blob.size < 1200) {
+          toast.message("Didn't catch that — try holding a bit longer.");
+          return;
+        }
+        setTranscribing(true);
+        try {
+          const fd = new FormData();
+          fd.append("file", blob, `hold.${type.includes("mp4") ? "mp4" : "webm"}`);
+          fd.append("persona", settings.persona);
+          if (/^[a-z]{2}$/.test(settings.language)) fd.append("language", settings.language);
+          const res = await fetch("/api/transcribe", { method: "POST", body: fd });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data?.error || `Transcription failed (${res.status})`);
+          const text = (data?.text || "").trim();
+          if (!text) { toast.message("Couldn't hear you clearly."); return; }
+          setInput(text);
+          // Auto-send so hold-to-talk is truly hands-free.
+          setTimeout(() => sendMessage(text), 40);
+        } catch (err: any) {
+          toast.error(err?.message ?? "Voice transcription failed");
+        } finally {
+          setTranscribing(false);
+        }
+      };
+      // Capture in small slices so we get audio even if the tab loses focus.
+      rec.start(250);
+      startedAtRef.current = Date.now();
+      setListening(true);
+      try { navigator.vibrate?.(12); } catch { /* noop */ }
+    } catch {
+      toast.error("Mic permission denied");
+      cleanupStream();
+    }
+  };
+
+  const stopListening = (opts: { cancel?: boolean } = {}) => {
+    if (!listening || !recorderRef.current) return;
+    const held = Date.now() - startedAtRef.current;
+    // Too short to be intentional → treat as cancel.
+    const cancel = opts.cancel || held < minHold;
+    cancelRef.current = cancel;
+    try { recorderRef.current.stop(); } catch { /* noop */ }
+    if (cancel) {
+      try { navigator.vibrate?.([6, 40, 6]); } catch { /* noop */ }
+    } else {
+      try { navigator.vibrate?.(8); } catch { /* noop */ }
+    }
+  };
+
+  // Escape cancels an active recording.
+  useEffect(() => {
+    if (!listening) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") stopListening({ cancel: true }); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [listening]);
+
+  // sendMessage is defined below (uses the value directly, bypassing the input state race).
+  const sendMessage = (text: string) => {
+    const value = text.trim();
+    if (!value) return;
+    setInput(value);
+    // Defer to next tick so state settles, then reuse the existing send path.
+    setTimeout(() => send(), 0);
   };
 
   const forgetMessage = (id: string) => {
