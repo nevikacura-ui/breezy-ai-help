@@ -190,6 +190,34 @@ function Onboarding() {
               );
             })}
           </div>
+
+          {/* Try my voice */}
+          <div className="mt-6 flex flex-col items-center gap-2">
+            <button
+              onClick={() => playSample(settings.persona)}
+              disabled={voiceState === "loading"}
+              className="flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition-all active:scale-[0.97] disabled:opacity-60"
+              style={{
+                background: "color-mix(in oklab, var(--butter) 18%, transparent)",
+                color: "var(--butter)",
+                border: "1px solid color-mix(in oklab, var(--butter) 30%, transparent)",
+              }}
+              aria-live="polite"
+            >
+              {voiceState === "loading" ? (
+                <><Loader2 className="h-4 w-4 animate-spin" /> Warming up…</>
+              ) : voiceState === "playing" ? (
+                <><Square className="h-4 w-4 fill-current" /> Stop</>
+              ) : voiceState === "error" ? (
+                <><Volume2 className="h-4 w-4" /> Try again</>
+              ) : (
+                <><Volume2 className="h-4 w-4" /> Try my voice</>
+              )}
+            </button>
+            <p className="text-[11px] opacity-50">
+              Sample at {PERSONA_PRESETS[settings.persona].voiceRate.toFixed(2)}× · {PERSONAS.find(p => p.id === settings.persona)?.label} tone
+            </p>
+          </div>
         </section>
       ) : step === 1 ? (
         <section className="px-6 pt-4">
