@@ -114,6 +114,7 @@ const DEFAULT_SETTINGS: Settings = {
   textScale: 1,
   dyslexiaFont: false,
   privateMode: false,
+  voiceRate: 1,
 };
 
 
