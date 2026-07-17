@@ -428,7 +428,7 @@ function BotChat() {
           setMessages([{ id: "g", role: "assistant", content: bot.greeting, createdAt: Date.now() }]);
           setSettingsOpen(false);
         }}
-        onSelectLanguage={(code) => update({ language: code })}
+        onSelectLanguage={(code) => update({ botLanguages: { ...(settings.botLanguages || {}), [bot.id]: code } })}
       />
 
       {/* Mood check-in */}
