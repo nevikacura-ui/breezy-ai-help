@@ -254,26 +254,9 @@ function BotChat() {
 }
 
 function BotAvatarSmall({ bot }: { bot: Bot }) {
-  return (
-    <div
-      className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full"
-      style={{
-        background:
-          bot.accent === "butter" ? "linear-gradient(135deg,#ffe58a,#ffc107)"
-            : bot.accent === "lavender" ? "linear-gradient(135deg,#dfc4ee,#b487d3)"
-              : bot.accent === "pink" ? "linear-gradient(135deg,#ffd6e0,#ff9ec4)"
-                : bot.accent === "mint" ? "linear-gradient(135deg,#c6f0d5,#7ecfa1)"
-                  : "linear-gradient(135deg,#fff6dd,#f2e2b4)",
-      }}
-    >
-      {bot.avatar ? (
-        <img src={bot.avatar} alt="" className="h-full w-full object-cover" width={32} height={32} loading="lazy" />
-      ) : (
-        <span className="text-[15px]">{bot.emoji ?? "🤖"}</span>
-      )}
-    </div>
-  );
+  return <BotAvatar bot={bot} size={32} eager emojiSize={15} />;
 }
+
 
 function MessageRow({ m, bot }: { m: Message; bot: Bot }) {
   const isUser = m.role === "user";
