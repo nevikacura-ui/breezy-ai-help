@@ -54,6 +54,8 @@ export type Settings = {
   voiceRate: number;
   /** Focus / Business mode: terse, structured, no mascot, Ultra model default. */
   focusMode: boolean;
+  /** Per-bot language override. Falls back to `language` when unset. */
+  botLanguages: Record<string, LangCode>;
 };
 
 /** Persona presets applied in one tap during onboarding. */
@@ -121,6 +123,7 @@ const DEFAULT_SETTINGS: Settings = {
   reduceMotion: false,
   voiceRate: 1,
   focusMode: false,
+  botLanguages: {},
 };
 
 

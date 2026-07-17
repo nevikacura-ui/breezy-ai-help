@@ -21,6 +21,8 @@ type Props = {
   onClearConversation: () => void;
   onUpgrade: () => void;
   onSelectLanguage: (code: LangCode) => void;
+  /** Optional override for which language is shown as active (per-bot). */
+  activeLanguage?: LangCode;
   isProEffective: boolean;
   usage: Usage;
 };
@@ -38,9 +40,10 @@ const MODEL_ICON: Record<ModelId, React.ReactNode> = {
 };
 
 export function SettingsSheet({
-  open, onOpenChange, settings, update, onClearConversation, onUpgrade, onSelectLanguage, isProEffective, usage,
+  open, onOpenChange, settings, update, onClearConversation, onUpgrade, onSelectLanguage, activeLanguage, isProEffective, usage,
 }: Props) {
   const currentModel = settings.openRouterModel as ModelId;
+  const currentLang: LangCode = activeLanguage ?? settings.language;
   const daysLeft = trialDaysLeft(settings);
   const inTrial = trialActive(settings);
 
@@ -135,8 +138,8 @@ export function SettingsSheet({
           {/* Language */}
           <section className="space-y-3">
             <div className="flex items-center justify-between">
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">Reply language</div>
-              {settings.language !== "en" && !isProEffective && (
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">Reply language (this bot)</div>
+              {currentLang !== "en" && !isProEffective && (
                 <div className={"flex items-center gap-1 text-[11px] font-medium " + (inTrial ? "text-foreground/80" : "text-destructive")}>
                   <Clock className="h-3 w-3" />
                   {inTrial ? `Trial · ${daysLeft} day${daysLeft === 1 ? "" : "s"} left` : "Trial ended"}
@@ -145,7 +148,7 @@ export function SettingsSheet({
             </div>
             <div className="grid grid-cols-2 gap-1.5">
               {LANGUAGES.map((l) => {
-                const active = settings.language === l.code;
+                const active = currentLang === l.code;
                 const locked = l.code !== "en" && !isProEffective && !inTrial;
                 return (
                   <button

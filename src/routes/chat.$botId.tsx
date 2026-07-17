@@ -94,7 +94,8 @@ function BotChat() {
     [onboarding.categories],
   );
 
-  const langName = LANG_ENGLISH_NAME[settings.language] ?? "English";
+  const effectiveLang = (bot && settings.botLanguages?.[bot.id]) || settings.language;
+  const langName = LANG_ENGLISH_NAME[effectiveLang] ?? "English";
 
   const systemPrompt = useMemo(() => {
     if (!bot) return "";
@@ -272,7 +273,7 @@ function BotChat() {
           const fd = new FormData();
           fd.append("file", blob, `hold.${type.includes("mp4") ? "mp4" : "webm"}`);
           fd.append("persona", settings.persona);
-          if (/^[a-z]{2}$/.test(settings.language)) fd.append("language", settings.language);
+          if (/^[a-z]{2}$/.test(effectiveLang)) fd.append("language", effectiveLang);
           const res = await fetch("/api/transcribe", { method: "POST", body: fd });
           const data = await res.json().catch(() => ({}));
           if (!res.ok) throw new Error(data?.error || `Transcription failed (${res.status})`);
@@ -375,7 +376,7 @@ function BotChat() {
     warmth: settings.warmth,
     categories: categoryLabels,
     langName,
-    currentLangCode: settings.language,
+    currentLangCode: effectiveLang,
   });
 
 
@@ -427,7 +428,8 @@ function BotChat() {
           setMessages([{ id: "g", role: "assistant", content: bot.greeting, createdAt: Date.now() }]);
           setSettingsOpen(false);
         }}
-        onSelectLanguage={(code) => update({ language: code })}
+        onSelectLanguage={(code) => update({ botLanguages: { ...(settings.botLanguages || {}), [bot.id]: code } })}
+        activeLanguage={effectiveLang}
       />
 
       {/* Mood check-in */}
@@ -503,10 +505,10 @@ function BotChat() {
             onKeyDown={(e) => { bumpActivity(); if (e.key === "Enter") send(); }}
             onFocus={() => { setFocused(true); bumpActivity(); }}
             onBlur={() => setFocused(false)}
-            placeholder={transcribing ? "…" : listening ? "…" : t(settings.language, "compose.placeholder")}
+            placeholder={transcribing ? "…" : listening ? "…" : t(effectiveLang, "compose.placeholder")}
             className="flex-1 bg-transparent py-2.5 text-[14.5px] outline-none placeholder:opacity-40"
             style={{ color: "var(--cream)" }}
-            dir={isRTL(settings.language) ? "rtl" : "ltr"}
+            dir={isRTL(effectiveLang) ? "rtl" : "ltr"}
           />
           {/* Hold-to-talk mic */}
           <button
