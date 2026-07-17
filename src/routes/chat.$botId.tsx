@@ -230,7 +230,14 @@ function BotChat() {
   }
 
   const mascotClass = listening ? "mascot-listen" : (thinking || input.length > 0 ? "" : "mascot-idle");
-  const suggestedQuickChips = ["Explain simpler", "Give an example", `In ${langName}`];
+  const suggestedQuickChips = buildFallbackChips({
+    persona: settings.persona,
+    warmth: settings.warmth,
+    categories: categoryLabels,
+    langName,
+    currentLangCode: settings.language,
+  });
+
 
   return (
     <main
@@ -415,6 +422,47 @@ function BotChat() {
     </main>
   );
 }
+
+// Alt language rotation for the "try in another language" chip
+const ALT_LANGS: { code: string; name: string }[] = [
+  { code: "es", name: "Spanish"  },
+  { code: "fr", name: "French"   },
+  { code: "hi", name: "Hindi"    },
+  { code: "ja", name: "Japanese" },
+  { code: "de", name: "German"   },
+  { code: "pt", name: "Portuguese" },
+];
+
+function buildFallbackChips(opts: {
+  persona: "kid" | "teen" | "adult" | "elder";
+  warmth: number;
+  categories: string[];
+  langName: string;
+  currentLangCode: string;
+}): string[] {
+  const { persona, warmth, categories, currentLangCode } = opts;
+  const playful = warmth >= 70;
+
+  // 1) Depth/clarity chip — tuned to persona
+  const clarity =
+    persona === "kid"   ? "Explain like I'm 6"
+    : persona === "teen"  ? "TL;DR please"
+    : persona === "elder" ? "Explain slowly, step by step"
+    : "Explain simpler";
+
+  // 2) Concrete-example chip — tuned to first category if we have one
+  const topic = categories[0];
+  const example = topic
+    ? (playful ? `Fun ${topic.toLowerCase()} example?` : `Give a ${topic.toLowerCase()} example`)
+    : (playful ? "Give a fun example" : "Give an example");
+
+  // 3) Language variety chip — rotate to a different language than current
+  const alt = ALT_LANGS.find((l) => l.code !== currentLangCode) ?? ALT_LANGS[0];
+  const language = `Try in ${alt.name}`;
+
+  return [clarity, example, language];
+}
+
 
 
 function MessageRow({ m, bot, isLast, onForget, onQuickAsk, quickChips }: {
