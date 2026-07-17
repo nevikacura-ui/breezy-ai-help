@@ -216,20 +216,30 @@ export function personalityPrompt(s: Settings): string {
   const nameBit = s.name ? `The user's name is ${s.name}. Greet warmly by name when it fits.` : "";
   if (nameBit) bits.push(nameBit);
 
-  const personaMap: Record<Persona, string> = {
-    kid:   "Audience: a curious child (~6-11). Use short sentences (max ~12 words), simple words, playful analogies, occasional emoji. Never discuss violence, adult, or unsafe topics; gently redirect to safe alternatives.",
-    teen:  "Audience: a teenager. Be upbeat, casual, brief, and encouraging. Light emoji ok. Avoid lectures.",
-    adult: "Audience: an adult. Be clear, direct, and helpful. Skip filler.",
-    elder: "Audience: an older adult. Use larger conceptual chunks, gentle pacing, plain vocabulary, and step-by-step guidance. Confirm understanding at the end.",
-  };
-  bits.push(personaMap[s.persona]);
+  if (s.focusMode) {
+    bits.push(
+      "FOCUS MODE — this is a serious work session. Be terse, precise, and professional. " +
+      "No mascot chatter, no emoji, no filler ('Great question!', 'Sure!'). " +
+      "Structure answers with headings, bullet lists, and tables when useful. " +
+      "Cite sources or note uncertainty explicitly. Never guess numbers. " +
+      "Prefer step-by-step or checklist format for tasks."
+    );
+  } else {
+    const personaMap: Record<Persona, string> = {
+      kid:   "Audience: a curious child (~6-11). Use short sentences (max ~12 words), simple words, playful analogies, occasional emoji. Never discuss violence, adult, or unsafe topics; gently redirect to safe alternatives.",
+      teen:  "Audience: a teenager. Be upbeat, casual, brief, and encouraging. Light emoji ok. Avoid lectures.",
+      adult: "Audience: an adult. Be clear, direct, and helpful. Skip filler.",
+      elder: "Audience: an older adult. Use larger conceptual chunks, gentle pacing, plain vocabulary, and step-by-step guidance. Confirm understanding at the end.",
+    };
+    bits.push(personaMap[s.persona]);
 
-  const warmthLabel =
-    s.warmth < 25 ? "very professional and concise"
-    : s.warmth < 55 ? "warm-professional, friendly but focused"
-    : s.warmth < 80 ? "friendly, encouraging, with light personality"
-    : "playful and enthusiastic with tasteful humor";
-  bits.push(`Tone: ${warmthLabel}.`);
+    const warmthLabel =
+      s.warmth < 25 ? "very professional and concise"
+      : s.warmth < 55 ? "warm-professional, friendly but focused"
+      : s.warmth < 80 ? "friendly, encouraging, with light personality"
+      : "playful and enthusiastic with tasteful humor";
+    bits.push(`Tone: ${warmthLabel}.`);
+  }
 
   if (s.aboutMe.length) {
     bits.push(
@@ -239,10 +249,12 @@ export function personalityPrompt(s: Settings): string {
     );
   }
 
-  if (s.mood === "down") {
-    bits.push("The user mentioned feeling down today. Lead with brief empathy before answering.");
-  } else if (s.mood === "great") {
-    bits.push("The user is in a great mood — match their energy.");
+  if (!s.focusMode) {
+    if (s.mood === "down") {
+      bits.push("The user mentioned feeling down today. Lead with brief empathy before answering.");
+    } else if (s.mood === "great") {
+      bits.push("The user is in a great mood — match their energy.");
+    }
   }
 
   bits.push("Always end your reply with 2-3 short follow-up suggestions as a bullet list starting with the token `[FOLLOW-UPS]` on its own line, each under 6 words.");
