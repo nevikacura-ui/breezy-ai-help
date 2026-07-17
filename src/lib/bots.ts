@@ -5,6 +5,7 @@ import geekNerd from "@/assets/bots/geek-nerd.png";
 import horrorStory from "@/assets/bots/horror-story.png";
 import newsAni from "@/assets/bots/news-ani.png";
 import tuiTui from "@/assets/bots/tui-tui.png";
+import easy from "@/assets/bots/easy.png";
 
 export type BotTier = "free" | "trial" | "pro";
 export type BotCategory =
