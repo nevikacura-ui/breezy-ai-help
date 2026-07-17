@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, MoreHorizontal, RotateCcw, ThumbsUp, ThumbsDown, Send, Square } from "lucide-react";
-import { getBotById, useCustomBots, type Bot } from "@/lib/bots";
+import { getBotById, useCustomBots, useOnboarding, ONBOARDING_CATEGORIES, type Bot } from "@/lib/bots";
 import { sendToAI, useSettings, type Message } from "@/lib/askeasy";
+import { LANG_ENGLISH_NAME } from "@/lib/i18n";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/chat/$botId")({
