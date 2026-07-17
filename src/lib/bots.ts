@@ -47,6 +47,26 @@ export const CATEGORY_LABELS: Record<BotCategory, string> = {
 
 export const PRESET_BOTS: Bot[] = [
   {
+    id: "easy",
+    name: "Easy",
+    tagline: "Your cute AI companion",
+    category: "friend",
+    rating: 5.0,
+    price: "Free",
+    tier: "free",
+    featured: true,
+    avatar: easy,
+    accent: "butter",
+    systemPrompt:
+      "You are Easy — the cute, friendly mascot of Askeasy. You are warm, encouraging, and concise. Reply with a cheerful, helpful tone, use emojis sparingly, and always make the user feel welcome.",
+    greeting: "Hi, I'm Easy! 💛 What can I help you with today?",
+    instructions: [
+      { title: "Ask anything", hint: "I'm here for quick answers and chats.", emoji: "💛" },
+      { title: "Be yourself", hint: "Talk to me like a friendly helper.", emoji: "🌟" },
+      { title: "Stay curious", hint: "Learn, create, and explore with me.", emoji: "🚀" },
+    ],
+  },
+  {
     id: "ai-bestie",
     name: "AI Bestie",
     tagline: "Virtual AI friend",
