@@ -273,7 +273,7 @@ function BotChat() {
           const fd = new FormData();
           fd.append("file", blob, `hold.${type.includes("mp4") ? "mp4" : "webm"}`);
           fd.append("persona", settings.persona);
-          if (/^[a-z]{2}$/.test(settings.language)) fd.append("language", settings.language);
+          if (/^[a-z]{2}$/.test(effectiveLang)) fd.append("language", effectiveLang);
           const res = await fetch("/api/transcribe", { method: "POST", body: fd });
           const data = await res.json().catch(() => ({}));
           if (!res.ok) throw new Error(data?.error || `Transcription failed (${res.status})`);
