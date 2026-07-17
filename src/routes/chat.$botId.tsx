@@ -607,7 +607,9 @@ function BotChat() {
             {uploadingDoc ? <Loader2 className="h-4 w-4 animate-spin" /> : <Paperclip className="h-4 w-4" />}
           </button>
 
+          <input
             ref={inputRef}
+
             value={input}
             onChange={(e) => {
               const v = e.target.value;
