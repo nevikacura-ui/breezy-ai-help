@@ -48,6 +48,8 @@ export type Settings = {
   textScale: number; // 0.9 .. 1.35
   dyslexiaFont: boolean;
   privateMode: boolean;
+  /** Slow or disable mascot / decorative animations for a calmer experience. */
+  reduceMotion: boolean;
   /** Speech synthesis rate (0.7 slow … 1.2 fast) */
   voiceRate: number;
 };
