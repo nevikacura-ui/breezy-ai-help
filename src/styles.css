@@ -129,9 +129,17 @@
 
 @utility font-display {
   font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.03em;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 0.95;
 }
+
+/* Dribbble-matched fluid type scale */
+@utility text-hero    { font-family: var(--font-display); font-weight: 800; font-size: clamp(2rem, 6vw, 2.75rem); letter-spacing: -0.04em; line-height: 0.95; }
+@utility text-title   { font-family: var(--font-display); font-weight: 800; font-size: 1.5rem;   letter-spacing: -0.03em; line-height: 1.05; }
+@utility text-section { font-family: var(--font-display); font-weight: 700; font-size: 1.15rem;  letter-spacing: -0.02em; line-height: 1.1; }
+@utility text-label   { font-family: var(--font-sans);    font-weight: 700; font-size: 0.72rem;  letter-spacing: 0.14em;  text-transform: uppercase; }
+@utility text-meta    { font-family: var(--font-sans);    font-weight: 500; font-size: 0.72rem;  letter-spacing: 0.01em; opacity: 0.65; }
 
 @utility glass {
   background: var(--glass-bg);
