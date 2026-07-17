@@ -26,12 +26,29 @@ type Step = 0 | 1 | 2;
 
 function Onboarding() {
   const nav = useNavigate();
-  const { state, update } = useOnboarding();
+  const { state, update, hydrated } = useOnboarding();
   const { settings, update: updateSettings } = useSettings();
   const [step, setStep] = useState<Step>(0);
-  const [selected, setSelected] = useState<Set<string>>(new Set(state.categories));
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   const [voiceState, setVoiceState] = useState<"idle" | "loading" | "playing" | "error">("idle");
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const restoredRef = useRef(false);
+
+  // Restore persisted step + draft category picks on first hydration.
+  useEffect(() => {
+    if (!hydrated || restoredRef.current) return;
+    restoredRef.current = true;
+    const resumeStep = state.completed ? 0 : (state.step ?? 0);
+    setStep(resumeStep as Step);
+    const draft = state.draftCategories?.length ? state.draftCategories : state.categories;
+    setSelected(new Set(draft));
+  }, [hydrated, state.completed, state.step, state.draftCategories, state.categories]);
+
+  // Persist step + in-progress category picks whenever they change.
+  useEffect(() => {
+    if (!hydrated || !restoredRef.current) return;
+    update({ step, draftCategories: Array.from(selected) });
+  }, [step, selected, hydrated, update]);
 
   useEffect(() => () => {
     if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ""; }
@@ -42,6 +59,7 @@ function Onboarding() {
     if (step === 1) return selected.size >= 2;
     return true;
   }, [step, selected]);
+
 
   const toggle = (id: string) =>
     setSelected((prev) => {
