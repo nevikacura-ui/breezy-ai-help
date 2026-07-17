@@ -349,8 +349,47 @@ function Onboarding() {
               );
             })}
           </div>
+
+          {/* Private Mode toggle */}
+          <button
+            onClick={() => updateSettings({ privateMode: !settings.privateMode })}
+            className="mt-5 flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left transition-all active:scale-[0.99]"
+            style={{
+              background: settings.privateMode
+                ? "color-mix(in oklab, var(--butter) 16%, transparent)"
+                : "color-mix(in oklab, var(--cream) 8%, transparent)",
+              border: settings.privateMode
+                ? "1px solid color-mix(in oklab, var(--butter) 40%, transparent)"
+                : "1px solid color-mix(in oklab, var(--cream) 12%, transparent)",
+            }}
+            aria-pressed={settings.privateMode}
+          >
+            <span className="text-xl leading-none" aria-hidden>🕶️</span>
+            <div className="min-w-0 flex-1">
+              <div className="text-[13.5px] font-semibold">Private Mode</div>
+              <div className="text-[11px] opacity-60">Don't save chats or memory on this device.</div>
+            </div>
+            <span
+              className="relative h-6 w-11 rounded-full transition-colors"
+              style={{
+                background: settings.privateMode
+                  ? "var(--butter)"
+                  : "color-mix(in oklab, var(--cream) 20%, transparent)",
+              }}
+              aria-hidden
+            >
+              <span
+                className="absolute top-0.5 h-5 w-5 rounded-full transition-all"
+                style={{
+                  left: settings.privateMode ? "22px" : "2px",
+                  background: settings.privateMode ? "var(--ink)" : "var(--cream)",
+                }}
+              />
+            </span>
+          </button>
         </section>
       )}
+
 
       {/* Continue button */}
       <div className="fixed inset-x-0 bottom-0 z-30 px-6 pb-6 pt-4"
