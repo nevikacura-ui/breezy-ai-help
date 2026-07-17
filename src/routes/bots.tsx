@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Bell, Settings2, SlidersHorizontal, Star, Plus, Sparkles } from "lucide-react";
+import { Bell, Settings2, SlidersHorizontal, Star, Plus, Sparkles, X } from "lucide-react";
 import {
   PRESET_BOTS,
   CATEGORY_LABELS,
@@ -11,8 +11,43 @@ import {
 } from "@/lib/bots";
 import { SettingsSheet } from "@/components/askeasy/SettingsSheet";
 import { BotAvatar, preloadBotAvatars } from "@/components/askeasy/BotAvatar";
-import { useAuthUser, useSettings, useUsage } from "@/lib/askeasy";
+import { useAuthUser, useSettings, useUsage, PERSONAS, type Persona } from "@/lib/askeasy";
 import easy from "@/assets/bots/easy.png";
+
+const WELCOME_DISMISSED_KEY = "askeasy.welcome.dismissed.v1";
+
+/** Persona × warmth → a short, tuned greeting for the home screen. */
+function personaWelcome(persona: Persona, warmth: number, name: string): { title: string; sub: string; emoji: string } {
+  const hi = name ? `, ${name}` : "";
+  const cozy = warmth >= 75;
+  switch (persona) {
+    case "kid":
+      return {
+        emoji: "🎈",
+        title: cozy ? `Yay${hi}! Easy's here 🎉` : `Hi${hi}! Ready to play?`,
+        sub: cozy ? "Let's explore fun stuff together — pick a buddy below!" : "Pick a chatbot friend and let's start.",
+      };
+    case "teen":
+      return {
+        emoji: "🎧",
+        title: cozy ? `Hey${hi} — good to see you` : `What's up${hi}?`,
+        sub: cozy ? "Your crew of bots is warmed up. Jump in whenever." : "Pick a bot below and go.",
+      };
+    case "elder":
+      return {
+        emoji: "🌿",
+        title: cozy ? `Welcome${hi}. Take your time.` : `Hello${hi}.`,
+        sub: cozy ? "I'll be gentle and clear. Choose any helper below." : "Choose a helper below when you're ready.",
+      };
+    case "adult":
+    default:
+      return {
+        emoji: "☕",
+        title: cozy ? `Welcome back${hi} — glad you're here` : `Welcome${hi}`,
+        sub: cozy ? "Your bots are ready. Pick one and let's get to it." : "Pick a bot below to get started.",
+      };
+  }
+}
 
 export const Route = createFileRoute("/bots")({
   head: () => ({
@@ -36,6 +71,29 @@ function BotsHome() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"top" | "new">("top");
   const [activeCategory, setActiveCategory] = useState<BotCategory>("all");
+  const [welcomeVisible, setWelcomeVisible] = useState(false);
+
+  // Show the personalized welcome the first time the user lands post-onboarding,
+  // and again if their persona changes.
+  useEffect(() => {
+    if (!hydrated || !state.completed) return;
+    try {
+      const seen = localStorage.getItem(WELCOME_DISMISSED_KEY);
+      if (seen !== settings.persona) setWelcomeVisible(true);
+    } catch {
+      setWelcomeVisible(true);
+    }
+  }, [hydrated, state.completed, settings.persona]);
+
+  const dismissWelcome = () => {
+    setWelcomeVisible(false);
+    try { localStorage.setItem(WELCOME_DISMISSED_KEY, settings.persona); } catch { /* ignore */ }
+  };
+
+  const welcome = useMemo(
+    () => personaWelcome(settings.persona, settings.warmth, settings.name),
+    [settings.persona, settings.warmth, settings.name],
+  );
 
   // Redirect through splash if never seen
   if (hydrated && !state.seenSplash) {
@@ -85,6 +143,47 @@ function BotsHome() {
           />
         </button>
       </header>
+
+      {/* Personalized welcome — tuned to persona + warmth */}
+      {welcomeVisible && (
+        <div className="px-5 pt-4">
+          <div
+            className="animate-tile-in relative flex items-start gap-3 overflow-hidden rounded-3xl p-4"
+            style={{
+              background: "color-mix(in oklab, var(--butter) 14%, transparent)",
+              border: "1px solid color-mix(in oklab, var(--butter) 28%, transparent)",
+            }}
+            role="status"
+            aria-live="polite"
+          >
+            <span
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-2xl"
+              style={{ background: "color-mix(in oklab, var(--butter) 25%, transparent)" }}
+              aria-hidden
+            >
+              {welcome.emoji}
+            </span>
+            <div className="min-w-0 flex-1 pr-6">
+              <div className="font-display text-[1.05rem] leading-tight" style={{ color: "var(--cream)" }}>
+                {welcome.title}
+              </div>
+              <p className="mt-1 text-[12.5px] leading-snug opacity-70">{welcome.sub}</p>
+              <p className="mt-1.5 text-[10.5px] font-semibold uppercase tracking-wider opacity-50">
+                {PERSONAS.find((p) => p.id === settings.persona)?.label} tone · warmth {settings.warmth}
+              </p>
+            </div>
+            <button
+              onClick={dismissWelcome}
+              aria-label="Dismiss welcome"
+              className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full opacity-60 transition-opacity hover:opacity-100"
+              style={{ background: "color-mix(in oklab, var(--cream) 10%, transparent)" }}
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
+
 
       {/* Rounded page container — like a phone card */}
       <section
