@@ -91,15 +91,16 @@ function BotsHome() {
           style={{ background: "var(--ink)", color: "var(--cream)" }}
         >
           <div className="max-w-[60%]">
-            <div className="text-[15px] font-semibold leading-tight">AI Chat bots on subscription</div>
+            <div className="text-[15px] font-semibold leading-tight">Chat with Easy & friends</div>
+            <p className="mt-1 text-[12px] opacity-70">Your cute AI companion, always ready.</p>
             <button
               className="mt-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-bold uppercase tracking-wider"
               style={{ background: "var(--lavender)", color: "var(--ink)" }}
             >
-              Unlock $25/year
+              Unlock Pro $25/year
             </button>
           </div>
-          <img src={mascot} alt="Mascot" className="h-24 w-24 object-contain" width={192} height={192} loading="lazy" />
+          <img src={easy} alt="Easy mascot" className="h-24 w-24 object-contain" width={192} height={192} loading="lazy" />
         </div>
 
         {/* Feature icons */}
