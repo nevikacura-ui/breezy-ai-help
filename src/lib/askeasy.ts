@@ -188,7 +188,8 @@ export function useSettings() {
     const root = document.documentElement;
     root.style.setProperty("--text-scale", String(settings.textScale ?? 1));
     root.classList.toggle("font-dyslexic", !!settings.dyslexiaFont);
-  }, [settings.textScale, settings.dyslexiaFont]);
+    root.classList.toggle("reduce-motion", !!settings.reduceMotion);
+  }, [settings.textScale, settings.dyslexiaFont, settings.reduceMotion]);
 
   const update = useCallback(
     (patch: Partial<Settings>) => setSettings((s) => ({ ...s, ...patch })),
