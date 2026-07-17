@@ -7,7 +7,7 @@ import { useCustomBots, type Bot } from "@/lib/bots";
 export const Route = createFileRoute("/bots/new")({
   head: () => ({
     meta: [
-      { title: "Create your own bot — Chation" },
+      { title: "Create your own bot — Askeasy" },
       { name: "description", content: "Create a custom AI chatbot with its own personality, role, and tone." },
     ],
   }),
