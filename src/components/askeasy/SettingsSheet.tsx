@@ -117,10 +117,18 @@ export function SettingsSheet({
 
           {/* About you */}
           <section className="space-y-2">
-            <div className="text-xs uppercase tracking-wider text-muted-foreground">About you</div>
-            <p className="text-[11px] text-muted-foreground">Facts Easy will gently remember. You're in control.</p>
+            <div className="flex items-center justify-between">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">About you</div>
+              <div className="text-[10px] text-muted-foreground tabular-nums">
+                {settings.aboutMe.length}/5 · aim for 3–5
+              </div>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              A few preferences Easy will weave in naturally — never listed back at you.
+            </p>
             <AboutMe items={settings.aboutMe} onChange={(aboutMe) => update({ aboutMe })} />
           </section>
+
 
 
 
