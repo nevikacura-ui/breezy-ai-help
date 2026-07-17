@@ -162,6 +162,8 @@ function BotChat() {
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setThinking(true);
+    bumpActivity();
+    triggerReaction(detectTone(userMsg.content));
     const controller = new AbortController();
     abortRef.current = controller;
     try {
