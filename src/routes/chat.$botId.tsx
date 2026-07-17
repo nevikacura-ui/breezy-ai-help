@@ -499,24 +499,37 @@ function BotChat() {
             onKeyDown={(e) => { bumpActivity(); if (e.key === "Enter") send(); }}
             onFocus={() => { setFocused(true); bumpActivity(); }}
             onBlur={() => setFocused(false)}
-            placeholder={listening ? "Listening…" : "Type your question…"}
+            placeholder={transcribing ? "Transcribing…" : listening ? "Listening… release to send, drag away to cancel" : "Type your question…"}
             className="flex-1 bg-transparent py-2.5 text-[14.5px] outline-none placeholder:opacity-40"
             style={{ color: "var(--cream)" }}
           />
           {/* Hold-to-talk mic */}
           <button
-            onPointerDown={startListening}
-            onPointerUp={stopListening}
-            onPointerLeave={stopListening}
-            aria-label="Hold to talk"
-            className="flex h-11 w-11 items-center justify-center rounded-full"
+            type="button"
+            onPointerDown={(e) => { e.preventDefault(); startListening(); }}
+            onPointerUp={() => stopListening()}
+            onPointerCancel={() => stopListening({ cancel: true })}
+            onPointerLeave={() => { if (listening) stopListening({ cancel: true }); }}
+            onKeyDown={(e) => { if ((e.key === " " || e.key === "Enter") && !e.repeat) { e.preventDefault(); startListening(); } }}
+            onKeyUp={(e) => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); stopListening(); } }}
+            aria-label={listening ? "Recording — release to send, drag away to cancel" : "Hold to talk"}
+            aria-pressed={listening}
+            disabled={transcribing}
+            className="flex h-11 w-11 items-center justify-center rounded-full transition-transform touch-none select-none focus-visible:ring-2 focus-visible:ring-offset-2"
             style={{
-              background: listening ? "var(--butter)" : "color-mix(in oklab, var(--cream) 12%, transparent)",
-              color: listening ? "var(--ink)" : "var(--cream)",
+              background: listening ? "var(--butter)" : transcribing ? "color-mix(in oklab, var(--lavender) 40%, transparent)" : "color-mix(in oklab, var(--cream) 12%, transparent)",
+              color: listening || transcribing ? "var(--ink)" : "var(--cream)",
+              transform: listening ? "scale(1.08)" : "scale(1)",
+              boxShadow: listening ? "0 0 0 6px color-mix(in oklab, var(--butter) 25%, transparent)" : "none",
             }}
           >
-            <Mic className="h-4 w-4" />
+            <Mic className={`h-4 w-4 ${listening ? "animate-pulse" : ""}`} />
           </button>
+          {/* Live status region for screen readers */}
+          <span className="sr-only" aria-live="polite">
+            {listening ? "Recording" : transcribing ? "Transcribing your voice" : ""}
+          </span>
+
           {thinking ? (
             <button
               onClick={stop}
