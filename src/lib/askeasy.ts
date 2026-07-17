@@ -52,6 +52,8 @@ export type Settings = {
   reduceMotion: boolean;
   /** Speech synthesis rate (0.7 slow … 1.2 fast) */
   voiceRate: number;
+  /** Focus / Business mode: terse, structured, no mascot, Ultra model default. */
+  focusMode: boolean;
 };
 
 /** Persona presets applied in one tap during onboarding. */
