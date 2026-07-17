@@ -53,6 +53,19 @@ export function SettingsSheet({
         </SheetHeader>
 
         <div className="mt-8 space-y-8">
+          {/* Streak */}
+          {settings.streakDays > 0 && (
+            <div className="flex items-center gap-3 rounded-2xl border border-border/60 bg-foreground/[0.03] p-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: "var(--send-gradient)" }}>
+                <Flame className="h-5 w-5" style={{ color: "var(--ink)" }} />
+              </span>
+              <div>
+                <div className="text-sm font-semibold text-foreground">{settings.streakDays}-day streak</div>
+                <div className="text-[11.5px] text-muted-foreground">Nice — keep it going tomorrow.</div>
+              </div>
+            </div>
+          )}
+
           {/* Identity */}
           <section className="space-y-2">
             <Label htmlFor="name" className="text-xs uppercase tracking-wider text-muted-foreground">Your name</Label>
@@ -64,6 +77,52 @@ export function SettingsSheet({
             />
             <p className="text-xs text-muted-foreground">Used in your greeting.</p>
           </section>
+
+          {/* Who's chatting (persona) */}
+          <section className="space-y-3">
+            <div className="text-xs uppercase tracking-wider text-muted-foreground">Who's chatting</div>
+            <div className="grid grid-cols-2 gap-1.5">
+              {PERSONAS.map((p) => {
+                const active = settings.persona === p.id;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => update({ persona: p.id, textScale: p.id === "elder" ? Math.max(settings.textScale, 1.2) : settings.textScale })}
+                    className={
+                      "flex items-center gap-2 rounded-2xl border px-3 py-2.5 text-left text-[13px] transition " +
+                      (active ? "border-foreground bg-foreground/[0.06]" : "border-border/60 hover:bg-foreground/[0.04]")
+                    }
+                  >
+                    <span className="text-lg leading-none">{p.emoji}</span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-medium">{p.label}</span>
+                      <span className="block truncate text-[10.5px] text-muted-foreground">{p.hint}</span>
+                    </span>
+                    {active && <Check className="h-3.5 w-3.5" />}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* Warmth slider */}
+          <section className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">Personality warmth</div>
+              <div className="text-[11px] text-muted-foreground">{warmthLabel(settings.warmth)}</div>
+            </div>
+            <Slider min={0} max={100} step={5} value={[settings.warmth]} onValueChange={(v) => update({ warmth: v[0] })} />
+            <div className="flex justify-between text-[10px] text-muted-foreground"><span>Professional</span><span>Playful</span></div>
+          </section>
+
+          {/* About you */}
+          <section className="space-y-2">
+            <div className="text-xs uppercase tracking-wider text-muted-foreground">About you</div>
+            <p className="text-[11px] text-muted-foreground">Facts Easy will gently remember. You're in control.</p>
+            <AboutMe items={settings.aboutMe} onChange={(aboutMe) => update({ aboutMe })} />
+          </section>
+
+
 
           {/* Language */}
           <section className="space-y-3">
