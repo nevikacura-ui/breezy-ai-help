@@ -17,10 +17,10 @@ import mascot from "@/assets/bots/mascot.png";
 export const Route = createFileRoute("/bots")({
   head: () => ({
     meta: [
-      { title: "Chation — Personalized AI bots" },
-      { name: "description", content: "Browse a collection of personalized AI chatbots. Cook, code, learn, storytell — pick your bot and start a conversation." },
-      { property: "og:title", content: "Chation — Personalized AI bots" },
-      { property: "og:description", content: "Browse a collection of personalized AI chatbots — one for every mood and task." },
+      { title: "Askeasy — Personalized AI bots" },
+      { name: "description", content: "Browse a collection of personalized AI chatbots led by Easy, your cute AI companion. Cook, code, learn, storytell — pick your bot and start a conversation." },
+      { property: "og:title", content: "Askeasy — Personalized AI bots" },
+      { property: "og:description", content: "Browse a collection of personalized AI chatbots led by Easy, your cute AI companion." },
     ],
   }),
   component: BotsHome,
