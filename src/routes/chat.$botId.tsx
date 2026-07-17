@@ -263,7 +263,28 @@ function BotChat() {
     );
   }
 
-  const mascotClass = listening ? "mascot-listen" : (thinking || input.length > 0 ? "" : "mascot-idle");
+  const mascotClass = listening
+    ? "mascot-listen"
+    : thinking
+      ? "mascot-curious"
+      : reaction === "excited"
+        ? "mascot-excited"
+        : reaction === "curious"
+          ? "mascot-curious"
+          : reaction === "comfort"
+            ? "mascot-comfort"
+            : (focused || input.length > 0)
+              ? "mascot-tilt"
+              : napping
+                ? "mascot-nap"
+                : "mascot-idle";
+  const Mascot = ({ size = 32 }: { size?: number }) => (
+    <span key={`${reactionKey}-${mascotClass}`} className={`mascot-wrap ${mascotClass} ${napping ? "napping" : ""}`}>
+      <BotAvatar bot={bot} size={size} eager emojiSize={Math.round(size * 0.47)} />
+      <span className="mascot-eyelid" aria-hidden />
+      {napping && <span className="mascot-zzz" aria-hidden>z</span>}
+    </span>
+  );
   const suggestedQuickChips = buildFallbackChips({
     persona: settings.persona,
     warmth: settings.warmth,
