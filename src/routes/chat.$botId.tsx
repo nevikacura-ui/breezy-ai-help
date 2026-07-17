@@ -311,9 +311,7 @@ function BotChat() {
           Bots
         </button>
         <div className="flex items-center gap-2">
-          <div className={mascotClass}>
-            <BotAvatar bot={bot} size={32} eager emojiSize={15} />
-          </div>
+          <Mascot size={32} />
           <div className="font-display text-[1rem]">{bot.name}</div>
           {settings.privateMode && <EyeOff className="h-3.5 w-3.5 opacity-60" aria-label="Private" />}
         </div>
