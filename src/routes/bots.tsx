@@ -144,6 +144,47 @@ function BotsHome() {
         </button>
       </header>
 
+      {/* Personalized welcome — tuned to persona + warmth */}
+      {welcomeVisible && (
+        <div className="px-5 pt-4">
+          <div
+            className="animate-tile-in relative flex items-start gap-3 overflow-hidden rounded-3xl p-4"
+            style={{
+              background: "color-mix(in oklab, var(--butter) 14%, transparent)",
+              border: "1px solid color-mix(in oklab, var(--butter) 28%, transparent)",
+            }}
+            role="status"
+            aria-live="polite"
+          >
+            <span
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-2xl"
+              style={{ background: "color-mix(in oklab, var(--butter) 25%, transparent)" }}
+              aria-hidden
+            >
+              {welcome.emoji}
+            </span>
+            <div className="min-w-0 flex-1 pr-6">
+              <div className="font-display text-[1.05rem] leading-tight" style={{ color: "var(--cream)" }}>
+                {welcome.title}
+              </div>
+              <p className="mt-1 text-[12.5px] leading-snug opacity-70">{welcome.sub}</p>
+              <p className="mt-1.5 text-[10.5px] font-semibold uppercase tracking-wider opacity-50">
+                {PERSONAS.find((p) => p.id === settings.persona)?.label} tone · warmth {settings.warmth}
+              </p>
+            </div>
+            <button
+              onClick={dismissWelcome}
+              aria-label="Dismiss welcome"
+              className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full opacity-60 transition-opacity hover:opacity-100"
+              style={{ background: "color-mix(in oklab, var(--cream) 10%, transparent)" }}
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
+
+
       {/* Rounded page container — like a phone card */}
       <section
         className="mx-3 mt-5 rounded-[2rem] px-4 pb-6 pt-5"
