@@ -42,15 +42,15 @@ function Splash() {
 
       <div className="animate-fade-up relative flex flex-col items-center">
         <div
-          className="relative flex h-40 w-40 items-center justify-center rounded-[2.5rem]"
-          style={{ background: "linear-gradient(135deg, var(--butter), #f7c948)" }}
+          className="relative flex h-44 w-44 items-center justify-center rounded-[2.5rem]"
+          style={{ background: "linear-gradient(135deg, #c4a8e0, #9b7ed1)" }}
         >
           <img
             src={easy}
             alt="Easy, the cute Askeasy mascot"
-            className="animate-breathe h-36 w-36 object-contain drop-shadow-[0_20px_30px_rgba(0,0,0,0.35)]"
-            width={288}
-            height={288}
+            className="animate-breathe h-40 w-40 object-contain drop-shadow-[0_20px_30px_rgba(0,0,0,0.35)]"
+            width={320}
+            height={320}
           />
         </div>
         <h1 className="mt-8 font-display text-[2.6rem] leading-none tracking-tight">Askeasy</h1>
