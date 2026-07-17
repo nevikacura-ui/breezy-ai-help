@@ -410,8 +410,10 @@ function BotChat() {
           <input
             ref={inputRef}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") send(); }}
+            onChange={(e) => { setInput(e.target.value); bumpActivity(); }}
+            onKeyDown={(e) => { bumpActivity(); if (e.key === "Enter") send(); }}
+            onFocus={() => { setFocused(true); bumpActivity(); }}
+            onBlur={() => setFocused(false)}
             placeholder={listening ? "Listening…" : "Type your question…"}
             className="flex-1 bg-transparent py-2.5 text-[14.5px] outline-none placeholder:opacity-40"
             style={{ color: "var(--cream)" }}
