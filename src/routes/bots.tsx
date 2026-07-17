@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Bell, Grid3x3, SlidersHorizontal, Star, Plus, Sparkles } from "lucide-react";
 import {
   PRESET_BOTS,
@@ -11,6 +11,7 @@ import {
 } from "@/lib/bots";
 import { BottomNav } from "@/components/askeasy/BottomNav";
 import { SettingsSheet } from "@/components/askeasy/SettingsSheet";
+import { BotAvatar, preloadBotAvatars } from "@/components/askeasy/BotAvatar";
 import { useAuthUser, useSettings, useUsage } from "@/lib/askeasy";
 import easy from "@/assets/bots/easy.png";
 
