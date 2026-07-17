@@ -112,8 +112,11 @@ function BotChat() {
       bits.push(`The user is especially interested in: ${categoryLabels.join(", ")}. Weave in when relevant.`);
     }
     bits.push(`Reply in ${langName} unless the user explicitly asks otherwise.`);
+    const docCtx = buildDocContext(docs);
+    if (docCtx) bits.push(docCtx);
     return bits.join("\n\n");
-  }, [bot, settings, categoryLabels, langName]);
+  }, [bot, settings, categoryLabels, langName, docs]);
+
 
   // Streak + weekly mood check-in on mount
   useEffect(() => {
