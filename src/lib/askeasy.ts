@@ -54,6 +54,8 @@ export type Settings = {
   voiceRate: number;
   /** Focus / Business mode: terse, structured, no mascot, Ultra model default. */
   focusMode: boolean;
+  /** Web search + citations. Only applied when focusMode is on. */
+  webSearch: boolean;
   /** Per-bot language override. Falls back to `language` when unset. */
   botLanguages: Record<string, LangCode>;
 };
@@ -123,6 +125,7 @@ const DEFAULT_SETTINGS: Settings = {
   reduceMotion: false,
   voiceRate: 1,
   focusMode: false,
+  webSearch: false,
   botLanguages: {},
 };
 
@@ -400,6 +403,7 @@ export async function sendToAI(args: {
       model: args.settings.openRouterModel,
       language: args.settings.language,
       system: args.system,
+      webSearch: !!args.settings.webSearch && !!args.settings.focusMode,
       messages: args.messages.map((m) => ({ role: m.role, content: m.content })),
     }),
   });
@@ -408,8 +412,13 @@ export async function sendToAI(args: {
     const err = await res.text().catch(() => "");
     throw new Error(`Chat failed (${res.status}): ${err.slice(0, 200)}`);
   }
-  const data = (await res.json()) as { reply?: string };
-  return data.reply ?? "";
+  const data = (await res.json()) as { reply?: string; citations?: { title?: string; url: string }[] };
+  const cites = data.citations ?? [];
+  if (cites.length === 0) return data.reply ?? "";
+  const sourcesBlock =
+    "\n\n**Sources**\n" +
+    cites.slice(0, 6).map((c, i) => `${i + 1}. [${c.title || c.url}](${c.url})`).join("\n");
+  return (data.reply ?? "") + sourcesBlock;
 }
 
 

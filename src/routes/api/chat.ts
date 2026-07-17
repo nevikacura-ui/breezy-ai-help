@@ -9,7 +9,7 @@ const MODEL_MAP: Record<string, { model: string; tier: "free" | "pro" }> = {
 };
 
 type ChatMessage = { role: "user" | "assistant" | "system"; content: string };
-type ChatRequestBody = { messages?: ChatMessage[]; model?: string; language?: string; system?: string };
+type ChatRequestBody = { messages?: ChatMessage[]; model?: string; language?: string; system?: string; webSearch?: boolean };
 
 
 const LANG_NAMES: Record<string, string> = {
@@ -119,6 +119,15 @@ export const Route = createFileRoute("/api/chat")({
           }
         }
 
+        const useWebSearch = !!body.webSearch;
+        const upstreamBody: Record<string, unknown> = {
+          model: mapped.model,
+          messages: [sys, ...history],
+        };
+        if (useWebSearch) {
+          upstreamBody.plugins = [{ id: "web", max_results: 5 }];
+        }
+
         const upstream = await fetch("https://openrouter.ai/api/v1/chat/completions", {
           method: "POST",
           headers: {
@@ -127,10 +136,7 @@ export const Route = createFileRoute("/api/chat")({
             "HTTP-Referer": "https://askeasy.lovable.app",
             "X-Title": "AskEasy",
           },
-          body: JSON.stringify({
-            model: mapped.model,
-            messages: [sys, ...history],
-          }),
+          body: JSON.stringify(upstreamBody),
         });
 
         if (!upstream.ok) {
@@ -141,11 +147,29 @@ export const Route = createFileRoute("/api/chat")({
           );
         }
 
-        const data = (await upstream.json()) as { choices?: { message?: { content?: string } }[] };
-        const reply = data.choices?.[0]?.message?.content ?? "";
+        type Annotation = { type?: string; url_citation?: { url?: string; title?: string } };
+        const data = (await upstream.json()) as {
+          choices?: { message?: { content?: string; annotations?: Annotation[] } }[];
+          citations?: (string | { url?: string; title?: string })[];
+        };
+        const msg = data.choices?.[0]?.message;
+        const reply = msg?.content ?? "";
+
+        // Collect citations from annotations + top-level citations (dedup by url).
+        const citations: { title?: string; url: string }[] = [];
+        const seen = new Set<string>();
+        for (const a of msg?.annotations ?? []) {
+          const c = a?.url_citation;
+          if (c?.url && !seen.has(c.url)) { seen.add(c.url); citations.push({ url: c.url, title: c.title }); }
+        }
+        for (const c of data.citations ?? []) {
+          const url = typeof c === "string" ? c : c?.url;
+          const title = typeof c === "string" ? undefined : c?.title;
+          if (url && !seen.has(url)) { seen.add(url); citations.push({ url, title }); }
+        }
 
         return new Response(
-          JSON.stringify({ reply, model: mapped.model, tier: mapped.tier }),
+          JSON.stringify({ reply, model: mapped.model, tier: mapped.tier, citations }),
           { headers: { "Content-Type": "application/json" } },
         );
       },

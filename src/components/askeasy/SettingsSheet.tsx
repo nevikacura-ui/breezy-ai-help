@@ -325,6 +325,17 @@ export function SettingsSheet({
                 <p className="mt-0.5 text-[11.5px] leading-snug text-muted-foreground">
                   Terse, structured answers for serious work. Hides mascot, drops emoji, prefers headings, bullets, and tables.
                 </p>
+                {settings.focusMode && (
+                  <div className="mt-3 flex items-center justify-between gap-2 border-t border-border/60 pt-2.5">
+                    <div className="min-w-0">
+                      <div className="text-[13px] font-medium text-foreground">Web search + citations</div>
+                      <p className="text-[11px] leading-snug text-muted-foreground">
+                        Fetch live sources and append a numbered Sources list to answers.
+                      </p>
+                    </div>
+                    <Switch checked={!!settings.webSearch} onCheckedChange={(v) => update({ webSearch: v })} />
+                  </div>
+                )}
               </div>
             </div>
           </section>
