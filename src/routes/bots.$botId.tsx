@@ -7,7 +7,7 @@ export const Route = createFileRoute("/bots/$botId")({
     const bot = PRESET_BOTS.find((b) => b.id === params.botId);
     return {
       meta: [
-        { title: bot ? `${bot.name} — Chation` : "Bot — Chation" },
+        { title: bot ? `${bot.name} — Askeasy` : "Bot — Askeasy" },
         { name: "description", content: bot?.tagline ?? "Personalized AI chatbot" },
       ],
     };

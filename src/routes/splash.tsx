@@ -1,13 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useOnboarding } from "@/lib/bots";
-import mascot from "@/assets/bots/mascot.png";
+import easy from "@/assets/bots/easy.png";
 
 export const Route = createFileRoute("/splash")({
   head: () => ({
     meta: [
-      { title: "AskEasy — Personalized AI chatbots" },
-      { name: "description", content: "Discover a world of personalized AI companions. Chat, learn, cook, code — every bot tuned for how you talk." },
+      { title: "Askeasy — Meet Easy" },
+      { name: "description", content: "Meet Easy, your cute AI companion. Ask anything, learn, create, and chat — the easy way." },
     ],
   }),
   component: Splash,
@@ -46,16 +46,16 @@ function Splash() {
           style={{ background: "linear-gradient(135deg, var(--butter), #f7c948)" }}
         >
           <img
-            src={mascot}
-            alt="AskEasy mascot"
+            src={easy}
+            alt="Easy, the cute Askeasy mascot"
             className="animate-breathe h-36 w-36 object-contain drop-shadow-[0_20px_30px_rgba(0,0,0,0.35)]"
             width={288}
             height={288}
           />
         </div>
-        <h1 className="mt-8 font-display text-[2.6rem] leading-none tracking-tight">AskEasy</h1>
+        <h1 className="mt-8 font-display text-[2.6rem] leading-none tracking-tight">Askeasy</h1>
         <p className="mt-3 max-w-[18rem] text-center text-sm opacity-70">
-          Your personal collection of AI companions.
+          Meet Easy — your personal AI companion.
         </p>
       </div>
 
