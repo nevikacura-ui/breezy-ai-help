@@ -71,6 +71,29 @@ function BotsHome() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"top" | "new">("top");
   const [activeCategory, setActiveCategory] = useState<BotCategory>("all");
+  const [welcomeVisible, setWelcomeVisible] = useState(false);
+
+  // Show the personalized welcome the first time the user lands post-onboarding,
+  // and again if their persona changes.
+  useEffect(() => {
+    if (!hydrated || !state.completed) return;
+    try {
+      const seen = localStorage.getItem(WELCOME_DISMISSED_KEY);
+      if (seen !== settings.persona) setWelcomeVisible(true);
+    } catch {
+      setWelcomeVisible(true);
+    }
+  }, [hydrated, state.completed, settings.persona]);
+
+  const dismissWelcome = () => {
+    setWelcomeVisible(false);
+    try { localStorage.setItem(WELCOME_DISMISSED_KEY, settings.persona); } catch { /* ignore */ }
+  };
+
+  const welcome = useMemo(
+    () => personaWelcome(settings.persona, settings.warmth, settings.name),
+    [settings.persona, settings.warmth, settings.name],
+  );
 
   // Redirect through splash if never seen
   if (hydrated && !state.seenSplash) {
