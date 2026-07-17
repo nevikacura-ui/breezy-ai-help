@@ -138,8 +138,8 @@ export function SettingsSheet({
           {/* Language */}
           <section className="space-y-3">
             <div className="flex items-center justify-between">
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">Reply language</div>
-              {settings.language !== "en" && !isProEffective && (
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">Reply language (this bot)</div>
+              {currentLang !== "en" && !isProEffective && (
                 <div className={"flex items-center gap-1 text-[11px] font-medium " + (inTrial ? "text-foreground/80" : "text-destructive")}>
                   <Clock className="h-3 w-3" />
                   {inTrial ? `Trial · ${daysLeft} day${daysLeft === 1 ? "" : "s"} left` : "Trial ended"}
@@ -148,7 +148,7 @@ export function SettingsSheet({
             </div>
             <div className="grid grid-cols-2 gap-1.5">
               {LANGUAGES.map((l) => {
-                const active = settings.language === l.code;
+                const active = currentLang === l.code;
                 const locked = l.code !== "en" && !isProEffective && !inTrial;
                 return (
                   <button
