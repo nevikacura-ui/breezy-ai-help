@@ -429,6 +429,7 @@ function BotChat() {
           setSettingsOpen(false);
         }}
         onSelectLanguage={(code) => update({ botLanguages: { ...(settings.botLanguages || {}), [bot.id]: code } })}
+        activeLanguage={effectiveLang}
       />
 
       {/* Mood check-in */}
