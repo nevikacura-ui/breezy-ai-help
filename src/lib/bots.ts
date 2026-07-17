@@ -261,6 +261,8 @@ export type OnboardingState = {
   seenSplash: boolean;
   completed: boolean;
   categories: string[]; // e.g. ["love","learn","music",...]
+  step: 0 | 1 | 2;
+  draftCategories: string[];
 };
 
 export const ONBOARDING_KEY = "askeasy.onboarding.v1";
@@ -269,6 +271,8 @@ const ONBOARDING_DEFAULT: OnboardingState = {
   seenSplash: false,
   completed: false,
   categories: [],
+  step: 0,
+  draftCategories: [],
 };
 
 export const ONBOARDING_CATEGORIES: { id: string; label: string; emoji: string; tone: "butter" | "lavender" | "cream" | "pink" | "mint" | "peach" }[] = [
