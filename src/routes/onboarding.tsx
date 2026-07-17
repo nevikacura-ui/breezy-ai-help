@@ -1,9 +1,16 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { ChevronLeft } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ChevronLeft, Volume2, Loader2, Square } from "lucide-react";
 import { ONBOARDING_CATEGORIES, useOnboarding } from "@/lib/bots";
 import { LANGUAGES, type LangCode } from "@/lib/i18n";
 import { useSettings, PERSONAS, PERSONA_PRESETS, type Persona } from "@/lib/askeasy";
+
+const VOICE_SAMPLES: Record<Persona, { text: string; instructions: string }> = {
+  kid:   { text: "Hi there, superstar! I'm Easy — your friendly buddy. Ready to have some fun?", instructions: "Speak like a cheerful, gentle friend for a young child. Warm, playful, and clear. Smile through your voice." },
+  teen:  { text: "Yo! I'm Easy — your quick-thinking sidekick. Let's make cool stuff together.", instructions: "Speak casually and upbeat, like a friendly older sibling. Confident, quick, and fun." },
+  adult: { text: "Hello, I'm Easy — your everyday assistant. Ask me anything, the easy way.", instructions: "Speak warmly and naturally, like a calm, capable helper. Clear and friendly." },
+  elder: { text: "Hello there. I'm Easy — your patient helper. Take your time; I'm right here.", instructions: "Speak slowly, warmly, and clearly, with gentle pacing and kind reassurance." },
+};
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({
