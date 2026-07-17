@@ -12,7 +12,7 @@ import {
 import { BottomNav } from "@/components/askeasy/BottomNav";
 import { SettingsSheet } from "@/components/askeasy/SettingsSheet";
 import { useAuthUser, useSettings, useUsage } from "@/lib/askeasy";
-import mascot from "@/assets/bots/mascot.png";
+import easy from "@/assets/bots/easy.png";
 
 export const Route = createFileRoute("/bots")({
   head: () => ({
