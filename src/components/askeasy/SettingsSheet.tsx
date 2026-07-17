@@ -281,11 +281,40 @@ export function SettingsSheet({
             )}
           </section>
 
+          {/* Accessibility */}
+          <section className="space-y-3">
+            <div className="text-xs uppercase tracking-wider text-muted-foreground">Accessibility</div>
+            <div className="space-y-2 rounded-2xl border border-border/60 p-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm"><Type className="h-4 w-4" /> Text size</div>
+                <div className="text-[11px] text-muted-foreground tabular-nums">{Math.round(settings.textScale * 100)}%</div>
+              </div>
+              <Slider min={0.9} max={1.35} step={0.05} value={[settings.textScale]} onValueChange={(v) => update({ textScale: v[0] })} />
+            </div>
+            <Row
+              label="Dyslexia-friendly font"
+              hint="More even letter shapes and spacing."
+              checked={settings.dyslexiaFont}
+              onChange={(v) => update({ dyslexiaFont: v })}
+            />
+          </section>
+
+          {/* Privacy */}
+          <section className="space-y-3">
+            <div className="text-xs uppercase tracking-wider text-muted-foreground">Privacy</div>
+            <Row
+              label={<span className="flex items-center gap-1.5"><EyeOff className="h-4 w-4" /> Private mode</span>}
+              hint="Don't save this conversation locally."
+              checked={settings.privateMode}
+              onChange={(v) => update({ privateMode: v })}
+            />
+          </section>
+
           {/* Voice */}
           <section>
             <Row
               label="Voice input"
-              hint="Long-press the ring to talk."
+              hint="Long-press the mic to talk."
               checked={settings.voiceEnabled}
               onChange={(v) => update({ voiceEnabled: v })}
             />
@@ -299,6 +328,42 @@ export function SettingsSheet({
     </Sheet>
   );
 }
+
+function warmthLabel(v: number): string {
+  if (v < 25) return "Professional";
+  if (v < 55) return "Warm";
+  if (v < 80) return "Friendly";
+  return "Playful";
+}
+
+function AboutMe({ items, onChange }: { items: string[]; onChange: (v: string[]) => void }) {
+  const [draft, setDraft] = useState("");
+  const add = () => {
+    const v = draft.trim();
+    if (!v) return;
+    onChange([...items, v].slice(0, 8));
+    setDraft("");
+  };
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap gap-1.5">
+        {items.map((f, i) => (
+          <span key={i} className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-foreground/[0.04] px-2.5 py-1 text-[12px]">
+            {f}
+            <button onClick={() => onChange(items.filter((_, j) => j !== i))} aria-label="Remove"><X className="h-3 w-3" /></button>
+          </span>
+        ))}
+        {items.length === 0 && <span className="text-[11px] text-muted-foreground">No facts yet.</span>}
+      </div>
+      <div className="flex gap-1.5">
+        <Input value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(); } }} placeholder="e.g. loves cricket" className="h-9 text-[13px]" />
+        <Button size="sm" variant="outline" onClick={add}><Plus className="h-3.5 w-3.5" /></Button>
+      </div>
+    </div>
+  );
+}
+
+
 
 function UsageTile({ icon, label, used, of }: { icon: React.ReactNode; label: string; used: number; of: number }) {
   const empty = used >= of;
