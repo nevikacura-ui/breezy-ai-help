@@ -123,6 +123,7 @@ const DEFAULT_SETTINGS: Settings = {
   reduceMotion: false,
   voiceRate: 1,
   focusMode: false,
+  botLanguages: {},
 };
 
 
