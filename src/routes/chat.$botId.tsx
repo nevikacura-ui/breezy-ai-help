@@ -504,10 +504,10 @@ function BotChat() {
             onKeyDown={(e) => { bumpActivity(); if (e.key === "Enter") send(); }}
             onFocus={() => { setFocused(true); bumpActivity(); }}
             onBlur={() => setFocused(false)}
-            placeholder={transcribing ? "…" : listening ? "…" : t(settings.language, "compose.placeholder")}
+            placeholder={transcribing ? "…" : listening ? "…" : t(effectiveLang, "compose.placeholder")}
             className="flex-1 bg-transparent py-2.5 text-[14.5px] outline-none placeholder:opacity-40"
             style={{ color: "var(--cream)" }}
-            dir={isRTL(settings.language) ? "rtl" : "ltr"}
+            dir={isRTL(effectiveLang) ? "rtl" : "ltr"}
           />
           {/* Hold-to-talk mic */}
           <button
