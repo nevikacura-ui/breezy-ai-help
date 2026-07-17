@@ -5,8 +5,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-display: "Space Grotesk", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Figtree", "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: "Outfit", "Figtree", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Instrument Serif", ui-serif, Georgia, serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -33,87 +33,68 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-butter: var(--butter);
+  --color-lavender: var(--lavender);
+  --color-cream: var(--cream);
+  --color-ink: var(--ink);
 }
 
+/* Ink & Butter — cream/ink surfaces with butter-yellow primary + lavender accent */
 :root {
-  --radius: 1.25rem;
-  --background: oklch(0.985 0.003 250);
-  --foreground: oklch(0.18 0.02 260);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.02 260);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.02 260);
-  --primary: oklch(0.22 0.03 265);
-  --primary-foreground: oklch(0.98 0.003 250);
-  --secondary: oklch(0.96 0.005 250);
-  --secondary-foreground: oklch(0.22 0.03 265);
-  --muted: oklch(0.955 0.005 250);
-  --muted-foreground: oklch(0.52 0.02 260);
-  --accent: oklch(0.94 0.02 280);
-  --accent-foreground: oklch(0.22 0.03 265);
-  --destructive: oklch(0.6 0.22 27);
-  --border: oklch(0.86 0.012 260);
-  --input: oklch(0.86 0.012 260);
-  --ring: oklch(0.7 0.05 280);
+  --radius: 1.5rem;
 
-  --glass-bg: color-mix(in oklab, white 78%, transparent);
-  --glass-border: color-mix(in oklab, oklch(0.55 0.02 260) 22%, transparent);
-  --send-gradient: linear-gradient(135deg, oklch(0.85 0.08 300), oklch(0.75 0.14 290));
-  --page-gradient: radial-gradient(120% 80% at 50% 0%, oklch(0.97 0.015 260) 0%, oklch(0.985 0.003 250) 60%);
+  --cream: #f5f1e8;
+  --ink: #0f0f10;
+  --butter: #ffe066;
+  --lavender: #c9a0dc;
+
+  --background: #f5f1e8;
+  --foreground: #0f0f10;
+  --card: #ffffff;
+  --card-foreground: #0f0f10;
+  --popover: #ffffff;
+  --popover-foreground: #0f0f10;
+  --primary: #ffe066;
+  --primary-foreground: #0f0f10;
+  --secondary: #c9a0dc;
+  --secondary-foreground: #0f0f10;
+  --muted: #ede8dc;
+  --muted-foreground: #6b6a63;
+  --accent: #c9a0dc;
+  --accent-foreground: #0f0f10;
+  --destructive: oklch(0.6 0.22 27);
+  --border: color-mix(in oklab, #0f0f10 12%, transparent);
+  --input: color-mix(in oklab, #0f0f10 14%, transparent);
+  --ring: #ffe066;
+
+  --glass-bg: color-mix(in oklab, #ffffff 82%, transparent);
+  --glass-border: color-mix(in oklab, #0f0f10 12%, transparent);
+  --send-gradient: linear-gradient(135deg, #ffe066, #f7c948);
+  --page-gradient: radial-gradient(120% 80% at 50% 0%, #faf7ee 0%, #f5f1e8 60%);
 }
 
 .dark {
-  --background: oklch(0.04 0.005 260);
-  --foreground: oklch(0.98 0.003 250);
-  --card: oklch(0.09 0.008 260);
-  --card-foreground: oklch(0.98 0.003 250);
-  --popover: oklch(0.09 0.008 260);
-  --popover-foreground: oklch(0.98 0.003 250);
-  --primary: oklch(0.98 0.003 250);
-  --primary-foreground: oklch(0.09 0.008 260);
-  --secondary: oklch(0.14 0.01 260);
-  --secondary-foreground: oklch(0.98 0.003 250);
-  --muted: oklch(0.14 0.01 260);
-  --muted-foreground: oklch(0.68 0.02 260);
-  --accent: oklch(0.18 0.02 280);
-  --accent-foreground: oklch(0.98 0.003 250);
-  --border: oklch(1 0 0 / 8%);
-  --input: oklch(1 0 0 / 10%);
-  --ring: oklch(0.55 0.06 280);
+  --background: #0f0f10;
+  --foreground: #f5f1e8;
+  --card: #1a1a1c;
+  --card-foreground: #f5f1e8;
+  --popover: #1a1a1c;
+  --popover-foreground: #f5f1e8;
+  --primary: #ffe066;
+  --primary-foreground: #0f0f10;
+  --secondary: #c9a0dc;
+  --secondary-foreground: #0f0f10;
+  --muted: #1a1a1c;
+  --muted-foreground: color-mix(in oklab, #f5f1e8 55%, transparent);
+  --accent: #c9a0dc;
+  --accent-foreground: #0f0f10;
+  --border: color-mix(in oklab, #f5f1e8 12%, transparent);
+  --input: color-mix(in oklab, #f5f1e8 14%, transparent);
+  --ring: #ffe066;
 
-  --glass-bg: color-mix(in oklab, oklch(0.08 0.006 260) 72%, transparent);
-  --glass-border: color-mix(in oklab, white 6%, transparent);
-  --page-gradient: radial-gradient(120% 80% at 50% 0%, oklch(0.09 0.015 265) 0%, oklch(0.03 0.005 260) 70%);
-}
-
-/* India Mode — tricolor theme (crisp white base, saffron primary, India green accent) */
-.india {
-  --background: oklch(0.99 0.002 90);
-  --foreground: oklch(0.18 0.03 265);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.03 265);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.03 265);
-  --primary: oklch(0.72 0.19 55);          /* saffron #FF9933 */
-  --primary-foreground: oklch(0.99 0.002 90);
-  --secondary: oklch(0.6 0.17 148);         /* india green #138808 */
-  --secondary-foreground: oklch(0.99 0.002 90);
-  --muted: oklch(0.965 0.008 80);
-  --muted-foreground: oklch(0.48 0.04 260);
-  --accent: oklch(0.92 0.06 55);            /* soft saffron tint */
-  --accent-foreground: oklch(0.22 0.03 265);
-  --destructive: oklch(0.6 0.22 27);
-  --border: oklch(0.88 0.02 80);
-  --input: oklch(0.88 0.02 80);
-  --ring: oklch(0.72 0.19 55);
-
-  --glass-bg: color-mix(in oklab, white 82%, transparent);
-  --glass-border: color-mix(in oklab, oklch(0.72 0.19 55) 22%, transparent);
-  --send-gradient: linear-gradient(135deg, oklch(0.72 0.19 55), oklch(0.6 0.17 148));
-  --page-gradient:
-    radial-gradient(60% 40% at 50% 0%, color-mix(in oklab, oklch(0.72 0.19 55) 18%, transparent) 0%, transparent 70%),
-    radial-gradient(60% 40% at 50% 100%, color-mix(in oklab, oklch(0.6 0.17 148) 16%, transparent) 0%, transparent 70%),
-    white;
+  --glass-bg: color-mix(in oklab, #1a1a1c 78%, transparent);
+  --glass-border: color-mix(in oklab, #f5f1e8 10%, transparent);
+  --page-gradient: radial-gradient(120% 80% at 50% 0%, #17171a 0%, #0a0a0b 70%);
 }
 
 @layer base {
@@ -124,21 +105,15 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
-    font-feature-settings: "ss01", "cv11";
+    font-feature-settings: "ss01";
   }
-  /* Seamless theme transitions — colors, borders, shadows morph smoothly */
-  html {
-    transition: background-color 500ms ease, color 500ms ease;
-  }
-  body {
-    transition: background 600ms ease, color 500ms ease;
-  }
+  html { transition: background-color 500ms ease, color 500ms ease; }
+  body { transition: background 600ms ease, color 500ms ease; }
   *, *::before, *::after {
     transition-property: background-color, border-color, color, fill, stroke, box-shadow;
     transition-duration: 400ms;
     transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
   }
-  /* Respect motion preferences */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition-duration: 0ms !important; }
   }
@@ -146,8 +121,8 @@
 
 @utility font-display {
   font-family: var(--font-display);
-  font-weight: 400;
-  letter-spacing: -0.02em;
+  font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
 @utility glass {
@@ -157,14 +132,6 @@
   border: 1px solid var(--glass-border);
 }
 
-@keyframes orb-float {
-  0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
-  50% { transform: translateY(-10px) rotate(4deg) scale(1.02); }
-}
-@keyframes orb-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
 @keyframes fade-up {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
@@ -173,57 +140,25 @@
   from { opacity: 0; }
   to { opacity: 1; }
 }
-@keyframes pulse-soft {
-  0%, 100% { opacity: 0.6; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.08); }
-}
 @keyframes bubble-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
-@keyframes bubble-pulse {
-  0%, 100% { opacity: 0.85; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.12); }
-}
-@keyframes shimmer {
-  0% { background-position: 200% center; }
-  100% { background-position: -200% center; }
-}
 @keyframes breathe {
-  0%, 100% { opacity: 0.85; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.03); }
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
 }
-@keyframes orb-spin-reverse {
-  from { transform: rotate(360deg); }
-  to { transform: rotate(0deg); }
+@keyframes tile-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
-@keyframes orb-core-pulse {
-  0%, 100% { opacity: 0.8; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.08); }
-}
-
-@utility animate-orb-float { animation: orb-float 8s ease-in-out infinite; }
-@utility animate-orb-spin { animation: orb-spin 40s linear infinite; }
-@utility animate-fade-up { animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both; }
-@utility animate-fade-in { animation: fade-in 1.2s cubic-bezier(0.22, 1, 0.36, 1) both; }
-@utility animate-pulse-soft { animation: pulse-soft 2.4s ease-in-out infinite; }
-@utility animate-shimmer { animation: shimmer 4s linear infinite; }
-@utility animate-breathe { animation: breathe 6s ease-in-out infinite; }
-@utility text-gradient {
-  background: linear-gradient(90deg, oklch(0.45 0.08 280), oklch(0.55 0.12 300), oklch(0.45 0.08 280));
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-/* Orb: blend into light backgrounds so its dark video edges don't show; keep dark mode untouched */
-.orb-video { mix-blend-mode: screen; }
-:where(.dark) .orb-video { mix-blend-mode: normal; }
-
-/* Caret blink for typewriter */
 @keyframes caret-blink {
   0%, 45% { opacity: 1; }
   55%, 100% { opacity: 0; }
 }
+
+@utility animate-fade-up { animation: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@utility animate-fade-in { animation: fade-in 1s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@utility animate-breathe { animation: breathe 6s ease-in-out infinite; }
+@utility animate-tile-in { animation: tile-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
 @utility animate-caret { animation: caret-blink 1s steps(1, end) infinite; }
