@@ -234,7 +234,7 @@ function BotsHome() {
 function BotFeatureCard({ bot }: { bot: Bot }) {
   return (
     <Link
-      to="/bots/$botId"
+      to="/chat/$botId"
       params={{ botId: bot.id }}
       className="animate-tile-in flex flex-col overflow-hidden rounded-3xl border p-3 transition-all active:scale-[0.98]"
       style={{
