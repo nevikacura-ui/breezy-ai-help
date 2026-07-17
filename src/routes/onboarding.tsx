@@ -69,7 +69,7 @@ function Onboarding() {
       {/* Header */}
       <header className="flex items-center justify-between px-5 pt-6">
         <button
-          onClick={() => (step === 0 ? nav({ to: "/splash" }) : setStep(0))}
+          onClick={() => (step === 0 ? nav({ to: "/splash" }) : setStep((step - 1) as Step))}
           aria-label="Back"
           className="flex h-10 w-10 items-center justify-center rounded-full"
           style={{ background: "color-mix(in oklab, var(--cream) 8%, transparent)" }}
@@ -77,7 +77,7 @@ function Onboarding() {
           <ChevronLeft className="h-5 w-5" />
         </button>
         <div className="flex gap-1">
-          {[0, 1, 2, 3].map((i) => (
+          {[0, 1, 2].map((i) => (
             <span
               key={i}
               className="h-1 w-8 rounded-full transition-all"
@@ -92,6 +92,60 @@ function Onboarding() {
       </header>
 
       {step === 0 ? (
+        <section className="px-6 pt-4 pb-40">
+          <h1 className="font-display text-[1.7rem] leading-tight tracking-tight">
+            Who's chatting<br />today?
+          </h1>
+          <p className="mt-2 text-sm opacity-60">
+            One tap tunes tone, text size, and voice speed — you can change it later in Settings.
+          </p>
+
+          <div className="mt-8 grid grid-cols-2 gap-3">
+            {PERSONAS.map((p) => {
+              const active = settings.persona === p.id;
+              const preset = PERSONA_PRESETS[p.id];
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => pickPersona(p.id)}
+                  className="flex flex-col items-start gap-2 rounded-3xl p-4 text-left transition-all active:scale-[0.98]"
+                  style={{
+                    background: active ? "var(--butter)" : "color-mix(in oklab, var(--cream) 8%, transparent)",
+                    color: active ? "var(--ink)" : "var(--cream)",
+                    border: active
+                      ? "1px solid var(--ink)"
+                      : "1px solid color-mix(in oklab, var(--cream) 12%, transparent)",
+                    minHeight: 148,
+                  }}
+                  aria-pressed={active}
+                >
+                  <span
+                    className="flex h-11 w-11 items-center justify-center rounded-2xl text-2xl"
+                    style={{
+                      background: active
+                        ? "color-mix(in oklab, var(--ink) 10%, transparent)"
+                        : "color-mix(in oklab, var(--cream) 10%, transparent)",
+                    }}
+                    aria-hidden
+                  >
+                    {p.emoji}
+                  </span>
+                  <div className="font-display text-[1.1rem] leading-none">{p.label}</div>
+                  <div className="text-[12px] opacity-70">{p.hint}</div>
+                  <div className="mt-auto flex gap-1.5 text-[10px] font-semibold uppercase tracking-wider opacity-70">
+                    <span className="rounded-full px-1.5 py-0.5" style={{ background: active ? "color-mix(in oklab, var(--ink) 10%, transparent)" : "color-mix(in oklab, var(--cream) 10%, transparent)" }}>
+                      Aa {Math.round(preset.textScale * 100)}%
+                    </span>
+                    <span className="rounded-full px-1.5 py-0.5" style={{ background: active ? "color-mix(in oklab, var(--ink) 10%, transparent)" : "color-mix(in oklab, var(--cream) 10%, transparent)" }}>
+                      {preset.voiceRate.toFixed(2)}× voice
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      ) : step === 1 ? (
         <section className="px-6 pt-4">
           <h1 className="font-display text-[1.7rem] leading-tight tracking-tight">
             Choose your<br />bot's categories
