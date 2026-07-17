@@ -376,7 +376,7 @@ function BotChat() {
     warmth: settings.warmth,
     categories: categoryLabels,
     langName,
-    currentLangCode: settings.language,
+    currentLangCode: effectiveLang,
   });
 
 
