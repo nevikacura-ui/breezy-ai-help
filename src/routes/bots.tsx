@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Bell, Settings2, SlidersHorizontal, Star, Plus, Sparkles } from "lucide-react";
+import { Bell, Settings2, SlidersHorizontal, Star, Plus, Sparkles, X } from "lucide-react";
 import {
   PRESET_BOTS,
   CATEGORY_LABELS,
@@ -11,8 +11,43 @@ import {
 } from "@/lib/bots";
 import { SettingsSheet } from "@/components/askeasy/SettingsSheet";
 import { BotAvatar, preloadBotAvatars } from "@/components/askeasy/BotAvatar";
-import { useAuthUser, useSettings, useUsage } from "@/lib/askeasy";
+import { useAuthUser, useSettings, useUsage, PERSONAS, type Persona } from "@/lib/askeasy";
 import easy from "@/assets/bots/easy.png";
+
+const WELCOME_DISMISSED_KEY = "askeasy.welcome.dismissed.v1";
+
+/** Persona × warmth → a short, tuned greeting for the home screen. */
+function personaWelcome(persona: Persona, warmth: number, name: string): { title: string; sub: string; emoji: string } {
+  const hi = name ? `, ${name}` : "";
+  const cozy = warmth >= 75;
+  switch (persona) {
+    case "kid":
+      return {
+        emoji: "🎈",
+        title: cozy ? `Yay${hi}! Easy's here 🎉` : `Hi${hi}! Ready to play?`,
+        sub: cozy ? "Let's explore fun stuff together — pick a buddy below!" : "Pick a chatbot friend and let's start.",
+      };
+    case "teen":
+      return {
+        emoji: "🎧",
+        title: cozy ? `Hey${hi} — good to see you` : `What's up${hi}?`,
+        sub: cozy ? "Your crew of bots is warmed up. Jump in whenever." : "Pick a bot below and go.",
+      };
+    case "elder":
+      return {
+        emoji: "🌿",
+        title: cozy ? `Welcome${hi}. Take your time.` : `Hello${hi}.`,
+        sub: cozy ? "I'll be gentle and clear. Choose any helper below." : "Choose a helper below when you're ready.",
+      };
+    case "adult":
+    default:
+      return {
+        emoji: "☕",
+        title: cozy ? `Welcome back${hi} — glad you're here` : `Welcome${hi}`,
+        sub: cozy ? "Your bots are ready. Pick one and let's get to it." : "Pick a bot below to get started.",
+      };
+  }
+}
 
 export const Route = createFileRoute("/bots")({
   head: () => ({
