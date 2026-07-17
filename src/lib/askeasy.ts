@@ -54,6 +54,8 @@ export type Settings = {
   voiceRate: number;
   /** Focus / Business mode: terse, structured, no mascot, Ultra model default. */
   focusMode: boolean;
+  /** Web search + citations. Only applied when focusMode is on. */
+  webSearch: boolean;
   /** Per-bot language override. Falls back to `language` when unset. */
   botLanguages: Record<string, LangCode>;
 };
