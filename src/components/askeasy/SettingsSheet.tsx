@@ -3,12 +3,15 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Sun, Moon, Monitor, Zap, Check, Lock, Sparkles, Leaf, MessageSquare, ImageIcon, Mic, Clock } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { Sun, Moon, Monitor, Zap, Check, Lock, Sparkles, Leaf, MessageSquare, ImageIcon, Mic, Clock, Flame, X, Plus, Type, EyeOff } from "lucide-react";
+import { useState } from "react";
 import {
-  MODELS, FREE_LIMITS, type ModelId, type Settings, type Theme, type Usage,
+  MODELS, FREE_LIMITS, PERSONAS, type ModelId, type Settings, type Theme, type Usage, type Persona,
   trialDaysLeft, trialActive,
 } from "@/lib/askeasy";
 import { LANGUAGES, type LangCode } from "@/lib/i18n";
+
 
 type Props = {
   open: boolean;
