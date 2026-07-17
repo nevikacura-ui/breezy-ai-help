@@ -283,11 +283,11 @@ function Onboarding() {
         style={{ background: "linear-gradient(to top, var(--ink) 60%, transparent)" }}>
         <button
           onClick={handleContinue}
-          disabled={step === 0 && !canContinue}
+          disabled={!canContinue}
           className="flex h-14 w-full items-center justify-center rounded-full font-display text-[1.05rem] transition-all active:scale-[0.98] disabled:opacity-40"
           style={{ background: "var(--butter)", color: "var(--ink)" }}
         >
-          {step === 0 ? "Continue" : "Get started"}
+          {step === 2 ? "Get started" : "Continue"}
         </button>
       </div>
     </main>
