@@ -307,6 +307,25 @@ export function SettingsSheet({
             />
           </section>
 
+          {/* Focus mode */}
+          <section className="space-y-2">
+            <div className="text-xs uppercase tracking-wider text-muted-foreground">Work</div>
+            <div className="flex items-start gap-3 rounded-2xl border border-border/60 p-3">
+              <span className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-full bg-foreground/10">
+                <Briefcase className="h-4 w-4" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="text-sm font-medium text-foreground">Focus mode</div>
+                  <Switch checked={settings.focusMode} onCheckedChange={(v) => update({ focusMode: v })} />
+                </div>
+                <p className="mt-0.5 text-[11.5px] leading-snug text-muted-foreground">
+                  Terse, structured answers for serious work. Hides mascot, drops emoji, prefers headings, bullets, and tables.
+                </p>
+              </div>
+            </div>
+          </section>
+
           {/* Privacy */}
           <section className="space-y-3">
             <div className="text-xs uppercase tracking-wider text-muted-foreground">Privacy</div>
