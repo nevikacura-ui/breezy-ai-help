@@ -48,6 +48,16 @@ export type Settings = {
   textScale: number; // 0.9 .. 1.35
   dyslexiaFont: boolean;
   privateMode: boolean;
+  /** Speech synthesis rate (0.7 slow … 1.2 fast) */
+  voiceRate: number;
+};
+
+/** Persona presets applied in one tap during onboarding. */
+export const PERSONA_PRESETS: Record<Persona, { warmth: number; textScale: number; voiceRate: number }> = {
+  kid:   { warmth: 85, textScale: 1.15, voiceRate: 0.95 },
+  teen:  { warmth: 75, textScale: 1.00, voiceRate: 1.10 },
+  adult: { warmth: 60, textScale: 1.00, voiceRate: 1.00 },
+  elder: { warmth: 70, textScale: 1.25, voiceRate: 0.85 },
 };
 
 export type ModelId = "askeasy/smart" | "askeasy/eco" | "askeasy/ultra";
