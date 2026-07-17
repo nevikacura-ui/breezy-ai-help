@@ -1,9 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, Settings as SettingsIcon, RotateCcw, ThumbsUp, ThumbsDown, Send, Square } from "lucide-react";
+import { ArrowLeft, Settings as SettingsIcon, RotateCcw, ThumbsUp, ThumbsDown, Send, Square, Mic, EyeOff, Trash2, Smile } from "lucide-react";
 import { getBotById, useCustomBots, useOnboarding, ONBOARDING_CATEGORIES, type Bot } from "@/lib/bots";
 import { BotAvatar } from "@/components/askeasy/BotAvatar";
-import { sendToAI, useAuthUser, useSettings, useUsage, type Message } from "@/lib/askeasy";
+import {
+  sendToAI, useAuthUser, useSettings, useUsage,
+  personalityPrompt, tickStreak, splitFollowUps,
+  type Message, type Mood,
+} from "@/lib/askeasy";
 import { SettingsSheet } from "@/components/askeasy/SettingsSheet";
 import { LANG_ENGLISH_NAME } from "@/lib/i18n";
 import { toast } from "sonner";
@@ -18,7 +22,16 @@ export const Route = createFileRoute("/chat/$botId")({
   component: BotChat,
 });
 
-function chatKey(botId: string) { return `askeasy.chat.${botId}.v1`; }
+type EnrichedMessage = Message & { followUps?: string[] };
+
+function chatKey(botId: string) { return `askeasy.chat.${botId}.v2`; }
+
+const MOOD_OPTIONS: { id: NonNullable<Mood>; emoji: string; label: string }[] = [
+  { id: "great", emoji: "🤩", label: "Great" },
+  { id: "good",  emoji: "😊", label: "Good"  },
+  { id: "meh",   emoji: "😐", label: "Meh"   },
+  { id: "down",  emoji: "🥺", label: "Down"  },
+];
 
 function BotChat() {
   const { botId } = Route.useParams();
@@ -31,14 +44,16 @@ function BotChat() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const { state: onboarding } = useOnboarding();
 
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<EnrichedMessage[]>([]);
   const [input, setInput] = useState("");
   const [thinking, setThinking] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const [confetti, setConfetti] = useState(false);
+  const [askMood, setAskMood] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // Human-readable category labels the user picked in onboarding
   const categoryLabels = useMemo(
     () =>
       onboarding.categories
@@ -49,29 +64,43 @@ function BotChat() {
 
   const langName = LANG_ENGLISH_NAME[settings.language] ?? "English";
 
-  // Build a system prompt augmented with onboarding context
   const systemPrompt = useMemo(() => {
     if (!bot) return "";
-    const bits: string[] = [bot.systemPrompt];
+    const bits: string[] = [bot.systemPrompt, personalityPrompt(settings)];
     if (categoryLabels.length) {
-      bits.push(
-        `The user is especially interested in: ${categoryLabels.join(", ")}. Weave these interests into your replies when relevant.`,
-      );
+      bits.push(`The user is especially interested in: ${categoryLabels.join(", ")}. Weave in when relevant.`);
     }
     bits.push(`Reply in ${langName} unless the user explicitly asks otherwise.`);
     return bits.join("\n\n");
-  }, [bot, categoryLabels, langName]);
+  }, [bot, settings, categoryLabels, langName]);
+
+  // Streak + weekly mood check-in on mount
+  useEffect(() => {
+    if (!hydrated) return;
+    const { streakDays, lastActiveDate, changed } = tickStreak(settings);
+    if (changed) {
+      update({ streakDays, lastActiveDate });
+      if (streakDays > 1) toast(`🔥 ${streakDays}-day streak!`, { description: "Nice, you're building a habit." });
+    }
+    // Weekly mood ask
+    const last = Number(window.localStorage.getItem("askeasy.moodAskedAt") || 0);
+    if (Date.now() - last > 7 * 24 * 60 * 60 * 1000) {
+      setAskMood(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated]);
 
   // Hydrate per-bot history + prefill first message
   useEffect(() => {
     if (!bot) return;
     try {
-      const raw = window.localStorage.getItem(chatKey(bot.id));
+      const raw = settings.privateMode ? null : window.localStorage.getItem(chatKey(bot.id));
       if (raw) {
-        setMessages(JSON.parse(raw) as Message[]);
+        setMessages(JSON.parse(raw) as EnrichedMessage[]);
       } else {
-        setMessages([{ id: "g", role: "assistant", content: bot.greeting, createdAt: Date.now() }]);
-        // Prefill an opening question tailored to the user's interests
+        const nameBit = settings.name ? `, ${settings.name}` : "";
+        const greeting = bot.greeting.replace(/^Hi[!,]?/i, `Hi${nameBit}!`).replace(/^Hello[!,]?/i, `Hello${nameBit}!`);
+        setMessages([{ id: "g", role: "assistant", content: greeting, createdAt: Date.now() }]);
         const opener =
           categoryLabels.length > 0
             ? `Hey ${bot.name}! I'm into ${categoryLabels.slice(0, 3).join(", ")} — where should we start?`
@@ -82,20 +111,22 @@ function BotChat() {
       setMessages([{ id: "g", role: "assistant", content: bot.greeting, createdAt: Date.now() }]);
     }
     setHydrated(true);
-  }, [bot?.id]); // eslint-disable-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bot?.id]);
 
   useEffect(() => {
     if (!bot || !hydrated) return;
+    if (settings.privateMode) return;
     window.localStorage.setItem(chatKey(bot.id), JSON.stringify(messages));
-  }, [messages, hydrated, bot?.id]); // eslint-disable-line
+  }, [messages, hydrated, bot?.id, settings.privateMode]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, thinking]);
 
-  const send = useCallback(async () => {
-    if (!bot || !input.trim() || thinking) return;
-    const userMsg: Message = { id: crypto.randomUUID(), role: "user", content: input.trim(), createdAt: Date.now() };
+  const sendText = useCallback(async (text: string) => {
+    if (!bot || !text.trim() || thinking) return;
+    const userMsg: EnrichedMessage = { id: crypto.randomUUID(), role: "user", content: text.trim(), createdAt: Date.now() };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setThinking(true);
@@ -108,27 +139,33 @@ function BotChat() {
         system: systemPrompt,
         signal: controller.signal,
       });
-      setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "assistant", content: reply, createdAt: Date.now() }]);
+      const { body, followUps } = splitFollowUps(reply);
+      setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "assistant", content: body, followUps, createdAt: Date.now() }]);
       if (typeof navigator !== "undefined" && "vibrate" in navigator) {
         try { navigator.vibrate([18, 40, 18]); } catch { /* noop */ }
       }
-    } catch (e) {
-      if ((e as Error).name !== "AbortError") {
-        toast.error("Something went wrong. Try again.");
+      // First-message celebration
+      if (!settings.firstMessageDone) {
+        update({ firstMessageDone: true });
+        setConfetti(true);
+        setTimeout(() => setConfetti(false), 1800);
       }
+    } catch (e) {
+      if ((e as Error).name !== "AbortError") toast.error("Something went wrong. Try again.");
     } finally {
       setThinking(false);
       abortRef.current = null;
+      inputRef.current?.focus();
     }
-  }, [bot, input, thinking, messages, settings]);
+  }, [bot, thinking, messages, settings, systemPrompt, update]);
 
+  const send = useCallback(() => sendText(input), [input, sendText]);
   const stop = () => abortRef.current?.abort();
 
   const regenerate = async () => {
     if (!bot) return;
     const lastUser = [...messages].reverse().find((m) => m.role === "user");
     if (!lastUser) return;
-    // Remove last assistant if present
     setMessages((prev) => {
       const last = prev[prev.length - 1];
       if (last?.role === "assistant") return prev.slice(0, -1);
@@ -136,17 +173,52 @@ function BotChat() {
     });
     setThinking(true);
     try {
-      const reply = await sendToAI({
-        messages: messages.filter((m) => m.role !== "assistant" || m !== messages[messages.length - 1]),
-        settings,
-        system: systemPrompt,
-      });
-      setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "assistant", content: reply, createdAt: Date.now() }]);
+      const reply = await sendToAI({ messages: messages.filter((_, i) => i < messages.length - 1), settings, system: systemPrompt });
+      const { body, followUps } = splitFollowUps(reply);
+      setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "assistant", content: body, followUps, createdAt: Date.now() }]);
     } catch {
       toast.error("Couldn't regenerate.");
     } finally {
       setThinking(false);
     }
+  };
+
+  // Voice input (Web Speech API)
+  const recognitionRef = useRef<any>(null);
+  const [listening, setListening] = useState(false);
+  const startListening = () => {
+    if (!settings.voiceEnabled) return toast.message("Voice input is off", { description: "Enable it in Settings." });
+    const SR = (typeof window !== "undefined" ? (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition : null);
+    if (!SR) return toast.message("Voice not supported here");
+    const rec = new SR();
+    rec.lang = settings.language === "en" ? "en-US" : settings.language;
+    rec.interimResults = true;
+    rec.continuous = false;
+    rec.onresult = (ev: any) => {
+      const txt = Array.from(ev.results).map((r: any) => r[0].transcript).join(" ");
+      setInput(txt);
+    };
+    rec.onend = () => setListening(false);
+    rec.onerror = () => setListening(false);
+    rec.start();
+    recognitionRef.current = rec;
+    setListening(true);
+    try { navigator.vibrate?.(10); } catch { /* noop */ }
+  };
+  const stopListening = () => {
+    try { recognitionRef.current?.stop(); } catch { /* noop */ }
+    setListening(false);
+  };
+
+  const forgetMessage = (id: string) => {
+    setMessages((prev) => prev.filter((m) => m.id !== id));
+    toast.success("Forgotten.");
+  };
+
+  const answerMood = (m: Mood) => {
+    update({ mood: m });
+    window.localStorage.setItem("askeasy.moodAskedAt", String(Date.now()));
+    setAskMood(false);
   };
 
   if (!bot) {
@@ -157,28 +229,36 @@ function BotChat() {
     );
   }
 
+  const mascotClass = listening ? "mascot-listen" : (thinking || input.length > 0 ? "" : "mascot-idle");
+  const suggestedQuickChips = ["Explain simpler", "Give an example", `In ${langName}`];
+
   return (
     <main
       className="relative flex min-h-dvh flex-col overflow-hidden"
       style={{ background: "var(--ink)", color: "var(--cream)" }}
     >
       {/* Header */}
-      <header className="flex items-center justify-between px-5 pt-6">
+      <header className="flex items-center justify-between px-4 pt-5">
         <button
           onClick={() => nav({ to: "/bots" })}
-          className="flex h-10 w-10 items-center justify-center rounded-full"
-          style={{ background: "color-mix(in oklab, var(--cream) 8%, transparent)" }}
-          aria-label="Back"
+          className="flex items-center gap-1.5 rounded-full px-3 py-2 text-[13px] font-semibold"
+          style={{ background: "color-mix(in oklab, var(--cream) 10%, transparent)", color: "var(--cream)" }}
+          aria-label="Back to bots"
         >
-          <ChevronLeft className="h-5 w-5" />
+          <ArrowLeft className="h-4 w-4" />
+          Bots
         </button>
-        <div className="text-center">
-          <div className="font-display text-[1.05rem]">{bot.name}</div>
+        <div className="flex items-center gap-2">
+          <div className={mascotClass}>
+            <BotAvatar bot={bot} size={32} eager emojiSize={15} />
+          </div>
+          <div className="font-display text-[1rem]">{bot.name}</div>
+          {settings.privateMode && <EyeOff className="h-3.5 w-3.5 opacity-60" aria-label="Private" />}
         </div>
         <button
           onClick={() => setSettingsOpen(true)}
           className="flex h-10 w-10 items-center justify-center rounded-full"
-          style={{ background: "color-mix(in oklab, var(--cream) 8%, transparent)" }}
+          style={{ background: "color-mix(in oklab, var(--cream) 10%, transparent)" }}
           aria-label="Settings"
         >
           <SettingsIcon className="h-5 w-5" />
@@ -201,15 +281,42 @@ function BotChat() {
         onSelectLanguage={(code) => update({ language: code })}
       />
 
+      {/* Mood check-in */}
+      {askMood && (
+        <div className="mx-4 mt-3 rounded-2xl border p-3 animate-fade-up"
+          style={{ borderColor: "color-mix(in oklab, var(--cream) 14%, transparent)", background: "color-mix(in oklab, var(--cream) 6%, transparent)" }}>
+          <div className="flex items-center gap-2 text-[13px] font-semibold">
+            <Smile className="h-4 w-4" /> How are you feeling today?
+          </div>
+          <div className="mt-2 flex gap-2">
+            {MOOD_OPTIONS.map((m) => (
+              <button key={m.id} onClick={() => answerMood(m.id)} className="flex flex-1 flex-col items-center gap-0.5 rounded-xl py-2 text-[11px]"
+                style={{ background: "color-mix(in oklab, var(--cream) 8%, transparent)" }}>
+                <span className="text-xl leading-none">{m.emoji}</span>{m.label}
+              </button>
+            ))}
+          </div>
+          <button onClick={() => answerMood(null)} className="mt-2 w-full text-center text-[11px] opacity-60">Skip</button>
+        </div>
+      )}
+
       {/* Messages */}
       <section ref={scrollRef} className="flex-1 overflow-y-auto px-4 pb-40 pt-5">
         <div className="mx-auto flex max-w-lg flex-col gap-4">
-          {messages.map((m) => (
-            <MessageRow key={m.id} m={m} bot={bot} />
+          {messages.map((m, idx) => (
+            <MessageRow
+              key={m.id}
+              m={m}
+              bot={bot}
+              isLast={idx === messages.length - 1}
+              onForget={() => forgetMessage(m.id)}
+              onQuickAsk={sendText}
+              quickChips={idx === messages.length - 1 && m.role === "assistant" ? (m.followUps?.length ? m.followUps : suggestedQuickChips) : []}
+            />
           ))}
           {thinking && (
             <div className="flex items-center gap-2 opacity-70">
-              <BotAvatarSmall bot={bot} />
+              <div className={mascotClass}><BotAvatar bot={bot} size={32} eager emojiSize={15} /></div>
               <div className="flex items-center gap-1 rounded-2xl px-3 py-2"
                 style={{ background: "color-mix(in oklab, var(--cream) 8%, transparent)" }}>
                 <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-current" />
@@ -241,13 +348,28 @@ function BotChat() {
         <div className="mx-auto flex max-w-lg items-center gap-2 rounded-full py-1.5 pl-4 pr-1.5"
           style={{ background: "color-mix(in oklab, var(--cream) 8%, transparent)", border: "1px solid color-mix(in oklab, var(--cream) 12%, transparent)" }}>
           <input
+            ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") send(); }}
-            placeholder="Type your question…"
+            placeholder={listening ? "Listening…" : "Type your question…"}
             className="flex-1 bg-transparent py-2.5 text-[14.5px] outline-none placeholder:opacity-40"
             style={{ color: "var(--cream)" }}
           />
+          {/* Hold-to-talk mic */}
+          <button
+            onPointerDown={startListening}
+            onPointerUp={stopListening}
+            onPointerLeave={stopListening}
+            aria-label="Hold to talk"
+            className="flex h-11 w-11 items-center justify-center rounded-full"
+            style={{
+              background: listening ? "var(--butter)" : "color-mix(in oklab, var(--cream) 12%, transparent)",
+              color: listening ? "var(--ink)" : "var(--cream)",
+            }}
+          >
+            <Mic className="h-4 w-4" />
+          </button>
           {thinking ? (
             <button
               onClick={stop}
@@ -270,20 +392,44 @@ function BotChat() {
           )}
         </div>
       </div>
+
+      {/* Confetti */}
+      {confetti && (
+        <div className="pointer-events-none fixed inset-0 z-40 overflow-hidden">
+          {Array.from({ length: 28 }).map((_, i) => {
+            const colors = ["var(--butter)", "var(--lavender)", "var(--pink)", "var(--mint)", "var(--peach)"];
+            const left = Math.random() * 100;
+            const dx = (Math.random() - 0.5) * 240;
+            const delay = Math.random() * 0.4;
+            const bg = colors[i % colors.length];
+            return (
+              <span
+                key={i}
+                className="animate-confetti absolute top-0 h-2 w-2 rounded-sm"
+                style={{ left: `${left}%`, background: bg, animationDelay: `${delay}s`, ["--dx" as any]: `${dx}px` }}
+              />
+            );
+          })}
+        </div>
+      )}
     </main>
   );
 }
 
-function BotAvatarSmall({ bot }: { bot: Bot }) {
-  return <BotAvatar bot={bot} size={32} eager emojiSize={15} />;
-}
 
-
-function MessageRow({ m, bot }: { m: Message; bot: Bot }) {
+function MessageRow({ m, bot, isLast, onForget, onQuickAsk, quickChips }: {
+  m: EnrichedMessage; bot: Bot; isLast: boolean; onForget: () => void; onQuickAsk: (t: string) => void; quickChips: string[];
+}) {
   const isUser = m.role === "user";
+  const [showForget, setShowForget] = useState(false);
   if (isUser) {
     return (
-      <div className="flex items-start justify-end gap-2">
+      <div className="group flex items-start justify-end gap-2" onDoubleClick={() => setShowForget((v) => !v)}>
+        {showForget && (
+          <button onClick={onForget} aria-label="Forget this" className="mt-2 rounded-full p-1 opacity-70 hover:opacity-100">
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        )}
         <div
           className="max-w-[85%] rounded-2xl rounded-tr-md px-3.5 py-2.5 text-[14px]"
           style={{ background: "color-mix(in oklab, var(--cream) 6%, transparent)", color: "var(--cream)" }}
@@ -295,7 +441,7 @@ function MessageRow({ m, bot }: { m: Message; bot: Bot }) {
   }
   return (
     <div className="flex items-start gap-2">
-      <BotAvatarSmall bot={bot} />
+      <BotAvatar bot={bot} size={32} eager emojiSize={15} />
       <div className="max-w-[85%] flex-1">
         <div
           className="rounded-2xl rounded-tl-md px-3.5 py-3 text-[14px] leading-relaxed"
@@ -308,9 +454,25 @@ function MessageRow({ m, bot }: { m: Message; bot: Bot }) {
             <p key={i} className={i > 0 ? "mt-1.5" : ""}>{line}</p>
           ))}
         </div>
+        {/* Suggested follow-up chips */}
+        {isLast && quickChips.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {quickChips.map((c, i) => (
+              <button
+                key={i}
+                onClick={() => onQuickAsk(c)}
+                className="rounded-full border px-2.5 py-1 text-[11.5px] font-medium"
+                style={{ borderColor: "color-mix(in oklab, var(--cream) 20%, transparent)", background: "color-mix(in oklab, var(--cream) 6%, transparent)", color: "var(--cream)" }}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+        )}
         <div className="mt-1.5 flex items-center gap-2 pl-1 opacity-60">
           <button aria-label="Like" className="hover:opacity-100"><ThumbsUp className="h-3.5 w-3.5" /></button>
           <button aria-label="Dislike" className="hover:opacity-100"><ThumbsDown className="h-3.5 w-3.5" /></button>
+          <button aria-label="Forget this" onClick={onForget} className="ml-auto hover:opacity-100"><Trash2 className="h-3.5 w-3.5" /></button>
         </div>
       </div>
     </div>
