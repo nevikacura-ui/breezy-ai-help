@@ -3,19 +3,19 @@ import { useMemo, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { ONBOARDING_CATEGORIES, useOnboarding } from "@/lib/bots";
 import { LANGUAGES, type LangCode } from "@/lib/i18n";
-import { useSettings } from "@/lib/askeasy";
+import { useSettings, PERSONAS, PERSONA_PRESETS, type Persona } from "@/lib/askeasy";
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({
     meta: [
       { title: "Choose your vibe — AskEasy" },
-      { name: "description", content: "Pick your favorite bot categories and language to personalize your AskEasy experience." },
+      { name: "description", content: "Tell us who you are, pick your favorite bot categories and language to personalize your AskEasy experience." },
     ],
   }),
   component: Onboarding,
 });
 
-type Step = 0 | 1;
+type Step = 0 | 1 | 2;
 
 function Onboarding() {
   const nav = useNavigate();
@@ -24,7 +24,11 @@ function Onboarding() {
   const [step, setStep] = useState<Step>(0);
   const [selected, setSelected] = useState<Set<string>>(new Set(state.categories));
 
-  const canContinue = useMemo(() => selected.size >= 2, [selected]);
+  const canContinue = useMemo(() => {
+    if (step === 0) return true; // persona has a default
+    if (step === 1) return selected.size >= 2;
+    return true;
+  }, [step, selected]);
 
   const toggle = (id: string) =>
     setSelected((prev) => {
@@ -34,17 +38,28 @@ function Onboarding() {
       return next;
     });
 
+  const pickPersona = (id: Persona) => {
+    const preset = PERSONA_PRESETS[id];
+    updateSettings({
+      persona: id,
+      warmth: preset.warmth,
+      textScale: preset.textScale,
+      voiceRate: preset.voiceRate,
+    });
+  };
+
   const handleContinue = () => {
-    if (step === 0) {
+    if (step === 0) { setStep(1); return; }
+    if (step === 1) {
       if (!canContinue) return;
       update({ categories: Array.from(selected) });
-      setStep(1);
+      setStep(2);
       return;
     }
-    // step 1 → complete
     update({ completed: true });
     nav({ to: "/bots" });
   };
+
 
   return (
     <main
