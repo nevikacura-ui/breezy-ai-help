@@ -396,8 +396,12 @@ function BotChat() {
           Bots
         </button>
         <div className="flex items-center gap-2">
-          <Mascot size={32} />
+          {!settings.focusMode && <Mascot size={32} />}
           <div className="font-display text-[1rem]">{bot.name}</div>
+          {settings.focusMode && (
+            <span className="ml-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
+              style={{ background: "color-mix(in oklab, var(--cream) 14%, transparent)" }}>Focus</span>
+          )}
           {settings.privateMode && <EyeOff className="h-3.5 w-3.5 opacity-60" aria-label="Private" />}
         </div>
         <button
@@ -461,7 +465,7 @@ function BotChat() {
           ))}
           {thinking && (
             <div className="flex items-center gap-2 opacity-70">
-              <Mascot size={32} />
+              {!settings.focusMode && <Mascot size={32} />}
               <div className="flex items-center gap-1 rounded-2xl px-3 py-2"
                 style={{ background: "color-mix(in oklab, var(--cream) 8%, transparent)" }}>
                 <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-current" />
