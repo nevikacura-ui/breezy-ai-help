@@ -18,6 +18,7 @@ import { Route as UpgradeSuccessRouteImport } from './routes/upgrade.success'
 import { Route as ChatBotIdRouteImport } from './routes/chat.$botId'
 import { Route as BotsNewRouteImport } from './routes/bots.new'
 import { Route as BotsBotIdRouteImport } from './routes/bots.$botId'
+import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiBotGenerateRouteImport } from './routes/api/bot-generate'
 import { Route as ApiPublicCashfreeWebhookRouteImport } from './routes/api/public/cashfree-webhook'
@@ -67,6 +68,11 @@ const BotsBotIdRoute = BotsBotIdRouteImport.update({
   path: '/$botId',
   getParentRoute: () => BotsRoute,
 } as any)
+const ApiTranscribeRoute = ApiTranscribeRouteImport.update({
+  id: '/api/transcribe',
+  path: '/api/transcribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
@@ -92,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/splash': typeof SplashRoute
   '/api/bot-generate': typeof ApiBotGenerateRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/transcribe': typeof ApiTranscribeRoute
   '/bots/$botId': typeof BotsBotIdRoute
   '/bots/new': typeof BotsNewRoute
   '/chat/$botId': typeof ChatBotIdRoute
@@ -106,6 +113,7 @@ export interface FileRoutesByTo {
   '/splash': typeof SplashRoute
   '/api/bot-generate': typeof ApiBotGenerateRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/transcribe': typeof ApiTranscribeRoute
   '/bots/$botId': typeof BotsBotIdRoute
   '/bots/new': typeof BotsNewRoute
   '/chat/$botId': typeof ChatBotIdRoute
@@ -121,6 +129,7 @@ export interface FileRoutesById {
   '/splash': typeof SplashRoute
   '/api/bot-generate': typeof ApiBotGenerateRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/transcribe': typeof ApiTranscribeRoute
   '/bots/$botId': typeof BotsBotIdRoute
   '/bots/new': typeof BotsNewRoute
   '/chat/$botId': typeof ChatBotIdRoute
@@ -137,6 +146,7 @@ export interface FileRouteTypes {
     | '/splash'
     | '/api/bot-generate'
     | '/api/chat'
+    | '/api/transcribe'
     | '/bots/$botId'
     | '/bots/new'
     | '/chat/$botId'
@@ -151,6 +161,7 @@ export interface FileRouteTypes {
     | '/splash'
     | '/api/bot-generate'
     | '/api/chat'
+    | '/api/transcribe'
     | '/bots/$botId'
     | '/bots/new'
     | '/chat/$botId'
@@ -165,6 +176,7 @@ export interface FileRouteTypes {
     | '/splash'
     | '/api/bot-generate'
     | '/api/chat'
+    | '/api/transcribe'
     | '/bots/$botId'
     | '/bots/new'
     | '/chat/$botId'
@@ -180,6 +192,7 @@ export interface RootRouteChildren {
   SplashRoute: typeof SplashRoute
   ApiBotGenerateRoute: typeof ApiBotGenerateRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiTranscribeRoute: typeof ApiTranscribeRoute
   ChatBotIdRoute: typeof ChatBotIdRoute
   UpgradeSuccessRoute: typeof UpgradeSuccessRoute
   ApiPublicCashfreeWebhookRoute: typeof ApiPublicCashfreeWebhookRoute
@@ -250,6 +263,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BotsBotIdRouteImport
       parentRoute: typeof BotsRoute
     }
+    '/api/transcribe': {
+      id: '/api/transcribe'
+      path: '/api/transcribe'
+      fullPath: '/api/transcribe'
+      preLoaderRoute: typeof ApiTranscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -294,6 +314,7 @@ const rootRouteChildren: RootRouteChildren = {
   SplashRoute: SplashRoute,
   ApiBotGenerateRoute: ApiBotGenerateRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiTranscribeRoute: ApiTranscribeRoute,
   ChatBotIdRoute: ChatBotIdRoute,
   UpgradeSuccessRoute: UpgradeSuccessRoute,
   ApiPublicCashfreeWebhookRoute: ApiPublicCashfreeWebhookRoute,
