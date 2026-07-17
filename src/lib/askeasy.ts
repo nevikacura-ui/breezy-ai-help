@@ -26,9 +26,9 @@ export type Settings = {
   voiceEnabled: boolean;
   openRouterModel: string;
   isPro: boolean;
-  indiaMode: boolean;
   language: LangCode;
-  indiaOnboarded: boolean;
+  /** Timestamp (ms) when the user first switched to a non-English language. */
+  trialStartedAt: number | null;
 };
 
 export type ModelId = "askeasy/smart" | "askeasy/eco" | "askeasy/ultra";
@@ -47,6 +47,8 @@ export const MODELS: ModelInfo[] = [
 ];
 
 export const FREE_LIMITS = { text: 5, media: 2, voice: 2 } as const;
+export const TRIAL_DAYS = 3;
+export const TRIAL_MS = TRIAL_DAYS * 24 * 60 * 60 * 1000;
 
 export type Usage = { text: number; media: number; voice: number };
 
@@ -54,43 +56,9 @@ export function modelTier(id: string): "free" | "pro" {
   return MODELS.find((m) => m.id === id)?.tier ?? "free";
 }
 
-export const SETTINGS_KEY = "askeasy.settings.v4";
+export const SETTINGS_KEY = "askeasy.settings.v5";
 export const MESSAGES_KEY = "askeasy.messages.v1";
 export const USAGE_KEY = "askeasy.usage.v1";
-const INDIA_DEFAULT_LANGUAGE: LangCode = "hi";
-
-/**
- * Purge every India Mode–related cache from localStorage + sessionStorage:
- * cached messages, attachment drafts, and any language/india scoped keys.
- * The persisted settings object is rewritten with language forced to "en".
- * Exported so the UI + integration tests can invoke the same routine.
- */
-export function resetIndiaModeArtifacts(): void {
-  if (typeof window === "undefined") return;
-  const ls = window.localStorage;
-  const ss = window.sessionStorage;
-  try {
-    ls.removeItem(MESSAGES_KEY);
-    const scopedPrefixes = ["askeasy.india", "askeasy.language", "askeasy.draft", "askeasy.attachments"];
-    for (const store of [ls, ss]) {
-      const doomed: string[] = [];
-      for (let i = 0; i < store.length; i++) {
-        const k = store.key(i);
-        if (!k) continue;
-        if (scopedPrefixes.some((p) => k.startsWith(p))) doomed.push(k);
-      }
-      for (const k of doomed) store.removeItem(k);
-    }
-    const raw = ls.getItem(SETTINGS_KEY);
-    if (raw) {
-      try {
-        const parsed = JSON.parse(raw) as Partial<Settings>;
-        ls.setItem(SETTINGS_KEY, JSON.stringify({ ...parsed, indiaMode: false, language: "en" }));
-      } catch { /* ignore malformed settings */ }
-    }
-  } catch { /* storage may be unavailable */ }
-}
-
 
 const DEFAULT_SETTINGS: Settings = {
   name: "",
@@ -98,28 +66,36 @@ const DEFAULT_SETTINGS: Settings = {
   voiceEnabled: true,
   openRouterModel: "askeasy/smart",
   isPro: false,
-  indiaMode: false,
   language: "en",
-  indiaOnboarded: false,
+  trialStartedAt: null,
 };
 
 const DEFAULT_USAGE: Usage = { text: 0, media: 0, voice: 0 };
 
-function normalizeSettings(settings: Settings): Settings {
-  if (!settings.indiaMode) {
-    return { ...settings, language: "en" };
-  }
-  return {
-    ...settings,
-    language: settings.language === "en" ? INDIA_DEFAULT_LANGUAGE : settings.language,
-  };
+/** Days left in the language trial. Returns 0 if trial expired or never started. */
+export function trialDaysLeft(settings: Settings): number {
+  if (!settings.trialStartedAt) return 0;
+  const elapsed = Date.now() - settings.trialStartedAt;
+  const left = TRIAL_MS - elapsed;
+  return left > 0 ? Math.ceil(left / (24 * 60 * 60 * 1000)) : 0;
 }
 
-function readJSON<T>(key: string, fallback: T): T {
+export function trialActive(settings: Settings): boolean {
+  return trialDaysLeft(settings) > 0;
+}
+
+/** Can this user reply in the given language right now? */
+export function canUseLanguage(settings: Settings, code: LangCode, isPro: boolean): boolean {
+  if (code === "en") return true;
+  if (isPro) return true;
+  return trialActive(settings);
+}
+
+function readJSON<T extends object>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
   try {
     const raw = window.localStorage.getItem(key);
-    return raw ? { ...fallback, ...(JSON.parse(raw) as object) } as T : fallback;
+    return raw ? ({ ...fallback, ...(JSON.parse(raw) as object) } as T) : fallback;
   } catch {
     return fallback;
   }
@@ -130,7 +106,7 @@ export function useSettings() {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    setSettings(normalizeSettings(readJSON<Settings>(SETTINGS_KEY, DEFAULT_SETTINGS)));
+    setSettings(readJSON<Settings>(SETTINGS_KEY, DEFAULT_SETTINGS));
     setHydrated(true);
   }, []);
 
@@ -143,13 +119,6 @@ export function useSettings() {
     if (typeof document === "undefined") return;
     const applyTheme = () => {
       const root = document.documentElement;
-      // India Mode overrides light/dark with the tricolor theme.
-      if (settings.indiaMode) {
-        root.classList.remove("dark");
-        root.classList.add("india");
-        return;
-      }
-      root.classList.remove("india");
       const t = settings.theme;
       const prefersDark =
         window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
@@ -157,26 +126,25 @@ export function useSettings() {
       root.classList.toggle("dark", dark);
     };
     applyTheme();
-    if (settings.indiaMode || settings.theme !== "system") return;
+    if (settings.theme !== "system") return;
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     mq.addEventListener("change", applyTheme);
     return () => mq.removeEventListener("change", applyTheme);
-  }, [settings.theme, settings.indiaMode]);
+  }, [settings.theme]);
 
   const update = useCallback(
-    (patch: Partial<Settings>) => setSettings((s) => normalizeSettings({ ...s, ...patch })),
+    (patch: Partial<Settings>) => setSettings((s) => ({ ...s, ...patch })),
     []
   );
 
   return { settings, update, hydrated };
 }
 
-/** Localized string helper bound to current settings. */
-export function useI18n(settings: Settings) {
-  const lang: LangCode = settings.indiaMode ? settings.language : "en";
+/** UI stays English; kept for callers. */
+export function useI18n(_settings: Settings) {
   return useCallback(
-    (key: string, vars?: Record<string, string>) => translate(lang, key, vars),
-    [lang],
+    (key: string, vars?: Record<string, string>) => translate("en", key, vars),
+    [],
   );
 }
 
@@ -189,7 +157,9 @@ export function useConversation() {
     try {
       const raw = window.localStorage.getItem(MESSAGES_KEY);
       if (raw) setMessages(JSON.parse(raw) as Message[]);
-    } catch {}
+    } catch {
+      /* noop */
+    }
     setHydrated(true);
   }, []);
 
@@ -199,11 +169,7 @@ export function useConversation() {
   }, [messages, hydrated]);
 
   const addMessage = useCallback((m: Omit<Message, "id" | "createdAt">) => {
-    const msg: Message = {
-      ...m,
-      id: crypto.randomUUID(),
-      createdAt: Date.now(),
-    };
+    const msg: Message = { ...m, id: crypto.randomUUID(), createdAt: Date.now() };
     setMessages((prev) => [...prev, msg]);
     return msg;
   }, []);
@@ -226,7 +192,9 @@ export function useUsage() {
     try {
       const raw = window.localStorage.getItem(USAGE_KEY);
       if (raw) setUsage({ ...DEFAULT_USAGE, ...JSON.parse(raw) });
-    } catch {}
+    } catch {
+      /* noop */
+    }
     setHydrated(true);
   }, []);
 
@@ -248,11 +216,7 @@ export function quotaCheck(
   usage: Usage,
   text: string,
   attachments: Attachment[]
-): {
-  needs: Array<keyof Usage>;
-  overLimit: Array<keyof Usage>;
-  remaining: Usage;
-} {
+): { needs: Array<keyof Usage>; overLimit: Array<keyof Usage>; remaining: Usage } {
   const needs: Array<keyof Usage> = [];
   if (text.trim().length > 0) needs.push("text");
   const mediaCount = attachments.filter((a) => a.type === "image" || a.type === "file").length;
@@ -272,7 +236,6 @@ export function quotaCheck(
   return { needs, overLimit, remaining };
 }
 
-
 export async function sendToAI(args: {
   messages: Message[];
   settings: Settings;
@@ -283,7 +246,9 @@ export async function sendToAI(args: {
     const { data } = await supabase.auth.getSession();
     const tok = data.session?.access_token;
     if (tok) headers["Authorization"] = `Bearer ${tok}`;
-  } catch { /* anonymous — fine */ }
+  } catch {
+    /* anon fine */
+  }
 
   const res = await fetch("/api/chat", {
     method: "POST",
@@ -291,11 +256,8 @@ export async function sendToAI(args: {
     signal: args.signal,
     body: JSON.stringify({
       model: args.settings.openRouterModel,
-      language: args.settings.indiaMode ? args.settings.language : undefined,
-      messages: args.messages.map((m) => ({
-        role: m.role,
-        content: m.content,
-      })),
+      language: args.settings.language,
+      messages: args.messages.map((m) => ({ role: m.role, content: m.content })),
     }),
   });
 
@@ -303,12 +265,11 @@ export async function sendToAI(args: {
     const err = await res.text().catch(() => "");
     throw new Error(`Chat failed (${res.status}): ${err.slice(0, 200)}`);
   }
-
   const data = (await res.json()) as { reply?: string };
   return data.reply ?? "";
 }
 
-// -------- Auth session + cloud sync --------
+// -------- Auth session --------
 export type AuthUser = { id: string; email?: string; name?: string; avatar?: string } | null;
 
 export function useAuthUser(): AuthUser {
@@ -316,11 +277,26 @@ export function useAuthUser(): AuthUser {
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       const u = data.session?.user;
-      if (u) setUser({ id: u.id, email: u.email ?? undefined, name: (u.user_metadata as { full_name?: string } | undefined)?.full_name, avatar: (u.user_metadata as { avatar_url?: string } | undefined)?.avatar_url });
+      if (u)
+        setUser({
+          id: u.id,
+          email: u.email ?? undefined,
+          name: (u.user_metadata as { full_name?: string } | undefined)?.full_name,
+          avatar: (u.user_metadata as { avatar_url?: string } | undefined)?.avatar_url,
+        });
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       const u = session?.user;
-      setUser(u ? { id: u.id, email: u.email ?? undefined, name: (u.user_metadata as { full_name?: string } | undefined)?.full_name, avatar: (u.user_metadata as { avatar_url?: string } | undefined)?.avatar_url } : null);
+      setUser(
+        u
+          ? {
+              id: u.id,
+              email: u.email ?? undefined,
+              name: (u.user_metadata as { full_name?: string } | undefined)?.full_name,
+              avatar: (u.user_metadata as { avatar_url?: string } | undefined)?.avatar_url,
+            }
+          : null,
+      );
     });
     return () => sub.subscription.unsubscribe();
   }, []);

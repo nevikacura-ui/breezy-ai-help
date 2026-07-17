@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowUp, FileUp, Camera, Mic, Square, X } from "lucide-react";
 import type { Attachment } from "@/lib/askeasy";
 import { Bubble } from "./Bubble";
-import tricolorRing from "@/assets/tricolor-ring.png.asset.json";
 
 type Props = {
   onSend: (text: string, attachments: Attachment[]) => void;
@@ -11,22 +10,18 @@ type Props = {
   externalAttachments: Attachment[];
   onAddAttachments: (a: Attachment[]) => void;
   onRemoveAttachment: (id: string) => void;
-  /** Emitted when input area is focused/hovered — used by the orb. */
   onActivityChange?: (state: { focused: boolean; hasInput: boolean }) => void;
   placeholder?: string;
   thinkingLabel?: string;
-  indiaMode?: boolean;
+  /** External seed text (from category tile). */
+  draft?: string;
 };
 
 const LONG_PRESS_MS = 450;
 
 function haptic(ms: number = 12) {
   if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-    try {
-      navigator.vibrate(ms);
-    } catch {
-      /* noop */
-    }
+    try { navigator.vibrate(ms); } catch { /* noop */ }
   }
 }
 
@@ -40,7 +35,7 @@ export function Composer({
   onActivityChange,
   placeholder,
   thinkingLabel,
-  indiaMode,
+  draft,
 }: Props) {
   const [text, setText] = useState("");
   const [focused, setFocused] = useState(false);
@@ -58,6 +53,15 @@ export function Composer({
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Sync external draft (category tile) into the textarea.
+  useEffect(() => {
+    if (draft && draft !== text) {
+      setText(draft);
+      requestAnimationFrame(() => textareaRef.current?.focus());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft]);
 
   useEffect(() => {
     const el = textareaRef.current;
@@ -83,7 +87,6 @@ export function Composer({
     onActivityChange?.({ focused: focused || hovered, hasInput: hasContent });
   }, [focused, hovered, hasContent, onActivityChange]);
 
-
   const submit = () => {
     if (!hasContent || disabled) return;
     haptic(10);
@@ -97,35 +100,29 @@ export function Composer({
   const handleFiles = (files: FileList | null) => {
     if (!files) return;
     const list: Attachment[] = [];
-    Array.from(files)
-      .slice(0, 4)
-      .forEach((file) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          list.push({
-            id: crypto.randomUUID(),
-            type: file.type.startsWith("image/") ? "image" : "file",
-            dataUrl: String(reader.result),
-            name: file.name,
-          });
-          if (list.length) onAddAttachments([...list]);
-        };
-        reader.readAsDataURL(file);
-      });
+    Array.from(files).slice(0, 4).forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        list.push({
+          id: crypto.randomUUID(),
+          type: file.type.startsWith("image/") ? "image" : "file",
+          dataUrl: String(reader.result),
+          name: file.name,
+        });
+        if (list.length) onAddAttachments([...list]);
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
-      const mime = MediaRecorder.isTypeSupported("audio/webm")
-        ? "audio/webm"
-        : "audio/mp4";
+      const mime = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "audio/mp4";
       const recorder = new MediaRecorder(stream, { mimeType: mime });
       chunksRef.current = [];
-      recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) chunksRef.current.push(e.data);
-      };
+      recorder.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
       recorder.onstop = () => {
         const blob = new Blob(chunksRef.current, { type: mime });
         const reader = new FileReader();
@@ -161,7 +158,6 @@ export function Composer({
     setRecording(false);
   };
 
-  // Bubble press handlers
   const onBubbleDown = () => {
     if (disabled || recording) return;
     longPressed.current = false;
@@ -172,34 +168,17 @@ export function Composer({
     }, LONG_PRESS_MS);
   };
   const clearLongPress = () => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
-    }
+    if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null; }
   };
-  const onBubbleUp = () => {
-    clearLongPress();
-  };
+  const onBubbleUp = () => clearLongPress();
   const onBubbleClick = () => {
-    if (recording) {
-      stopRecording();
-      return;
-    }
-    if (longPressed.current) {
-      longPressed.current = false;
-      return;
-    }
+    if (recording) { stopRecording(); return; }
+    if (longPressed.current) { longPressed.current = false; return; }
     if (disabled) return;
     setMenuOpen((v) => !v);
   };
 
-  const bubbleState = disabled
-    ? "thinking"
-    : recording
-      ? "listening"
-      : menuOpen
-        ? "active"
-        : "idle";
+  const bubbleState = disabled ? "thinking" : recording ? "listening" : menuOpen ? "active" : "idle";
 
   return (
     <div className="mx-auto w-full max-w-2xl">
@@ -208,11 +187,7 @@ export function Composer({
           {allAttachments.map((a) => (
             <div key={a.id} className="group relative">
               {a.type === "image" ? (
-                <img
-                  src={a.dataUrl}
-                  alt=""
-                  className="h-16 w-16 rounded-xl object-cover"
-                />
+                <img src={a.dataUrl} alt="" className="h-16 w-16 rounded-2xl object-cover" />
               ) : a.type === "audio" ? (
                 <div className="flex h-10 items-center gap-2 rounded-full bg-foreground/10 px-3 text-xs">
                   <Mic className="h-3.5 w-3.5" /> Voice note
@@ -224,11 +199,7 @@ export function Composer({
                 </div>
               )}
               <button
-                onClick={() =>
-                  a === voiceAttachment
-                    ? setVoiceAttachment(null)
-                    : onRemoveAttachment(a.id)
-                }
+                onClick={() => (a === voiceAttachment ? setVoiceAttachment(null) : onRemoveAttachment(a.id))}
                 className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-background"
                 aria-label="Remove"
               >
@@ -240,7 +211,6 @@ export function Composer({
       )}
 
       <div className="relative">
-        {/* Bubble menu */}
         {menuOpen && (
           <>
             <button
@@ -249,26 +219,20 @@ export function Composer({
               onClick={() => setMenuOpen(false)}
             />
             <div
-              className="glass animate-fade-up absolute bottom-full left-2 z-20 mb-3 w-56 rounded-2xl p-1.5 shadow-[0_20px_60px_-20px_oklch(0.2_0.05_280/0.45)]"
+              className="glass animate-fade-up absolute bottom-full left-2 z-20 mb-3 w-56 rounded-3xl p-1.5 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.35)]"
               style={{ animationDuration: "0.25s" }}
             >
               <MenuRow
                 icon={<FileUp className="h-4 w-4" />}
                 title="Add file"
                 hint="Images & PDFs"
-                onClick={() => {
-                  setMenuOpen(false);
-                  fileInputRef.current?.click();
-                }}
+                onClick={() => { setMenuOpen(false); fileInputRef.current?.click(); }}
               />
               <MenuRow
                 icon={<Camera className="h-4 w-4" />}
                 title="Camera"
                 hint="Snap a photo"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onOpenCamera();
-                }}
+                onClick={() => { setMenuOpen(false); onOpenCamera(); }}
               />
               <div className="mt-1 border-t border-foreground/10 px-3 py-2 text-[11px] text-muted-foreground">
                 Hold the ring to talk
@@ -283,79 +247,39 @@ export function Composer({
           accept="image/*,application/pdf"
           multiple
           className="hidden"
-          onChange={(e) => {
-            handleFiles(e.target.files);
-            e.target.value = "";
-          }}
+          onChange={(e) => { handleFiles(e.target.files); e.target.value = ""; }}
         />
 
         <div
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
-          className="glass flex items-center gap-3 rounded-full py-2 pl-2 pr-2 shadow-[0_30px_80px_-30px_oklch(0_0_0/0.6)] transition-all duration-500"
+          className="flex items-center gap-2 rounded-full py-2 pl-2 pr-2 transition-all duration-500"
           style={{
-            boxShadow: disabled
-              ? "inset 0 0 0 1px oklch(0.72 0.22 30 / 0.35), 0 24px 70px -22px oklch(0.7 0.2 30 / 0.35)"
-              : recording
-                ? "inset 0 0 0 1px oklch(0.7 0.24 25 / 0.4), 0 24px 70px -22px oklch(0.7 0.24 25 / 0.35)"
-                : focused
-                  ? "inset 0 0 0 1px oklch(0.75 0.16 40 / 0.35), 0 28px 80px -24px oklch(0.7 0.18 30 / 0.4)"
-                  : "inset 0 0 0 1px color-mix(in oklab, white 6%, transparent), 0 30px 80px -30px oklch(0 0 0 / 0.6)",
+            background: "var(--card)",
+            boxShadow: focused
+              ? "inset 0 0 0 1.5px var(--butter), 0 24px 60px -22px rgba(0,0,0,0.35)"
+              : "inset 0 0 0 1px var(--glass-border), 0 20px 60px -30px rgba(0,0,0,0.4)",
           }}
         >
-          {indiaMode ? (
-            <button
-              type="button"
-              aria-label={recording ? "Stop recording" : "Open actions — hold to talk"}
-              onPointerDown={onBubbleDown}
-              onPointerUp={onBubbleUp}
-              onPointerLeave={clearLongPress}
-              onPointerCancel={clearLongPress}
-              onClick={onBubbleClick}
-              onContextMenu={(e) => e.preventDefault()}
-              className="ml-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-transform duration-200 hover:scale-105 active:scale-95"
-            >
-              <img
-                src={tricolorRing.url}
-                alt=""
-                draggable={false}
-                className={
-                  "h-8 w-8 select-none " +
-                  (bubbleState === "thinking" || bubbleState === "listening"
-                    ? "animate-spin [animation-duration:2.4s]"
-                    : "")
-                }
-              />
-            </button>
-          ) : (
-            <Bubble
-              size={28}
-              state={bubbleState}
-              interactive
-              ariaLabel={recording ? "Stop recording" : "Open actions — hold to talk"}
-              onPointerDown={onBubbleDown}
-              onPointerUp={onBubbleUp}
-              onPointerLeave={clearLongPress}
-              onPointerCancel={clearLongPress}
-              onClick={onBubbleClick}
-              onContextMenu={(e) => e.preventDefault()}
-              className="ml-1"
-            />
-          )}
-
+          <Bubble
+            size={28}
+            state={bubbleState}
+            interactive
+            ariaLabel={recording ? "Stop recording" : "Open actions — hold to talk"}
+            onPointerDown={onBubbleDown}
+            onPointerUp={onBubbleUp}
+            onPointerLeave={clearLongPress}
+            onPointerCancel={clearLongPress}
+            onClick={onBubbleClick}
+            onContextMenu={(e) => e.preventDefault()}
+            className="ml-1"
+          />
 
           {recording ? (
             <div className="flex flex-1 items-center gap-2 text-sm text-foreground/80">
-              <img
-                src={tricolorRing.url}
-                alt=""
-                draggable={false}
-                className="h-5 w-5 shrink-0 select-none animate-spin [animation-duration:1.6s]"
-              />
+              <span className="inline-block h-2 w-2 shrink-0 animate-pulse rounded-full bg-destructive" />
               Listening… {formatTime(recordSeconds)}
-              <span className="ml-1 text-[11px] text-muted-foreground">
-                tap ring to stop
-              </span>
+              <span className="ml-1 text-[11px] text-muted-foreground">tap ring to stop</span>
             </div>
           ) : (
             <textarea
@@ -365,51 +289,34 @@ export function Composer({
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  submit();
-                }
+                if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit(); }
               }}
-              placeholder={disabled ? (thinkingLabel ?? "Thinking…") : (placeholder ?? "Ask anything…")}
+              placeholder={disabled ? (thinkingLabel ?? "Thinking…") : (placeholder ?? "Ask me anything…")}
               rows={1}
               disabled={disabled}
               className="flex-1 resize-none bg-transparent py-1.5 text-[16px] leading-6 text-foreground placeholder:text-muted-foreground/70 focus:outline-none disabled:opacity-60"
             />
           )}
 
-          {/* Go button — appears only when there's input */}
-          <div
-            className="overflow-hidden transition-all duration-300"
-            style={{
-              width: hasContent || recording ? 76 : 0,
-              opacity: hasContent || recording ? 1 : 0,
-            }}
-          >
-            {recording ? (
-              <button
-                onClick={stopRecording}
-                className="flex h-10 w-[72px] items-center justify-center gap-1 rounded-full bg-destructive text-white shadow-lg"
-                aria-label="Stop"
-              >
-                <Square className="h-3.5 w-3.5 fill-current" />
-                <span className="text-[13px] font-semibold">Stop</span>
-              </button>
-            ) : (
-              <button
-                aria-label="Send"
-                onClick={submit}
-                disabled={!hasContent || disabled}
-                className="flex h-10 w-[72px] items-center justify-center gap-1 rounded-full text-white shadow-lg transition-transform duration-200 hover:scale-[1.03] disabled:opacity-40"
-                style={{
-                  background: "var(--send-gradient)",
-                  transform: hasContent ? "scale(1)" : "scale(0.6)",
-                }}
-              >
-                <span className="text-[13px] font-semibold tracking-wide">Go</span>
-                <ArrowUp className="h-4 w-4" strokeWidth={2.6} />
-              </button>
-            )}
-          </div>
+          {recording ? (
+            <button
+              onClick={stopRecording}
+              className="flex h-11 w-11 items-center justify-center rounded-full bg-destructive text-white shadow-lg"
+              aria-label="Stop"
+            >
+              <Square className="h-4 w-4 fill-current" />
+            </button>
+          ) : (
+            <button
+              aria-label="Send"
+              onClick={submit}
+              disabled={!hasContent || disabled}
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[color:var(--primary-foreground)] shadow-[0_8px_20px_-6px_rgba(247,201,72,0.6)] transition-all duration-200 hover:scale-[1.04] disabled:cursor-not-allowed disabled:opacity-40"
+              style={{ background: "var(--send-gradient)" }}
+            >
+              <ArrowUp className="h-5 w-5" strokeWidth={2.75} />
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -417,28 +324,18 @@ export function Composer({
 }
 
 function MenuRow({
-  icon,
-  title,
-  hint,
-  onClick,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  hint: string;
-  onClick: () => void;
-}) {
+  icon, title, hint, onClick,
+}: { icon: React.ReactNode; title: string; hint: string; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-foreground/5"
+      className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition hover:bg-foreground/5"
     >
       <span className="flex h-8 w-8 items-center justify-center rounded-full bg-foreground/10 text-foreground">
         {icon}
       </span>
       <span className="flex-1">
-        <span className="block text-[13px] font-medium text-foreground">
-          {title}
-        </span>
+        <span className="block text-[13px] font-medium text-foreground">{title}</span>
         <span className="block text-[11px] text-muted-foreground">{hint}</span>
       </span>
     </button>

@@ -1,59 +1,54 @@
-## What you'll get
+# Global AI Assistant — Redesign & De-India
 
-1. **Model pill moves off home** → the top bar shows a clean icon-only "Model" chip in Settings only. Home stays quiet like you asked.
-2. **Composer quota UI** → inline segmented meter (Text 5 · Image/File 2 · Voice 2) sitting just under the composer, each segment lighting red as it depletes; the affected input (mic / attach / send) shows a lock icon + tooltip when exhausted.
-3. **Upgrade flow polish** → single `UpgradeDialog` (benefits, Pro model list, price, "Continue to Cashfree" CTA) opened from: model pill lock, composer lock, quota-exceeded toast, Settings.
-4. **Cashfree checkout** → Pro = ₹499/mo one-time top-up (final price your call, easy to change). Server fn creates a Cashfree order, opens hosted checkout, webhook flips the user to Pro.
-5. **Secure per-user memory** → Google sign-in via Lovable Cloud. Conversations, usage counters, and `isPro` move from `localStorage` to the database, scoped to `auth.uid()` with RLS. Guests keep the current localStorage flow so the app still works signed-out.
+## What ships
 
-## Answering "why did I put model settings on the home page?"
+1. **Remove India Mode end-to-end**
+   - Delete `src/routes/india.tsx`, `tests/e2e/india-mode-*.spec.py`, `src/lib/india-mode-reset.test.ts`, `src/assets/tricolor-ring.png.asset.json`.
+   - Strip `indiaMode`, `indiaOnboarded`, `resetIndiaModeArtifacts`, tricolor ring imports from `askeasy.ts`, `Composer.tsx`, `SettingsSheet.tsx`, `index.tsx`.
+   - Drop the `askindia` domain redirect. Delete the `.india` theme block in `styles.css`.
+   - Replace 24-language dictionary with 10-language reply-mode map (below). Keep the small `useI18n` helper only for UI strings that stay English.
 
-Old design used the pill for fast switching mid-chat. You've now told me you want it in Settings only — I'll remove it from the top bar and add a proper "Model" section in the Settings sheet (Smart / Eco / Ultra, with Pro-lock on Ultra).
+2. **Home = Dribbble Ink & Butter bento (chosen v3 direction)**
+   - Cream background surface `#f5f1e8` in light, ink `#0f0f10` in dark; buttery yellow `#ffe066` as primary CTA; lavender `#c9a0dc` secondary accent.
+   - Header: brand mark (yellow rounded-square with dot), title "AskEasy", language pill (right), settings icon.
+   - Hero copy: "How can I help, {name}?" with a soft subtitle.
+   - **Category bento grid** (2-col, one wide + 4 square tiles), each tile pre-fills the composer prompt:
+     - Write — story/email/blog
+     - Ideas — brainstorm
+     - Code — debug/build
+     - Learn — explain any concept
+     - Plan — trips, days, projects
+     - Translate — quick language help
+   - Floating pill composer at bottom with yellow send button.
+   - Chat view: cream user bubbles on ink surface (dark) / ink bubbles on cream (light); assistant streams plain text.
 
-## Technical plan
+3. **Language mode (10 languages, trial-gated)**
+   - English is the default and always free.
+   - Language picker in header + Settings, 10 options: English, Spanish, French, German, Portuguese, Italian, Arabic, Hindi, Chinese (Simplified), Japanese.
+   - Selecting a non-English language starts a **3-day free trial** (`trialStartedAt` timestamp saved locally + server profile field if signed in).
+   - After trial expires: switching to a non-English language opens the Upgrade dialog; English keeps working free.
+   - Pro users bypass the trial gate.
 
-### Backend (Lovable Cloud — I'll enable it)
-Tables (all RLS, `auth.uid()` scoped, `service_role` for webhook):
-```text
-profiles(user_id pk, is_pro bool, pro_until timestamptz, created_at)
-conversations(id, user_id, title, updated_at)
-messages(id, conversation_id, user_id, role, content, attachments jsonb, created_at)
-usage_daily(user_id, day date, text int, media int, voice int)  -- resets per day
-payments(id, user_id, cashfree_order_id, status, amount, raw jsonb, created_at)
-```
-Trigger: on `auth.users` insert → create `profiles` row. Google OAuth enabled via `configure_social_auth`.
+4. **Free English quota**
+   - 5 text prompts/day (already in `useUsage`); attachments free tier stays 2 media + 2 voice.
+   - Over quota → Upgrade dialog with clear reason.
 
-### Server functions (`src/lib/*.functions.ts`)
-- `getMe` — profile + today's usage
-- `listMessages` / `appendMessage` / `clearConversation`
-- `bumpUsage({ kind, n })` — server-authoritative quota (client can't cheat)
-- `createCashfreeOrder` — returns `payment_session_id` for hosted checkout
-- Public route `src/routes/api/public/cashfree-webhook.ts` — HMAC-verify, mark `payments.status`, flip `profiles.is_pro=true`, log to `webhook_events`
+5. **OpenRouter wiring**
+   - Keep `src/routes/api/chat.ts` on OpenRouter (already wired). Rewrite the language-enforcement prompt for the new 10-language map (drop 22-lang Indic block). English default = no language override.
 
-### Frontend
-- Remove `ModelPill` from `__root.tsx` top bar; keep the file but only mount inside `SettingsSheet` as a "Model" section.
-- New `QuotaMeter` under `Composer`; new `UpgradeDialog`.
-- `sendToAI` calls `bumpUsage` server-side before the OpenRouter proxy; server enforces limits (client UI just mirrors state).
-- `useConversation` / `useUsage` swap to server fns when signed-in, fall back to localStorage when signed-out.
-- Google sign-in button in the header account menu; `/auth` page for the Google broker return.
+## Technical touchpoints
 
-### Secrets needed from you (one form, after you approve)
-- `CASHFREE_APP_ID`
-- `CASHFREE_SECRET_KEY`
-- `CASHFREE_ENV` (`sandbox` to start, flip to `production` later)
+- `src/lib/askeasy.ts`: bump settings version, remove India fields, add `trialStartedAt: number | null`, add `trialDaysLeft()` helper, replace `LANGUAGES` list, keep `sendToAI` shape.
+- `src/lib/i18n.ts`: shrink to the 10-language table (`code`, `label`, `native`, `bcp47`). Remove per-language UI dictionary — UI stays English.
+- `src/routes/index.tsx`: full rewrite for the bento home + category tiles that call `setComposerDraft(prompt)`. Composer gains an optional `draft` prop.
+- `src/components/askeasy/Composer.tsx`: accept `draft` prop (controlled seed), remove `indiaMode`/tricolor ring branch, keep bubble.
+- `src/components/askeasy/SettingsSheet.tsx`: replace India toggle with Language section + trial status; keep model/theme/plan.
+- `src/styles.css`: retune tokens for Ink & Butter (light = cream base + ink text; dark = ink base + cream text; `--primary` = butter yellow); remove `.india` block.
+- `src/routes/api/chat.ts`: 10-language enforcement block; English = no override.
+- Delete: `src/routes/india.tsx`, `tests/e2e/india-mode-*.spec.py`, `src/lib/india-mode-reset.test.ts`, `src/assets/tricolor-ring.png.asset.json`.
 
-`OPENROUTER_API_KEY` and `LOVABLE_API_KEY` are already set.
+## Out of scope this pass
+- Server-side trial enforcement on the OpenRouter route (client-gated for now; Pro payment via existing Cashfree flow is unchanged).
+- New payment flows; upgrade dialog reused as-is.
 
-### Cashfree webhook + return URLs (I'll wire these; register them in Cashfree dashboard after publish)
-- Webhook: `https://<your-project>.lovable.app/api/public/cashfree-webhook`
-- Return: `https://<your-project>.lovable.app/upgrade/success?order={order_id}`
-
-## Order of work (single build turn)
-1. Enable Cloud, run migration, enable Google.
-2. Server fns + webhook + Cashfree client.
-3. Move ModelPill into Settings, remove from home.
-4. QuotaMeter + UpgradeDialog + composer wiring.
-5. Swap conversation/usage/isPro to server-backed when signed-in.
-6. Ask for the 3 Cashfree secrets.
-
-Approve and I'll execute end-to-end.
+Reply **go** and I'll build it.
