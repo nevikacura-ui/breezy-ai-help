@@ -383,16 +383,34 @@
 .stream-text.is-streaming {
   background: linear-gradient(
     90deg,
-    #b47cff 0%, #ff7ac6 20%, #ff9a6c 40%,
-    #ffd166 60%, #7ad7ff 80%, #b47cff 100%
+    #b47cff 0%, #ff7ac6 18%, #ff9a6c 36%,
+    #ffd166 54%, #7ad7ff 72%, #7cf0c2 86%, #b47cff 100%
   );
-  background-size: 200% 100%;
+  background-size: 220% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   animation: stream-shimmer 3.4s linear infinite;
 }
-.stream-text.is-done { color: inherit; }
+/* Finished text keeps a subtle, readable gradient tint — unique to AskEasy */
+.stream-text.is-done {
+  background: linear-gradient(
+    100deg,
+    var(--stream-done-a, #6d4bd8) 0%,
+    var(--stream-done-b, #d94fa8) 45%,
+    var(--stream-done-c, #2f8fbf) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.dark .stream-text.is-done {
+  --stream-done-a: #d9c6ff;
+  --stream-done-b: #ffc2e2;
+  --stream-done-c: #b8ecff;
+}
+.stream-text .stream-word:nth-child(7n)  { font-style: italic; }
+
 
 .stream-caret {
   display: inline-block;
