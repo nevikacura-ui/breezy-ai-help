@@ -13,7 +13,7 @@ import { SettingsSheet } from "@/components/askeasy/SettingsSheet";
 import { BotAvatar, preloadBotAvatars } from "@/components/askeasy/BotAvatar";
 import { useAuthUser, useSettings, useUsage, PERSONAS, type Persona } from "@/lib/askeasy";
 import easy from "@/assets/bots/easy.png";
-import logoAsset from "@/assets/askeasy-logo.png.asset.json";
+import logoAsset from "@/assets/askeasy-logo-transparent.png.asset.json";
 
 const WELCOME_DISMISSED_KEY = "askeasy.welcome.dismissed.v1";
 
