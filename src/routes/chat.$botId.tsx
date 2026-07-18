@@ -165,9 +165,55 @@ function BotChat() {
     window.localStorage.setItem(chatKey(bot.id), JSON.stringify(messages));
   }, [messages, hydrated, bot?.id, settings.privateMode]);
 
+  // Smart auto-scroll: stick to bottom while the user is near it; step aside
+  // the moment they scroll up. Follows streaming token growth via ResizeObserver
+  // without ever fighting the user.
+  const stickToBottomRef = useRef(true);
+  const lastScrollTopRef = useRef(0);
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages, thinking]);
+    const el = scrollRef.current;
+    if (!el) return;
+    const NEAR_PX = 80;
+    const onScroll = () => {
+      const distance = el.scrollHeight - el.scrollTop - el.clientHeight;
+      const goingUp = el.scrollTop < lastScrollTopRef.current - 2;
+      lastScrollTopRef.current = el.scrollTop;
+      if (goingUp && distance > NEAR_PX) stickToBottomRef.current = false;
+      else if (distance <= NEAR_PX) stickToBottomRef.current = true;
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const content = el.firstElementChild as HTMLElement | null;
+    if (!content) return;
+    let raf = 0;
+    const follow = () => {
+      if (!stickToBottomRef.current) return;
+      raf = requestAnimationFrame(() => {
+        el.scrollTop = el.scrollHeight;
+      });
+    };
+    const ro = new ResizeObserver(follow);
+    ro.observe(content);
+    return () => {
+      ro.disconnect();
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  // On new message boundaries (send / receive start), re-arm sticky and smooth-scroll.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    stickToBottomRef.current = true;
+    lastScrollTopRef.current = el.scrollHeight;
+    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+  }, [messages.length, thinking]);
+
 
   const sendText = useCallback(async (text: string) => {
     if (!bot || !text.trim() || thinking) return;
