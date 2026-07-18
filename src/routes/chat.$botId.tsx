@@ -448,7 +448,8 @@ function BotChat() {
   return (
     <main
       className="relative flex min-h-dvh flex-col overflow-hidden"
-      style={{ background: "var(--ink)", color: "var(--cream)" }}
+      style={{ background: "#000", color: "var(--cream)" }}
+
     >
       {/* Ambient gradient glow */}
       <div className={`chat-ambient ${thinking ? "is-streaming" : ""}`} aria-hidden />
