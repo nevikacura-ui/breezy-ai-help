@@ -361,8 +361,8 @@
    and a spinning gradient loader for AI responses.
    ============================================================ */
 @keyframes stream-word-in {
-  from { opacity: 0; transform: translateY(6px); filter: blur(4px); }
-  to   { opacity: 1; transform: translateY(0);   filter: blur(0); }
+  from { opacity: 0; transform: translate3d(0, 6px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 @keyframes stream-shimmer {
   0%   { background-position: 0% 50%; }
@@ -378,7 +378,14 @@
 
 .stream-text .stream-word {
   display: inline-block;
-  animation: stream-word-in 360ms cubic-bezier(.2,.7,.2,1) both;
+  animation: stream-word-in 320ms cubic-bezier(.2,.7,.2,1) both;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+/* Once the reveal finishes, drop compositor hints so the browser can free layers. */
+.stream-text.is-done .stream-word {
+  will-change: auto;
+  animation: none;
 }
 .stream-text.is-streaming {
   background: linear-gradient(
@@ -403,6 +410,8 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 200px;
 }
 .dark .stream-text.is-done {
   --stream-done-a: #d9c6ff;
@@ -410,6 +419,7 @@
   --stream-done-c: #b8ecff;
 }
 .stream-text .stream-word:nth-child(7n)  { font-style: italic; }
+
 
 
 .stream-caret {
