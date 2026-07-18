@@ -244,7 +244,14 @@ function BotChat() {
         setTimeout(() => setConfetti(false), 1800);
       }
     } catch (e) {
-      if ((e as Error).name !== "AbortError") toast.error("Something went wrong. Try again.");
+      const err = e as Error & { status?: number };
+      if (err.name === "AbortError") { /* user cancelled */ }
+      else if (err.status === 401) {
+        toast.error("Please sign in to chat.");
+        nav({ to: "/auth" });
+      } else {
+        toast.error(err.message || "Something went wrong. Try again.");
+      }
     } finally {
       setThinking(false);
       abortRef.current = null;
