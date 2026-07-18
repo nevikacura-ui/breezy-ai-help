@@ -86,8 +86,11 @@ function Splash() {
       {/* Hero */}
       <div className="relative flex flex-col items-center px-6">
         <div
-          className="animate-logo-pop relative flex w-full max-w-md items-center justify-center"
-          style={{ filter: "drop-shadow(0 30px 50px rgba(99, 78, 150, 0.45))" }}
+          className="animate-logo-pop relative w-full max-w-md overflow-hidden rounded-3xl"
+          style={{
+            border: "1px solid color-mix(in oklab, var(--lavender) 22%, transparent)",
+            boxShadow: "0 30px 60px -20px rgba(99, 78, 150, 0.55), inset 0 0 0 1px rgba(255,255,255,0.04)",
+          }}
         >
           <img
             src={logoAsset.url}
@@ -101,7 +104,7 @@ function Splash() {
         </div>
 
         <p
-          className="animate-fade-up mt-2 max-w-[18rem] text-center text-sm opacity-70"
+          className="animate-fade-up mt-4 max-w-[18rem] text-center text-sm opacity-70"
           style={{ animationDelay: "1.1s" }}
         >
           Meet Easy — your personal AI companion.
