@@ -13,6 +13,7 @@ import { SettingsSheet } from "@/components/askeasy/SettingsSheet";
 import { BotAvatar, preloadBotAvatars } from "@/components/askeasy/BotAvatar";
 import { useAuthUser, useSettings, useUsage, PERSONAS, type Persona } from "@/lib/askeasy";
 import easy from "@/assets/bots/easy.png";
+import logoAsset from "@/assets/askeasy-logo.png.asset.json";
 
 const WELCOME_DISMISSED_KEY = "askeasy.welcome.dismissed.v1";
 
@@ -117,34 +118,41 @@ function BotsHome() {
       className="relative min-h-dvh overflow-x-hidden pb-6"
       style={{ background: "var(--ink)", color: "var(--cream)" }}
     >
-      {/* Header */}
-      <header className="flex items-center justify-between px-5 pt-6">
+      {/* Header — logo banner matching the asset's dark background */}
+      <header
+        className="relative flex items-center justify-between px-4 pb-5 pt-5"
+        style={{
+          background: "#0f0d14",
+          borderBottom: "1px solid color-mix(in oklab, #c4a8e0 12%, transparent)",
+        }}
+      >
         <button
           onClick={() => setSettingsOpen(true)}
-          className="flex h-10 w-10 items-center justify-center rounded-full"
-          style={{ background: "color-mix(in oklab, var(--cream) 8%, transparent)" }}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-transform active:scale-95"
+          style={{ background: "color-mix(in oklab, #ffffff 8%, transparent)" }}
           aria-label="Settings"
         >
-          <Settings2 className="h-5 w-5" />
+          <Settings2 className="h-5 w-5" style={{ color: "#faf8f5" }} />
         </button>
-        <div className="flex items-center gap-2">
+
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           <img
-            src="/favicon.png"
-            alt=""
-            className="h-8 w-8 object-contain"
-            width={64}
-            height={64}
+            src={logoAsset.url}
+            alt="Askeasy"
+            className="h-auto w-[220px] object-contain sm:w-[260px]"
+            width={1200}
+            height={400}
             loading="eager"
             decoding="async"
           />
-          <span className="font-display text-[1.1rem] tracking-tight">Askeasy</span>
         </div>
+
         <button
-          className="relative flex h-10 w-10 items-center justify-center rounded-full"
-          style={{ background: "color-mix(in oklab, var(--cream) 8%, transparent)" }}
+          className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-transform active:scale-95"
+          style={{ background: "color-mix(in oklab, #ffffff 8%, transparent)" }}
           aria-label="Notifications"
         >
-          <Bell className="h-5 w-5" />
+          <Bell className="h-5 w-5" style={{ color: "#faf8f5" }} />
           <span
             className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full"
             style={{ background: "var(--butter)" }}
