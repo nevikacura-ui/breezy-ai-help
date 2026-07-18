@@ -205,14 +205,18 @@ function BotChat() {
     };
   }, []);
 
-  // On new message boundaries (send / receive start), re-arm sticky and smooth-scroll.
+  // On NEW message boundaries only, re-arm sticky and smooth-scroll.
+  // (Do NOT depend on `thinking` — on Android the keyboard/URL-bar resize
+  // already nudges the viewport, and an extra smooth scroll on every
+  // thinking flip reads as the page "scrolling on its own".)
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     stickToBottomRef.current = true;
     lastScrollTopRef.current = el.scrollHeight;
     el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-  }, [messages.length, thinking]);
+  }, [messages.length]);
+
 
 
   const sendText = useCallback(async (text: string) => {
@@ -447,8 +451,8 @@ function BotChat() {
 
   return (
     <main
-      className="relative flex min-h-dvh flex-col overflow-hidden"
-      style={{ background: "#000", color: "var(--cream)" }}
+      className="relative flex flex-col overflow-hidden"
+      style={{ background: "#000", color: "#ffffff", height: "100dvh", overscrollBehavior: "none", touchAction: "pan-y" }}
 
     >
       {/* Ambient gradient glow */}
@@ -521,7 +525,7 @@ function BotChat() {
       )}
 
       {/* Messages */}
-      <section ref={scrollRef} className="flex-1 overflow-y-auto px-4 pb-40 pt-5">
+      <section ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 pb-40 pt-5" style={{ WebkitOverflowScrolling: "touch" }}>
         <div className="mx-auto flex max-w-lg flex-col gap-4">
           {messages.map((m, idx) => (
             <MessageRow

@@ -408,7 +408,10 @@
   content-visibility: auto;
   contain-intrinsic-size: auto 200px;
 }
-.msg-assistant { color: #ffffff; }
+.msg-assistant, .msg-assistant p, .msg-assistant * { color: #ffffff !important; }
+.msg-assistant .stream-text.is-streaming,
+.msg-assistant .stream-text.is-streaming * { color: transparent !important; }
+.msg-user { color: #ffffff !important; }
 
 
 .stream-text .stream-word:nth-child(7n)  { font-style: italic; }
