@@ -128,10 +128,15 @@ function BotsHome() {
         >
           <Settings2 className="h-5 w-5" />
         </button>
-        <div className="flex items-center gap-1.5">
-          <Sparkles className="h-4 w-4" style={{ color: "var(--butter)" }} />
-          <span className="font-display text-[1.1rem] tracking-tight">Askeasy</span>
-        </div>
+        <img
+          src={logoAsset.url}
+          alt="Askeasy"
+          className="h-7 w-auto object-contain"
+          width={240}
+          height={60}
+          loading="eager"
+          decoding="async"
+        />
         <button
           className="relative flex h-10 w-10 items-center justify-center rounded-full"
           style={{ background: "color-mix(in oklab, var(--cream) 8%, transparent)" }}
