@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useOnboarding } from "@/lib/bots";
-import easy from "@/assets/bots/easy.png";
+import logoAsset from "@/assets/askeasy-logo.png.asset.json";
 
 export const Route = createFileRoute("/splash")({
   head: () => ({
@@ -12,8 +12,6 @@ export const Route = createFileRoute("/splash")({
   }),
   component: Splash,
 });
-
-const WORDMARK = "askeasy";
 
 const BUBBLES: Array<{ top: string; left: string; size: number; color: string; delay: number; float: number }> = [
   { top: "12%", left: "8%",  size: 56, color: "#ffd84d", delay: 0.05, float: 4.5 },
