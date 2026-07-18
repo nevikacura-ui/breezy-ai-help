@@ -37,9 +37,48 @@ export const Route = createFileRoute("/api/transcribe")({
     handlers: {
       POST: async ({ request }) => {
         const key = process.env.LOVABLE_API_KEY;
+        const supabaseUrl = process.env.SUPABASE_URL;
+        const supabaseKey = process.env.SUPABASE_PUBLISHABLE_KEY;
         if (!key) {
           return new Response(JSON.stringify({ error: "LOVABLE_API_KEY missing" }), {
             status: 500, headers: { "Content-Type": "application/json" },
+          });
+        }
+        if (!supabaseUrl || !supabaseKey) {
+          return new Response(JSON.stringify({ error: "Server auth not configured" }), {
+            status: 500, headers: { "Content-Type": "application/json" },
+          });
+        }
+
+        // Require auth + voice quota
+        const authHeader = request.headers.get("authorization") ?? "";
+        const token = authHeader.toLowerCase().startsWith("bearer ") ? authHeader.slice(7).trim() : "";
+        if (!token) {
+          return new Response(JSON.stringify({ error: "Sign in required" }), {
+            status: 401, headers: { "Content-Type": "application/json" },
+          });
+        }
+        const supa = createClient(supabaseUrl, supabaseKey, {
+          global: { headers: { Authorization: `Bearer ${token}` } },
+          auth: { persistSession: false, autoRefreshToken: false },
+        });
+        const { data: userData, error: userErr } = await supa.auth.getUser(token);
+        if (userErr || !userData?.user) {
+          return new Response(JSON.stringify({ error: "Invalid session" }), {
+            status: 401, headers: { "Content-Type": "application/json" },
+          });
+        }
+        const { data: allowed, error: qErr } = await supa.rpc("check_and_bump_usage", {
+          _kind: "voice", _n: 1, _limit: FREE_VOICE_LIMIT,
+        });
+        if (qErr) {
+          return new Response(JSON.stringify({ error: "Quota check failed" }), {
+            status: 500, headers: { "Content-Type": "application/json" },
+          });
+        }
+        if (allowed === false) {
+          return new Response(JSON.stringify({ error: "Daily voice limit reached. Upgrade to Pro.", code: "QUOTA_EXCEEDED" }), {
+            status: 429, headers: { "Content-Type": "application/json" },
           });
         }
 
