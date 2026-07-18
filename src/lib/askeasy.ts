@@ -106,7 +106,7 @@ export const USAGE_KEY = "askeasy.usage.v1";
 
 const DEFAULT_SETTINGS: Settings = {
   name: "",
-  theme: "system",
+  theme: "light",
   voiceEnabled: true,
   openRouterModel: "askeasy/smart",
   isPro: false,
