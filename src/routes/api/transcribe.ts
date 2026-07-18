@@ -1,4 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { createClient } from "@supabase/supabase-js";
+
+const FREE_VOICE_LIMIT = 2;
 
 // Persona-aware biasing prompts for the transcription model.
 // gpt-4o-mini-transcribe accepts a `prompt` field that steers vocabulary and style.
