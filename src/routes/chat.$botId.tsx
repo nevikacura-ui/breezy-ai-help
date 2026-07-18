@@ -451,8 +451,8 @@ function BotChat() {
 
   return (
     <main
-      className="relative flex min-h-dvh flex-col overflow-hidden"
-      style={{ background: "#000", color: "var(--cream)" }}
+      className="relative flex flex-col overflow-hidden"
+      style={{ background: "#000", color: "#ffffff", height: "100dvh", overscrollBehavior: "none", touchAction: "pan-y" }}
 
     >
       {/* Ambient gradient glow */}
