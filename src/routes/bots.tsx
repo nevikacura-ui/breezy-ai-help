@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Bell, Settings2, SlidersHorizontal, Star, Plus, Sparkles, X } from "lucide-react";
+import { Bell, Settings2, SlidersHorizontal, Star, Plus, X } from "lucide-react";
 import {
   PRESET_BOTS,
   CATEGORY_LABELS,
@@ -12,6 +12,7 @@ import {
 import { SettingsSheet } from "@/components/askeasy/SettingsSheet";
 import { BotAvatar, preloadBotAvatars } from "@/components/askeasy/BotAvatar";
 import { useAuthUser, useSettings, useUsage, PERSONAS, type Persona } from "@/lib/askeasy";
+import logoAsset from "@/assets/askeasy-logo.png.asset.json";
 import easy from "@/assets/bots/easy.png";
 
 const WELCOME_DISMISSED_KEY = "askeasy.welcome.dismissed.v1";
