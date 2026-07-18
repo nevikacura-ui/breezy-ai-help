@@ -308,7 +308,14 @@ export function SettingsSheet({
               checked={settings.dyslexiaFont}
               onChange={(v) => update({ dyslexiaFont: v })}
             />
+            <Row
+              label="Reduce motion"
+              hint="Tones down spinning, streaming shimmer, and ambient glow. Your system preference is respected automatically."
+              checked={settings.reduceMotion}
+              onChange={(v) => update({ reduceMotion: v })}
+            />
           </section>
+
 
           {/* Focus mode */}
           <section className="space-y-2">
