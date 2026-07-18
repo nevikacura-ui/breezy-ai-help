@@ -756,8 +756,8 @@ function MessageRow({ m, bot, isLast, onForget, onQuickAsk, quickChips }: {
           </button>
         )}
         <div
-          className="max-w-[85%] rounded-2xl rounded-tr-md px-3.5 py-2.5 text-[14px]"
-          style={{ background: "color-mix(in oklab, var(--cream) 6%, transparent)", color: "var(--cream)" }}
+          className="msg-user max-w-[78%] rounded-[22px] rounded-tr-lg px-4 py-2.5"
+          style={{ background: "color-mix(in oklab, var(--cream) 5%, transparent)", color: "var(--cream)" }}
         >
           {m.content}
         </div>
@@ -765,38 +765,32 @@ function MessageRow({ m, bot, isLast, onForget, onQuickAsk, quickChips }: {
     );
   }
   return (
-    <div className="flex items-start gap-2">
-      <BotAvatar bot={bot} size={32} eager emojiSize={15} />
-      <div className="max-w-[85%] flex-1">
-        <div
-          className="rounded-2xl rounded-tl-md px-3.5 py-3 text-[14px] leading-relaxed"
-          style={{
-            background: "linear-gradient(180deg, #fff, #fff5f8)",
-            color: "var(--ink)",
-          }}
-        >
+    <div className="flex items-start gap-3">
+      <BotAvatar bot={bot} size={30} eager emojiSize={14} />
+      <div className="max-w-[86%] flex-1">
+        <div className="msg-assistant">
           {m.content.split("\n").map((line, i) => (
-            <p key={i} className={i > 0 ? "mt-1.5" : ""}>
+            <p key={i} className={i > 0 ? "mt-3" : ""}>
               {isLast ? <StreamText text={line} /> : line}
             </p>
           ))}
         </div>
         {/* Suggested follow-up chips */}
         {isLast && quickChips.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1.5">
+          <div className="mt-3 flex flex-wrap gap-1.5">
             {quickChips.map((c, i) => (
               <button
                 key={i}
                 onClick={() => onQuickAsk(c)}
-                className="rounded-full border px-2.5 py-1 text-[11.5px] font-medium"
-                style={{ borderColor: "color-mix(in oklab, var(--cream) 20%, transparent)", background: "color-mix(in oklab, var(--cream) 6%, transparent)", color: "var(--cream)" }}
+                className="rounded-full border px-3 py-1 text-[11.5px] font-medium tracking-[-0.005em]"
+                style={{ borderColor: "color-mix(in oklab, var(--cream) 18%, transparent)", background: "color-mix(in oklab, var(--cream) 4%, transparent)", color: "var(--cream)" }}
               >
                 {c}
               </button>
             ))}
           </div>
         )}
-        <div className="mt-1.5 flex items-center gap-2 pl-1 opacity-60">
+        <div className="mt-2 flex items-center gap-3 pl-0.5 opacity-50">
           <button aria-label="Like" className="hover:opacity-100"><ThumbsUp className="h-3.5 w-3.5" /></button>
           <button aria-label="Dislike" className="hover:opacity-100"><ThumbsDown className="h-3.5 w-3.5" /></button>
           <button aria-label="Forget this" onClick={onForget} className="ml-auto hover:opacity-100"><Trash2 className="h-3.5 w-3.5" /></button>
@@ -805,3 +799,4 @@ function MessageRow({ m, bot, isLast, onForget, onQuickAsk, quickChips }: {
     </div>
   );
 }
+
