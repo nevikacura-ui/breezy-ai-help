@@ -399,25 +399,16 @@
   color: transparent;
   animation: stream-shimmer 3.4s linear infinite;
 }
-/* Finished text keeps a subtle, readable gradient tint — unique to AskEasy */
+/* Finished text: use solid foreground for maximum readability */
 .stream-text.is-done {
-  background: linear-gradient(
-    100deg,
-    var(--stream-done-a, #6d4bd8) 0%,
-    var(--stream-done-b, #d94fa8) 45%,
-    var(--stream-done-c, #2f8fbf) 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+  color: var(--foreground);
   content-visibility: auto;
   contain-intrinsic-size: auto 200px;
 }
-.dark .stream-text.is-done {
-  --stream-done-a: #d9c6ff;
-  --stream-done-b: #ffc2e2;
-  --stream-done-c: #b8ecff;
-}
+
 .stream-text .stream-word:nth-child(7n)  { font-style: italic; }
 
 
