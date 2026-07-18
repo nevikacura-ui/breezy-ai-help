@@ -96,10 +96,14 @@ function BotsHome() {
     [settings.persona, settings.warmth, settings.name],
   );
 
-  // Redirect through splash if never seen
-  if (hydrated && !state.seenSplash) {
-    nav({ to: "/splash" });
-  }
+  // Redirect through splash if never seen. Navigation must run after render;
+  // calling it in the render body makes TanStack's Transitioner update while
+  // BotsHome is rendering and can leave the client on a blank transition.
+  useEffect(() => {
+    if (hydrated && !state.seenSplash) {
+      void nav({ to: "/splash", replace: true });
+    }
+  }, [hydrated, state.seenSplash, nav]);
 
   const allBots = useMemo<Bot[]>(() => [...customBots, ...PRESET_BOTS], [customBots]);
   const featured = useMemo(() => PRESET_BOTS.filter((b) => b.featured), []);
