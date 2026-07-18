@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useOnboarding } from "@/lib/bots";
-import easy from "@/assets/bots/easy.png";
+import logoAsset from "@/assets/askeasy-logo.png.asset.json";
 
 export const Route = createFileRoute("/splash")({
   head: () => ({
@@ -12,8 +12,6 @@ export const Route = createFileRoute("/splash")({
   }),
   component: Splash,
 });
-
-const WORDMARK = "askeasy";
 
 const BUBBLES: Array<{ top: string; left: string; size: number; color: string; delay: number; float: number }> = [
   { top: "12%", left: "8%",  size: 56, color: "#ffd84d", delay: 0.05, float: 4.5 },
@@ -86,53 +84,28 @@ function Splash() {
       </div>
 
       {/* Hero */}
-      <div className="relative flex flex-col items-center">
-        <div className="relative flex h-52 w-52 items-center justify-center">
-          {/* Rotating soft ring */}
-          <div
-            className="absolute inset-0 rounded-full animate-ring-sweep"
-            style={{
-              background:
-                "conic-gradient(from 0deg, transparent 0deg, color-mix(in oklab, var(--butter) 55%, transparent) 90deg, transparent 180deg, color-mix(in oklab, #c4a8e0 55%, transparent) 270deg, transparent 360deg)",
-              WebkitMask: "radial-gradient(circle, transparent 62%, #000 63%, #000 100%)",
-              mask: "radial-gradient(circle, transparent 62%, #000 63%, #000 100%)",
-              filter: "blur(2px)",
-            }}
+      <div className="relative flex flex-col items-center px-6">
+        <div
+          className="animate-logo-pop relative w-full max-w-md overflow-hidden rounded-3xl"
+          style={{
+            border: "1px solid color-mix(in oklab, var(--lavender) 22%, transparent)",
+            boxShadow: "0 30px 60px -20px rgba(99, 78, 150, 0.55), inset 0 0 0 1px rgba(255,255,255,0.04)",
+          }}
+        >
+          <img
+            src={logoAsset.url}
+            alt="Askeasy"
+            className="h-auto w-full object-contain"
+            width={1200}
+            height={400}
+            loading="eager"
+            decoding="async"
           />
-          <div
-            className="relative flex h-44 w-44 items-center justify-center rounded-[2.5rem] animate-mascot-pop"
-            style={{
-              background: "linear-gradient(135deg, #c4a8e0, #9b7ed1)",
-              boxShadow: "0 30px 60px -20px rgba(155, 126, 209, 0.55)",
-            }}
-          >
-            <img
-              src={easy}
-              alt="Easy, the cute Askeasy mascot"
-              className="animate-breathe h-40 w-40 object-contain drop-shadow-[0_20px_30px_rgba(0,0,0,0.35)]"
-              width={320}
-              height={320}
-              style={{ animationDelay: "1.1s" }}
-            />
-          </div>
         </div>
 
-        {/* Wordmark — letter-by-letter rise */}
-        <h1 className="mt-9 flex font-display text-[2.8rem] leading-none tracking-tight">
-          {WORDMARK.split("").map((ch, i) => (
-            <span
-              key={i}
-              className="animate-letter-rise inline-block"
-              style={{ animationDelay: `${0.7 + i * 0.06}s` }}
-            >
-              {ch}
-            </span>
-          ))}
-        </h1>
-
         <p
-          className="animate-fade-up mt-3 max-w-[18rem] text-center text-sm opacity-70"
-          style={{ animationDelay: "1.25s" }}
+          className="animate-fade-up mt-4 max-w-[18rem] text-center text-sm opacity-70"
+          style={{ animationDelay: "1.1s" }}
         >
           Meet Easy — your personal AI companion.
         </p>

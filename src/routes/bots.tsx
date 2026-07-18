@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Bell, Settings2, SlidersHorizontal, Star, Plus, Sparkles, X } from "lucide-react";
+import { Bell, Settings2, SlidersHorizontal, Star, Plus, X } from "lucide-react";
 import {
   PRESET_BOTS,
   CATEGORY_LABELS,
@@ -127,8 +127,16 @@ function BotsHome() {
         >
           <Settings2 className="h-5 w-5" />
         </button>
-        <div className="flex items-center gap-1.5">
-          <Sparkles className="h-4 w-4" style={{ color: "var(--butter)" }} />
+        <div className="flex items-center gap-2">
+          <img
+            src="/favicon.png"
+            alt=""
+            className="h-8 w-8 object-contain"
+            width={64}
+            height={64}
+            loading="eager"
+            decoding="async"
+          />
           <span className="font-display text-[1.1rem] tracking-tight">Askeasy</span>
         </div>
         <button
