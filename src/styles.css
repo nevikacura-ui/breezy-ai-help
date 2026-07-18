@@ -471,30 +471,9 @@
 }
 
 /* Ambient gradient glow behind chat */
-.chat-ambient {
-  position: absolute;
-  inset: -20% -10% auto -10%;
-  height: 70vh;
-  z-index: 0;
-  pointer-events: none;
-  filter: blur(80px);
-  opacity: 0.35;
-  background:
-    radial-gradient(40% 45% at 20% 30%, color-mix(in oklab, #b47cff 70%, transparent) 0%, transparent 70%),
-    radial-gradient(38% 42% at 80% 25%, color-mix(in oklab, #7ad7ff 65%, transparent) 0%, transparent 70%),
-    radial-gradient(45% 40% at 55% 75%, color-mix(in oklab, #ff9a6c 55%, transparent) 0%, transparent 70%);
-  background-size: 180% 180%, 180% 180%, 200% 200%;
-  animation: chat-ambient-drift 22s ease-in-out infinite;
-  transition: opacity 900ms ease, filter 900ms ease;
-}
-:root:not(.dark) .chat-ambient { opacity: 0.28; }
-.chat-ambient.is-streaming {
-  opacity: 0.6;
-  filter: blur(64px) saturate(1.15);
-  animation-duration: 9s;
-}
+.chat-ambient { display: none; }
 main > * { position: relative; z-index: 1; }
-.chat-ambient { z-index: 0; }
+
 
 @keyframes chat-ambient-drift {
   0%   { background-position: 0% 50%, 100% 50%, 50% 0%; }
