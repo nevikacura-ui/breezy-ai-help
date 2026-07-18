@@ -399,15 +399,17 @@
   color: transparent;
   animation: stream-shimmer 3.4s linear infinite;
 }
-/* Finished text: use solid foreground for maximum readability */
+/* Finished text: pure white for maximum readability on black */
 .stream-text.is-done {
   background: none;
   -webkit-background-clip: unset;
   background-clip: unset;
-  color: var(--foreground);
+  color: #ffffff;
   content-visibility: auto;
   contain-intrinsic-size: auto 200px;
 }
+.msg-assistant { color: #ffffff; }
+
 
 .stream-text .stream-word:nth-child(7n)  { font-style: italic; }
 
