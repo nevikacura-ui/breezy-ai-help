@@ -86,6 +86,7 @@ export type Database = {
           display_name: string | null
           is_pro: boolean
           pro_until: string | null
+          trial_started_at: string | null
           updated_at: string
           user_id: string
         }
@@ -94,6 +95,7 @@ export type Database = {
           display_name?: string | null
           is_pro?: boolean
           pro_until?: string | null
+          trial_started_at?: string | null
           updated_at?: string
           user_id: string
         }
@@ -102,6 +104,7 @@ export type Database = {
           display_name?: string | null
           is_pro?: boolean
           pro_until?: string | null
+          trial_started_at?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -134,6 +137,7 @@ export type Database = {
       webhook_events: {
         Row: {
           created_at: string
+          event_id: string | null
           event_type: string | null
           id: string
           payload: Json | null
@@ -142,6 +146,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          event_id?: string | null
           event_type?: string | null
           id?: string
           payload?: Json | null
@@ -150,6 +155,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          event_id?: string | null
           event_type?: string | null
           id?: string
           payload?: Json | null
@@ -179,6 +185,11 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      check_and_bump_usage: {
+        Args: { _kind: string; _limit?: number; _n?: number }
+        Returns: boolean
+      }
+      start_language_trial: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never
