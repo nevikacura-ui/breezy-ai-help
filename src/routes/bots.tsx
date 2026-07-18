@@ -118,13 +118,9 @@ function BotsHome() {
       className="relative min-h-dvh overflow-x-hidden pb-6"
       style={{ background: "var(--ink)", color: "var(--cream)" }}
     >
-      {/* Header — logo banner matching the asset's dark background */}
+      {/* Header — transparent logo blends with page background */}
       <header
-        className="relative flex items-center justify-between px-4 pb-5 pt-5"
-        style={{
-          background: "#0f0d14",
-          borderBottom: "1px solid color-mix(in oklab, #c4a8e0 12%, transparent)",
-        }}
+        className="relative flex items-center justify-between px-4 pb-3 pt-4"
       >
         <button
           onClick={() => setSettingsOpen(true)}
