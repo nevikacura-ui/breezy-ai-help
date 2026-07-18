@@ -12,6 +12,7 @@ import { SettingsSheet } from "@/components/askeasy/SettingsSheet";
 import { LANG_ENGLISH_NAME, LANGUAGES, isRTL, t, detectLanguage, type LangCode } from "@/lib/i18n";
 import { extractPdfText, buildDocContext, type PdfDoc } from "@/lib/pdf";
 import { toast } from "sonner";
+import { StreamText } from "@/components/askeasy/StreamText";
 
 
 export const Route = createFileRoute("/chat/$botId")({
@@ -477,13 +478,12 @@ function BotChat() {
             />
           ))}
           {thinking && (
-            <div className="flex items-center gap-2 opacity-70">
+            <div className="flex items-center gap-2">
               {!settings.focusMode && <Mascot size={32} />}
-              <div className="flex items-center gap-1 rounded-2xl px-3 py-2"
+              <div className="flex items-center gap-2 rounded-2xl px-3 py-2"
                 style={{ background: "color-mix(in oklab, var(--cream) 8%, transparent)" }}>
-                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-current" />
-                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-current" style={{ animationDelay: "0.15s" }} />
-                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-current" style={{ animationDelay: "0.3s" }} />
+                <span className="stream-spinner" aria-hidden />
+                <span className="stream-text is-streaming text-[13px] font-medium">thinking</span>
               </div>
             </div>
           )}
@@ -776,7 +776,9 @@ function MessageRow({ m, bot, isLast, onForget, onQuickAsk, quickChips }: {
           }}
         >
           {m.content.split("\n").map((line, i) => (
-            <p key={i} className={i > 0 ? "mt-1.5" : ""}>{line}</p>
+            <p key={i} className={i > 0 ? "mt-1.5" : ""}>
+              {isLast ? <StreamText text={line} /> : line}
+            </p>
           ))}
         </div>
         {/* Suggested follow-up chips */}
