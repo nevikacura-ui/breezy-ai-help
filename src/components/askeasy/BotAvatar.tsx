@@ -92,7 +92,7 @@ export function BotAvatar({
           height={size}
           decoding="async"
           loading={eager ? "eager" : "lazy"}
-          {...({ fetchpriority: eager ? "high" : "auto" } as Record<string, string>)}
+          fetchPriority={eager ? "high" : "auto"}
           onLoad={() => { decoded.add(url); setReady(true); }}
           className="h-full w-full object-cover transition-opacity duration-300"
           style={{ opacity: ready ? 1 : 0 }}
