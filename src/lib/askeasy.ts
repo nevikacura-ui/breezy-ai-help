@@ -416,8 +416,12 @@ export async function sendToAI(args: {
   });
 
   if (!res.ok) {
-    const err = await res.text().catch(() => "");
-    throw new Error(`Chat failed (${res.status}): ${err.slice(0, 200)}`);
+    const raw = await res.text().catch(() => "");
+    let msg = raw;
+    try { msg = (JSON.parse(raw) as { error?: string }).error ?? raw; } catch { /* raw */ }
+    const err = new Error(msg || `Chat failed (${res.status})`) as Error & { status?: number };
+    err.status = res.status;
+    throw err;
   }
   const data = (await res.json()) as { reply?: string; citations?: { title?: string; url: string }[] };
   const cites = data.citations ?? [];
