@@ -205,14 +205,18 @@ function BotChat() {
     };
   }, []);
 
-  // On new message boundaries (send / receive start), re-arm sticky and smooth-scroll.
+  // On NEW message boundaries only, re-arm sticky and smooth-scroll.
+  // (Do NOT depend on `thinking` — on Android the keyboard/URL-bar resize
+  // already nudges the viewport, and an extra smooth scroll on every
+  // thinking flip reads as the page "scrolling on its own".)
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     stickToBottomRef.current = true;
     lastScrollTopRef.current = el.scrollHeight;
     el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-  }, [messages.length, thinking]);
+  }, [messages.length]);
+
 
 
   const sendText = useCallback(async (text: string) => {
