@@ -487,3 +487,46 @@ main > * { position: relative; z-index: 1; }
 @media (prefers-reduced-motion: reduce) {
   .chat-ambient { animation: none !important; }
 }
+
+/* ============================================================
+   Global reduce-motion guard — disables shimmer and smooths.
+   Fires for the user opt-in (.reduce-motion) AND the OS-level
+   prefers-reduced-motion media query. Keeps essential feedback
+   (caret blink, spinner) at a calm, slowed pace.
+   ============================================================ */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  transition-delay: 0ms !important;
+  scroll-behavior: auto !important;
+  background-attachment: initial !important;
+}
+.reduce-motion .animate-shimmer,
+.reduce-motion [class*="shimmer"] {
+  animation: none !important;
+  background-image: none !important;
+}
+/* Preserve minimal, non-distracting feedback loops */
+.reduce-motion .stream-caret { animation-duration: 1.4s !important; animation-iteration-count: infinite !important; }
+.reduce-motion .stream-spinner { animation-duration: 3s !important; animation-iteration-count: infinite !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+  .animate-shimmer,
+  [class*="shimmer"] {
+    animation: none !important;
+    background-image: none !important;
+  }
+  .stream-caret { animation-duration: 1.4s !important; animation-iteration-count: infinite !important; }
+  .stream-spinner { animation-duration: 3s !important; animation-iteration-count: infinite !important; }
+}
+
