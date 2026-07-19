@@ -1,0 +1,24 @@
+# AskEasy
+
+> AskEasy is a calm, beautifully simple AI assistant. Ask anything — text, voice, camera, or documents — in 10 languages with a cute mascot named Easy.
+
+## About
+- Name: AskEasy
+- Tagline: The easiest AI you'll ever use
+- Mascot: Easy — a friendly chat companion
+
+## Features
+- Multi-model chat (Gemini, GPT-4o mini, GPT-4o) via OpenRouter
+- 10 languages with per-bot memory
+- Voice input (hold-to-talk) and text-to-speech
+- PDF upload with document Q&A
+- Web search with citations (Focus mode)
+- Persona-based accessibility (kid / teen / grown-up / elder)
+- Reduce-motion and Private Mode toggles
+
+## Pages
+- / — Home
+- /bots — Choose or create a bot
+- /chat/$botId — Chat
+- /auth — Sign in
+- /onboarding — First-run persona setup
