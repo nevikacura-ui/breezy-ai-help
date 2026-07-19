@@ -376,33 +376,36 @@
   to { transform: rotate(360deg); }
 }
 
-.stream-text .stream-word {
-  display: inline-block;
-  animation: stream-word-in 320ms cubic-bezier(.2,.7,.2,1) both;
-  will-change: transform, opacity;
-  backface-visibility: hidden;
-}
-/* Once the reveal finishes, drop compositor hints so the browser can free layers. */
-.stream-text.is-done .stream-word {
-  will-change: auto;
-  animation: none;
-}
+/* Stable streaming layout — no ligature reflow, no caret-driven line shifts.
+   Ligatures/contextual alternates re-shape as characters append, which on
+   Android + Chrome can nudge whole lines down by a pixel mid-stream. */
 .stream-text {
   color: #ffffff;
   white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: normal;
+  font-variant-ligatures: none;
+  font-feature-settings: "kern" 1;
+  font-kerning: none;
+  text-rendering: optimizeSpeed;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  contain: layout style;
 }
 .stream-text.is-streaming,
-.stream-text.is-done {
-  color: #ffffff;
-}
+.stream-text.is-done { color: #ffffff; }
+
 .msg-assistant, .msg-assistant p, .msg-assistant * { color: #ffffff !important; }
 .msg-user { color: #ffffff !important; }
 
-
-
-
+/* Caret is absolutely positioned so its appearance/disappearance never
+   changes the width of the last line and never wraps a new one. */
+.stream-text {
+  position: relative;
+  display: inline;
+}
 .stream-caret {
-  display: inline-block;
+  position: absolute;
   width: 2px;
   height: 1em;
   margin-left: 2px;
@@ -410,7 +413,9 @@
   background: linear-gradient(180deg, #b47cff, #ff7ac6);
   border-radius: 2px;
   animation: stream-caret 900ms ease-in-out infinite;
+  pointer-events: none;
 }
+
 
 /* ============================================================
    Message typography — airy, premium, Apple-inspired
