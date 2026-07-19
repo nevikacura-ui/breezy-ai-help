@@ -561,6 +561,20 @@ function BotChat() {
         </div>
       </section>
 
+      {/* Jump to latest */}
+      {!atBottom && (
+        <div className="pointer-events-none fixed inset-x-0 bottom-36 z-30 flex justify-center px-4">
+          <button
+            onClick={jumpToLatest}
+            className="pointer-events-auto flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12px] font-semibold shadow-lg animate-fade-in"
+            style={{ background: "#ffffff", color: "#000" }}
+            aria-label="Jump to latest message"
+          >
+            {thinking ? "New reply ↓" : "Jump to latest ↓"}
+          </button>
+        </div>
+      )}
+
       {/* Regenerate pill */}
       {!thinking && messages.length > 1 && (
         <div className="pointer-events-none fixed inset-x-0 bottom-24 z-20 flex justify-center px-4">
