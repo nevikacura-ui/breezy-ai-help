@@ -23,7 +23,7 @@ const LANG_SCRIPTS: Record<string, string> = {
   ja: "Japanese script (Kanji + Kana)",
 };
 
-const FREE_TEXT_LIMIT = 5;
+const FREE_TEXT_LIMIT = 9999; // Launch trial: effectively unlimited
 const TRIAL_MS = 3 * 24 * 60 * 60 * 1000;
 
 const j = (obj: unknown, status = 200) =>
