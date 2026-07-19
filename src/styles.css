@@ -377,10 +377,10 @@
 }
 
 /* Stable streaming layout — no ligature reflow, no caret-driven line shifts.
-   Ligatures/contextual alternates re-shape as characters append, which on
-   Android + Chrome can nudge whole lines down by a pixel mid-stream. */
+   Colors resolve to the current theme's foreground so WCAG AA contrast is
+   guaranteed against --background in both light and dark modes. */
 .stream-text {
-  color: #ffffff;
+  color: var(--foreground);
   white-space: pre-wrap;
   overflow-wrap: break-word;
   word-break: normal;
@@ -391,30 +391,40 @@
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   contain: layout style;
-}
-.stream-text.is-streaming,
-.stream-text.is-done { color: #ffffff; }
-
-.msg-assistant, .msg-assistant p, .msg-assistant * { color: #ffffff !important; }
-.msg-user { color: #ffffff !important; }
-
-/* Caret is absolutely positioned so its appearance/disappearance never
-   changes the width of the last line and never wraps a new one. */
-.stream-text {
   position: relative;
   display: inline;
 }
+.stream-text.is-streaming,
+.stream-text.is-done { color: var(--foreground); }
+
+.msg-assistant,
+.msg-assistant p,
+.msg-assistant * { color: var(--foreground); }
+.msg-user { color: inherit; }
+
+/* Error text stays on the destructive token for a strong red on either theme,
+   never on a light-tinted background where red-on-red would fail contrast. */
+.msg-error,
+[role="alert"].msg-error {
+  color: var(--destructive);
+  font-weight: 600;
+}
+
+/* Caret is absolutely positioned so its appearance/disappearance never
+   changes the width of the last line and never wraps a new one. */
 .stream-caret {
   position: absolute;
   width: 2px;
   height: 1em;
   margin-left: 2px;
   vertical-align: -0.15em;
-  background: linear-gradient(180deg, #b47cff, #ff7ac6);
+  background: currentColor;
+  opacity: 0.85;
   border-radius: 2px;
   animation: stream-caret 900ms ease-in-out infinite;
   pointer-events: none;
 }
+
 
 
 /* ============================================================

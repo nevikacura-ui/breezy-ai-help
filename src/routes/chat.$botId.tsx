@@ -462,7 +462,7 @@ function BotChat() {
   return (
     <main
       className="relative flex flex-col overflow-hidden"
-      style={{ background: "#000", color: "#ffffff", height: "100dvh", overscrollBehavior: "none", touchAction: "pan-y" }}
+      style={{ background: "var(--background)", color: "var(--foreground)", height: "100dvh", overscrollBehavior: "none", touchAction: "pan-y" }}
 
     >
       {/* Ambient gradient glow */}
@@ -551,10 +551,14 @@ function BotChat() {
           {thinking && (
             <div className="flex items-center gap-2">
               {!settings.focusMode && <Mascot size={32} />}
-              <div className="flex items-center gap-2 rounded-2xl px-3 py-2"
-                style={{ background: "color-mix(in oklab, var(--cream) 8%, transparent)" }}>
+              <div
+                className="flex items-center gap-2 rounded-2xl px-3 py-2"
+                style={{ background: "color-mix(in oklab, var(--foreground) 10%, transparent)", color: "var(--foreground)" }}
+                role="status"
+                aria-live="polite"
+              >
                 <span className="stream-spinner" aria-hidden />
-                <span className="stream-text is-streaming text-[13px] font-medium">thinking</span>
+                <span className="stream-text is-streaming text-[13px] font-medium">Thinking…</span>
               </div>
             </div>
           )}
@@ -567,7 +571,7 @@ function BotChat() {
           <button
             onClick={jumpToLatest}
             className="pointer-events-auto flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12px] font-semibold shadow-lg animate-fade-in"
-            style={{ background: "#ffffff", color: "#000" }}
+            style={{ background: "var(--foreground)", color: "var(--background)" }}
             aria-label="Jump to latest message"
           >
             {thinking ? "New reply ↓" : "Jump to latest ↓"}
@@ -842,7 +846,7 @@ function MessageRow({ m, bot, isLast, onForget, onQuickAsk, quickChips }: {
         )}
         <div
           className="msg-user max-w-[78%] rounded-[22px] rounded-tr-lg px-4 py-2.5"
-          style={{ background: "color-mix(in oklab, var(--cream) 5%, transparent)", color: "var(--cream)" }}
+          style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
         >
           {m.content}
         </div>
