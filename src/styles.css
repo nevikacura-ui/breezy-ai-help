@@ -387,34 +387,17 @@
   will-change: auto;
   animation: none;
 }
-.stream-text.is-streaming {
-  background: linear-gradient(
-    90deg,
-    #b47cff 0%, #ff7ac6 18%, #ff9a6c 36%,
-    #ffd166 54%, #7ad7ff 72%, #7cf0c2 86%, #b47cff 100%
-  );
-  background-size: 220% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: stream-shimmer 3.4s linear infinite;
-}
-/* Finished text: pure white for maximum readability on black */
-.stream-text.is-done {
-  background: none;
-  -webkit-background-clip: unset;
-  background-clip: unset;
+.stream-text {
   color: #ffffff;
-  content-visibility: auto;
-  contain-intrinsic-size: auto 200px;
+  white-space: pre-wrap;
+}
+.stream-text.is-streaming,
+.stream-text.is-done {
+  color: #ffffff;
 }
 .msg-assistant, .msg-assistant p, .msg-assistant * { color: #ffffff !important; }
-.msg-assistant .stream-text.is-streaming,
-.msg-assistant .stream-text.is-streaming * { color: transparent !important; }
 .msg-user { color: #ffffff !important; }
 
-
-.stream-text .stream-word:nth-child(7n)  { font-style: italic; }
 
 
 
