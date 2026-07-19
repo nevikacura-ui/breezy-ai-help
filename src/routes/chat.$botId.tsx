@@ -170,6 +170,7 @@ function BotChat() {
   // without ever fighting the user.
   const stickToBottomRef = useRef(true);
   const lastScrollTopRef = useRef(0);
+  const [atBottom, setAtBottom] = useState(true);
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -180,10 +181,19 @@ function BotChat() {
       lastScrollTopRef.current = el.scrollTop;
       if (goingUp && distance > NEAR_PX) stickToBottomRef.current = false;
       else if (distance <= NEAR_PX) stickToBottomRef.current = true;
+      setAtBottom(distance <= NEAR_PX);
     };
     el.addEventListener("scroll", onScroll, { passive: true });
     return () => el.removeEventListener("scroll", onScroll);
   }, []);
+
+  const jumpToLatest = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    stickToBottomRef.current = true;
+    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+  }, []);
+
 
   useEffect(() => {
     const el = scrollRef.current;
