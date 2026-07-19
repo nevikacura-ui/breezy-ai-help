@@ -70,23 +70,30 @@ export const Route = createFileRoute("/api/chat")({
         const proUntil = profile?.pro_until ? new Date(profile.pro_until as string).getTime() : 0;
         const isPro = !!profile?.is_pro && (proUntil === 0 || proUntil > Date.now());
 
-        // --- Pro-tier model gate ---
-        if (mapped.tier === "pro" && !isPro) {
-          return j({ error: "Pro subscription required for this model" }, 403);
-        }
-
-        // --- Language trial gate (Phase 1 blocker #2) ---
-        const langCode = body.language ?? "en";
-        const wantsLang = langCode !== "en" && !!LANG_NAMES[langCode];
-        if (wantsLang && !isPro) {
-          const trialStart = profile?.trial_started_at
-            ? new Date(profile.trial_started_at as string).getTime()
-            : 0;
-          const trialActive = trialStart > 0 && Date.now() - trialStart < TRIAL_MS;
-          if (!trialActive) {
-            return j({ error: "Language trial expired. Upgrade to Pro to continue in this language.", code: "TRIAL_EXPIRED" }, 402);
+        // --- LAUNCH TRIAL: all models & all languages free for everyone ---
+        // Pro gate + language trial gate are temporarily disabled while we
+        // onboard the first wave of users. Flip LAUNCH_TRIAL to false to
+        // restore paid tiers.
+        const LAUNCH_TRIAL = true;
+        if (!LAUNCH_TRIAL) {
+          if (mapped.tier === "pro" && !isPro) {
+            return j({ error: "Pro subscription required for this model" }, 403);
+          }
+          const langCode0 = body.language ?? "en";
+          const wantsLang0 = langCode0 !== "en" && !!LANG_NAMES[langCode0];
+          if (wantsLang0 && !isPro) {
+            const trialStart = profile?.trial_started_at
+              ? new Date(profile.trial_started_at as string).getTime()
+              : 0;
+            const trialActive = trialStart > 0 && Date.now() - trialStart < TRIAL_MS;
+            if (!trialActive) {
+              return j({ error: "Language trial expired. Upgrade to Pro to continue in this language.", code: "TRIAL_EXPIRED" }, 402);
+            }
           }
         }
+        const langCode = body.language ?? "en";
+        const wantsLang = langCode !== "en" && !!LANG_NAMES[langCode];
+
 
         // --- Free text quota (Phase 1 blocker #1): atomic check+bump ---
         const { data: allowed, error: quotaErr } = await supa.rpc("check_and_bump_usage", {
