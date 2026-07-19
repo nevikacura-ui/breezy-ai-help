@@ -170,6 +170,7 @@ function BotChat() {
   // without ever fighting the user.
   const stickToBottomRef = useRef(true);
   const lastScrollTopRef = useRef(0);
+  const [atBottom, setAtBottom] = useState(true);
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -180,10 +181,19 @@ function BotChat() {
       lastScrollTopRef.current = el.scrollTop;
       if (goingUp && distance > NEAR_PX) stickToBottomRef.current = false;
       else if (distance <= NEAR_PX) stickToBottomRef.current = true;
+      setAtBottom(distance <= NEAR_PX);
     };
     el.addEventListener("scroll", onScroll, { passive: true });
     return () => el.removeEventListener("scroll", onScroll);
   }, []);
+
+  const jumpToLatest = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    stickToBottomRef.current = true;
+    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+  }, []);
+
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -550,6 +560,20 @@ function BotChat() {
           )}
         </div>
       </section>
+
+      {/* Jump to latest */}
+      {!atBottom && (
+        <div className="pointer-events-none fixed inset-x-0 bottom-36 z-30 flex justify-center px-4">
+          <button
+            onClick={jumpToLatest}
+            className="pointer-events-auto flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12px] font-semibold shadow-lg animate-fade-in"
+            style={{ background: "#ffffff", color: "#000" }}
+            aria-label="Jump to latest message"
+          >
+            {thinking ? "New reply ↓" : "Jump to latest ↓"}
+          </button>
+        </div>
+      )}
 
       {/* Regenerate pill */}
       {!thinking && messages.length > 1 && (
