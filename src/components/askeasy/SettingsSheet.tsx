@@ -177,6 +177,18 @@ export function SettingsSheet({
             </p>
           </section>
 
+          {/* Launch banner */}
+          <div
+            className="rounded-2xl border px-3 py-2.5 text-[12px] leading-snug"
+            style={{
+              borderColor: "color-mix(in oklab, var(--foreground) 15%, transparent)",
+              background: "color-mix(in oklab, var(--send-gradient-start, #a78bfa) 12%, transparent)",
+            }}
+          >
+            <span className="font-semibold">🎉 Free during launch</span>
+            <span className="ml-1 text-muted-foreground">All models &amp; languages unlocked. Pro pricing arrives soon — enjoy!</span>
+          </div>
+
           {/* Model */}
           <section className="space-y-3">
             <div className="text-xs uppercase tracking-wider text-muted-foreground">Model</div>
