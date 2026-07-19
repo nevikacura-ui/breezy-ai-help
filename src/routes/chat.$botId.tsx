@@ -195,14 +195,23 @@ function BotChat() {
   }, []);
 
 
+  // Follow content growth only. Track the last observed content height so
+  // ResizeObserver ticks caused by the container/viewport resizing (Android
+  // keyboard, URL-bar collapse) don't trigger any scroll adjustment.
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     const content = el.firstElementChild as HTMLElement | null;
     if (!content) return;
     let raf = 0;
+    let lastContentH = content.getBoundingClientRect().height;
     const follow = () => {
+      const h = content.getBoundingClientRect().height;
+      const grew = h > lastContentH + 0.5;
+      lastContentH = h;
+      if (!grew) return;
       if (!stickToBottomRef.current) return;
+      cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
         el.scrollTop = el.scrollHeight;
       });
@@ -214,6 +223,52 @@ function BotChat() {
       cancelAnimationFrame(raf);
     };
   }, []);
+
+  // Android keyboard handling: pin the shell to visualViewport.height so the
+  // keyboard shrinks the layout instead of pushing content above the fold, and
+  // preserve scroll position across keyboard toggles.
+  const shellRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const shell = shellRef.current;
+    const scroller = scrollRef.current;
+    if (!shell) return;
+
+    let prevVH = vv.height;
+    let raf = 0;
+    const apply = () => {
+      shell.style.height = `${vv.height}px`;
+      const dh = prevVH - vv.height;
+      prevVH = vv.height;
+      // If the viewport shrank (keyboard opened) and the user was pinned to the
+      // bottom, snap to bottom so the newest content stays visible. Otherwise
+      // compensate the scroller by the delta so the visible line doesn't jump.
+      if (scroller) {
+        if (stickToBottomRef.current) {
+          scroller.scrollTop = scroller.scrollHeight;
+        } else if (dh !== 0) {
+          scroller.scrollTop = Math.max(0, scroller.scrollTop + dh);
+        }
+        lastScrollTopRef.current = scroller.scrollTop;
+      }
+    };
+    const onResize = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(apply);
+    };
+    apply();
+    vv.addEventListener("resize", onResize);
+    vv.addEventListener("scroll", onResize);
+    return () => {
+      cancelAnimationFrame(raf);
+      vv.removeEventListener("resize", onResize);
+      vv.removeEventListener("scroll", onResize);
+      shell.style.height = "";
+    };
+  }, []);
+
 
   // On NEW message boundaries only, re-arm sticky and smooth-scroll.
   // (Do NOT depend on `thinking` — on Android the keyboard/URL-bar resize
@@ -461,9 +516,9 @@ function BotChat() {
 
   return (
     <main
+      ref={shellRef}
       className="relative flex flex-col overflow-hidden"
       style={{ background: "var(--background)", color: "var(--foreground)", height: "100dvh", overscrollBehavior: "none", touchAction: "pan-y" }}
-
     >
       {/* Ambient gradient glow */}
       <div className={`chat-ambient ${thinking ? "is-streaming" : ""}`} aria-hidden />
