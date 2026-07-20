@@ -85,12 +85,17 @@ async function checkRemote(url, { minBytes, label }) {
     return;
   }
   clearTimeout(t);
-  if (!res.ok) return fail(`${label}: remote fetch ${res.status} for ${url}`);
+  // Remote issues are warnings, not build failures — the published domain
+  // may not exist yet, and preview builds run before the CDN is warm.
+  if (!res.ok) return warn(`${label}: remote fetch ${res.status} for ${url}`);
   const ct = res.headers.get("content-type") || "";
-  if (!ct.includes("image/png")) fail(`${label}: remote content-type is "${ct}", expected image/png.`);
+  if (!ct.includes("image/png")) warn(`${label}: remote content-type is "${ct}", expected image/png.`);
   const buf = Buffer.from(await res.arrayBuffer());
-  if (buf.length < minBytes) fail(`${label}: remote file ${buf.length} bytes (< ${minBytes}).`);
+  if (buf.length < minBytes) warn(`${label}: remote file ${buf.length} bytes (< ${minBytes}).`);
+  // inspectPng writes into `problems`; downgrade to warn by capturing:
+  const before = problems.length;
   inspectPng(buf, `${label} (remote)`);
+  while (problems.length > before) warnings.push(problems.pop());
 }
 
 // --- Load __root.tsx and extract declared og:image / twitter:image URLs ---
