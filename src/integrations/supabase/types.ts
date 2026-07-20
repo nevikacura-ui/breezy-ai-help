@@ -41,6 +41,36 @@ export type Database = {
         }
         Relationships: []
       }
+      openrouter_spend: {
+        Row: {
+          completion_tokens: number
+          cost_usd: number
+          id: string
+          model: string
+          month: string
+          prompt_tokens: number
+          updated_at: string
+        }
+        Insert: {
+          completion_tokens?: number
+          cost_usd?: number
+          id?: string
+          model: string
+          month: string
+          prompt_tokens?: number
+          updated_at?: string
+        }
+        Update: {
+          completion_tokens?: number
+          cost_usd?: number
+          id?: string
+          model?: string
+          month?: string
+          prompt_tokens?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount: number
@@ -169,6 +199,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      bump_openrouter_spend: {
+        Args: {
+          _completion_tokens: number
+          _cost: number
+          _model: string
+          _prompt_tokens: number
+        }
+        Returns: number
+      }
       bump_usage: {
         Args: { _kind: string; _n?: number }
         Returns: {
@@ -189,6 +228,7 @@ export type Database = {
         Args: { _kind: string; _limit?: number; _n?: number }
         Returns: boolean
       }
+      get_openrouter_spend_month: { Args: never; Returns: number }
       start_language_trial: { Args: never; Returns: string }
     }
     Enums: {
