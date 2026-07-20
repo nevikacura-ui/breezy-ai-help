@@ -8,6 +8,13 @@ const MODEL_MAP: Record<string, { model: string; tier: "free" | "pro" }> = {
   "askeasy/ultra": { model: "openai/gpt-4o",           tier: "pro"  },
 };
 
+// USD per 1M tokens (fallback estimate; upstream `usage.cost` is preferred when present).
+const MODEL_PRICING: Record<string, { in: number; out: number }> = {
+  "google/gemini-2.5-flash": { in: 0.30,  out: 2.50 },
+  "openai/gpt-4o-mini":       { in: 0.15,  out: 0.60 },
+  "openai/gpt-4o":            { in: 2.50,  out: 10.00 },
+};
+
 type ChatMessage = { role: "user" | "assistant" | "system"; content: string };
 type ChatRequestBody = { messages?: ChatMessage[]; model?: string; language?: string; system?: string; webSearch?: boolean };
 
@@ -26,8 +33,51 @@ const LANG_SCRIPTS: Record<string, string> = {
 const FREE_TEXT_LIMIT = 9999; // Launch trial: effectively unlimited
 const TRIAL_MS = 3 * 24 * 60 * 60 * 1000;
 
-const j = (obj: unknown, status = 200) =>
-  new Response(JSON.stringify(obj), { status, headers: { "Content-Type": "application/json" } });
+// --- Per-IP rate limit (in-memory ring; per-worker-instance floor) ---
+const IP_WINDOW_MS = 60_000;
+const IP_MAX_PER_WINDOW = 15; // ~15 requests / minute per IP
+const IP_HOURLY_MAX = 120;    // hard hourly ceiling
+const IP_HOUR_MS = 60 * 60_000;
+
+type IpBucket = { minute: number[]; hour: number[] };
+const ipBuckets = new Map<string, IpBucket>();
+
+function pruneAndCheckIp(ip: string): { allowed: boolean; retryAfter: number } {
+  const now = Date.now();
+  let b = ipBuckets.get(ip);
+  if (!b) { b = { minute: [], hour: [] }; ipBuckets.set(ip, b); }
+  b.minute = b.minute.filter((t) => now - t < IP_WINDOW_MS);
+  b.hour = b.hour.filter((t) => now - t < IP_HOUR_MS);
+  if (b.minute.length >= IP_MAX_PER_WINDOW) {
+    return { allowed: false, retryAfter: Math.ceil((IP_WINDOW_MS - (now - b.minute[0])) / 1000) };
+  }
+  if (b.hour.length >= IP_HOURLY_MAX) {
+    return { allowed: false, retryAfter: Math.ceil((IP_HOUR_MS - (now - b.hour[0])) / 1000) };
+  }
+  b.minute.push(now);
+  b.hour.push(now);
+  // Opportunistic janitor: keep the map from growing unbounded.
+  if (ipBuckets.size > 5000) {
+    for (const [k, v] of ipBuckets) {
+      if (v.minute.length === 0 && v.hour.length === 0) ipBuckets.delete(k);
+      if (ipBuckets.size < 2500) break;
+    }
+  }
+  return { allowed: true, retryAfter: 0 };
+}
+
+function getClientIp(request: Request): string {
+  const h = request.headers;
+  const fwd = h.get("cf-connecting-ip") || h.get("x-real-ip") || h.get("x-forwarded-for");
+  if (!fwd) return "unknown";
+  return fwd.split(",")[0].trim();
+}
+
+const j = (obj: unknown, status = 200, extra?: Record<string, string>) =>
+  new Response(JSON.stringify(obj), {
+    status,
+    headers: { "Content-Type": "application/json", ...(extra ?? {}) },
+  });
 
 export const Route = createFileRoute("/api/chat")({
   server: {
@@ -39,7 +89,18 @@ export const Route = createFileRoute("/api/chat")({
         if (!apiKey) return j({ error: "OPENROUTER_API_KEY is not configured" }, 500);
         if (!supabaseUrl || !supabaseKey) return j({ error: "Server auth not configured" }, 500);
 
-        // --- Require auth (Phase 1 blocker #4) ---
+        // --- Per-IP rate limit (applies BEFORE auth so anon spam is cheap to reject) ---
+        const ip = getClientIp(request);
+        const rl = pruneAndCheckIp(ip);
+        if (!rl.allowed) {
+          return j(
+            { error: "Too many requests. Please slow down.", code: "RATE_LIMITED", retryAfter: rl.retryAfter },
+            429,
+            { "Retry-After": String(rl.retryAfter) },
+          );
+        }
+
+        // --- Require auth ---
         const authHeader = request.headers.get("authorization") ?? "";
         const token = authHeader.toLowerCase().startsWith("bearer ") ? authHeader.slice(7).trim() : "";
         if (!token) return j({ error: "Sign in required" }, 401);
@@ -60,6 +121,36 @@ export const Route = createFileRoute("/api/chat")({
         const messages = Array.isArray(body.messages) ? body.messages : [];
         if (messages.length === 0) return j({ error: "messages required" }, 400);
 
+        // --- Monthly spend cap (admin-side hard guard) ---
+        // Uses service-role RPC so the counter isn't spoofable by users.
+        const capUsd = Number(process.env.OPENROUTER_MONTHLY_CAP_USD ?? "50");
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { data: spendSoFar } = await supabaseAdmin.rpc("get_openrouter_spend_month");
+        const currentSpend = Number(spendSoFar ?? 0);
+        if (Number.isFinite(capUsd) && capUsd > 0 && currentSpend >= capUsd) {
+          console.warn(`[spend-cap] blocked request: month spend $${currentSpend.toFixed(4)} >= cap $${capUsd}`);
+          return j(
+            { error: "Service temporarily unavailable due to monthly budget cap. Please try again next month.", code: "SPEND_CAP" },
+            503,
+          );
+        }
+        // Per-model soft cap: Ultra (GPT-4o) is >6x pricier than Smart; cap at 40% of monthly budget.
+        if (mapped.model === "openai/gpt-4o" && capUsd > 0) {
+          const { data: ultraRow } = await supabaseAdmin
+            .from("openrouter_spend")
+            .select("cost_usd")
+            .eq("month", new Date().toISOString().slice(0, 7))
+            .eq("model", "openai/gpt-4o")
+            .maybeSingle();
+          const ultraSpend = Number(ultraRow?.cost_usd ?? 0);
+          if (ultraSpend >= capUsd * 0.4) {
+            return j(
+              { error: "Ultra model is temporarily unavailable (budget cap reached). Try Smart or Eco.", code: "ULTRA_CAP" },
+              503,
+            );
+          }
+        }
+
         // --- Pull profile once (Pro tier + trial) ---
         const { data: profile } = await supa
           .from("profiles")
@@ -71,9 +162,6 @@ export const Route = createFileRoute("/api/chat")({
         const isPro = !!profile?.is_pro && (proUntil === 0 || proUntil > Date.now());
 
         // --- LAUNCH TRIAL: all models & all languages free for everyone ---
-        // Pro gate + language trial gate are temporarily disabled while we
-        // onboard the first wave of users. Flip LAUNCH_TRIAL to false to
-        // restore paid tiers.
         const LAUNCH_TRIAL = true;
         if (!LAUNCH_TRIAL) {
           if (mapped.tier === "pro" && !isPro) {
@@ -94,8 +182,7 @@ export const Route = createFileRoute("/api/chat")({
         const langCode = body.language ?? "en";
         const wantsLang = langCode !== "en" && !!LANG_NAMES[langCode];
 
-
-        // --- Free text quota (Phase 1 blocker #1): atomic check+bump ---
+        // --- Free text quota (atomic check+bump) ---
         const { data: allowed, error: quotaErr } = await supa.rpc("check_and_bump_usage", {
           _kind: "text",
           _n: 1,
@@ -133,7 +220,11 @@ export const Route = createFileRoute("/api/chat")({
         }
 
         const useWebSearch = !!body.webSearch;
-        const upstreamBody: Record<string, unknown> = { model: mapped.model, messages: [sys, ...history] };
+        const upstreamBody: Record<string, unknown> = {
+          model: mapped.model,
+          messages: [sys, ...history],
+          usage: { include: true }, // ask OpenRouter to return token + cost accounting
+        };
         if (useWebSearch) upstreamBody.plugins = [{ id: "web", max_results: 5 }];
 
         const upstream = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -153,12 +244,36 @@ export const Route = createFileRoute("/api/chat")({
         }
 
         type Annotation = { type?: string; url_citation?: { url?: string; title?: string } };
+        type UsageBlock = { prompt_tokens?: number; completion_tokens?: number; cost?: number };
         const data = (await upstream.json()) as {
           choices?: { message?: { content?: string; annotations?: Annotation[] } }[];
           citations?: (string | { url?: string; title?: string })[];
+          usage?: UsageBlock;
         };
         const msg = data.choices?.[0]?.message;
         const reply = msg?.content ?? "";
+
+        // --- Record spend (best-effort; failures never block the reply) ---
+        try {
+          const usage = data.usage ?? {};
+          const promptTok = Number(usage.prompt_tokens ?? 0);
+          const completionTok = Number(usage.completion_tokens ?? 0);
+          let costUsd = Number(usage.cost ?? 0);
+          if (!costUsd || !Number.isFinite(costUsd)) {
+            const p = MODEL_PRICING[mapped.model];
+            if (p) costUsd = (promptTok * p.in + completionTok * p.out) / 1_000_000;
+          }
+          if (Number.isFinite(costUsd) && costUsd > 0) {
+            await supabaseAdmin.rpc("bump_openrouter_spend", {
+              _model: mapped.model,
+              _cost: costUsd,
+              _prompt_tokens: promptTok,
+              _completion_tokens: completionTok,
+            });
+          }
+        } catch (e) {
+          console.error("[spend-cap] failed to record spend:", e);
+        }
 
         const citations: { title?: string; url: string }[] = [];
         const seen = new Set<string>();
