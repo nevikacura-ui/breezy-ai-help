@@ -9,6 +9,10 @@ export const Route = createFileRoute("/splash")({
       { title: "Askeasy — Meet Easy" },
       { name: "description", content: "Meet Easy, your cute AI companion. Ask anything, learn, create, and chat — the easy way." },
     ],
+    links: [
+      // Preconnect + high-priority preload so the logo is decoded before first paint
+      { rel: "preload", as: "image", href: logoAsset.url, type: "image/png", fetchpriority: "high" },
+    ],
   }),
   component: Splash,
 });
@@ -17,9 +21,24 @@ function Splash() {
   const nav = useNavigate();
   const { state, update, hydrated } = useOnboarding();
   const [leaving, setLeaving] = useState(false);
+  const [logoReady, setLogoReady] = useState(false);
+
+  // Decode the logo bitmap before we let it paint — kills first-frame flicker.
+  useEffect(() => {
+    let cancelled = false;
+    const img = new Image();
+    img.decoding = "async";
+    (img as HTMLImageElement & { fetchPriority?: string }).fetchPriority = "high";
+    img.src = logoAsset.url;
+    const done = () => { if (!cancelled) setLogoReady(true); };
+    img.decode?.().then(done).catch(done) ?? done();
+    // Safety net if decode() never resolves
+    const fallback = window.setTimeout(done, 400);
+    return () => { cancelled = true; window.clearTimeout(fallback); };
+  }, []);
 
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || !logoReady) return;
     const leaveAt = window.setTimeout(() => setLeaving(true), 2400);
     const navAt = window.setTimeout(() => {
       update({ seenSplash: true });
@@ -29,7 +48,7 @@ function Splash() {
       window.clearTimeout(leaveAt);
       window.clearTimeout(navAt);
     };
-  }, [hydrated, nav, state.completed, update]);
+  }, [hydrated, logoReady, nav, state.completed, update]);
 
   return (
     <main
@@ -55,7 +74,10 @@ function Splash() {
       />
 
       {/* Hero stack — anchored to optical center (~46% vh) */}
-      <div className="relative z-10 flex flex-1 flex-col items-center justify-center" style={{ paddingBottom: "8vh" }}>
+      <div
+        className="relative z-10 flex flex-1 flex-col items-center justify-center"
+        style={{ paddingBottom: "8vh", opacity: logoReady ? 1 : 0, transition: "opacity 180ms ease-out" }}
+      >
         <div className="animate-logo-reveal relative overflow-hidden [transform-origin:center]">
           <img
             src={logoAsset.url}
@@ -64,7 +86,10 @@ function Splash() {
             width={1200}
             height={400}
             loading="eager"
-            decoding="async"
+            decoding="sync"
+            fetchPriority="high"
+            draggable={false}
+            style={{ contain: "layout paint" }}
           />
           {/* Single premium light sweep */}
           <span
