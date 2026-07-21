@@ -127,7 +127,7 @@ function Onboarding() {
 
   return (
     <main
-      className="relative min-h-dvh overflow-hidden"
+      className="relative min-h-dvh overflow-x-hidden pb-32"
       style={{ background: "var(--ink)", color: "var(--cream)" }}
     >
       {/* Header */}
@@ -156,7 +156,7 @@ function Onboarding() {
       </header>
 
       {step === 0 ? (
-        <section className="px-6 pt-4 pb-40">
+        <section className="px-6 pt-4">
           <h1 className="font-display text-[1.7rem] leading-tight tracking-tight">
             Who's chatting<br />today?
           </h1>
@@ -247,7 +247,7 @@ function Onboarding() {
           </p>
 
           {/* Scattered bubble cloud — Dribbble style */}
-          <div className="relative mt-8 h-[420px]">
+          <div className="relative mt-6 h-[62vh] min-h-[380px] max-h-[520px]">
             {ONBOARDING_CATEGORIES.map((c, i) => {
               const active = selected.has(c.id);
               // Deterministic scatter with varied sizes
@@ -319,7 +319,7 @@ function Onboarding() {
           </p>
         </section>
       ) : (
-        <section className="px-6 pt-4 pb-40">
+        <section className="px-6 pt-4">
           <h1 className="font-display text-[1.7rem] leading-tight tracking-tight">
             Which language<br />do you prefer?
           </h1>
