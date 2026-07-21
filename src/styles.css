@@ -234,6 +234,18 @@
 @utility animate-bubble-in { animation: bubble-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
 @utility animate-shimmer { animation: shimmer 1.4s ease-in-out infinite; }
 
+@keyframes logo-reveal {
+  0%   { opacity: 0; transform: scale(0.86); filter: blur(12px); }
+  55%  { opacity: 1; filter: blur(0); }
+  100% { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+@keyframes logo-halo {
+  0%, 100% { opacity: 0.55; transform: translate(-50%, -50%) scale(1); }
+  50%      { opacity: 0.9;  transform: translate(-50%, -50%) scale(1.12); }
+}
+@utility animate-logo-reveal { animation: logo-reveal 1.2s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@utility animate-logo-halo { animation: logo-halo 3.2s ease-in-out infinite; }
+
 /* Living mascot micro-motion */
 @keyframes mascot-idle {
   0%, 100% { transform: translateY(0) rotate(0); }
