@@ -258,6 +258,20 @@
 @utility animate-logo-halo   { animation: logo-halo 5.4s ease-in-out infinite; }
 @utility animate-logo-sheen  { animation: logo-sheen 1.8s cubic-bezier(0.22, 1, 0.36, 1) 1.15s both; }
 
+/* Reduced motion: keep the logo the hero, drop blur/scale/sweep */
+@media (prefers-reduced-motion: reduce) {
+  .animate-logo-reveal { animation: fade-in 0.4s ease-out both !important; filter: none !important; }
+  .animate-logo-settle { animation: none !important; }
+  .animate-logo-halo   { animation: none !important; opacity: 0.5 !important; filter: blur(24px) !important; }
+  .animate-logo-sheen  { display: none !important; }
+  .animate-splash-out  { animation: fade-out 0.3s ease-in both !important; }
+}
+.reduce-motion .animate-logo-reveal { animation: fade-in 0.4s ease-out both !important; filter: none !important; }
+.reduce-motion .animate-logo-settle { animation: none !important; }
+.reduce-motion .animate-logo-halo   { animation: none !important; opacity: 0.5 !important; filter: blur(24px) !important; }
+.reduce-motion .animate-logo-sheen  { display: none !important; }
+.reduce-motion .animate-splash-out  { animation: fade-out 0.3s ease-in both !important; }
+
 /* Living mascot micro-motion */
 @keyframes mascot-idle {
   0%, 100% { transform: translateY(0) rotate(0); }
