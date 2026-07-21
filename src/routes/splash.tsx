@@ -74,7 +74,10 @@ function Splash() {
       />
 
       {/* Hero stack — anchored to optical center (~46% vh) */}
-      <div className="relative z-10 flex flex-1 flex-col items-center justify-center" style={{ paddingBottom: "8vh" }}>
+      <div
+        className="relative z-10 flex flex-1 flex-col items-center justify-center"
+        style={{ paddingBottom: "8vh", opacity: logoReady ? 1 : 0, transition: "opacity 180ms ease-out" }}
+      >
         <div className="animate-logo-reveal relative overflow-hidden [transform-origin:center]">
           <img
             src={logoAsset.url}
@@ -83,7 +86,10 @@ function Splash() {
             width={1200}
             height={400}
             loading="eager"
-            decoding="async"
+            decoding="sync"
+            fetchPriority="high"
+            draggable={false}
+            style={{ contain: "layout paint" }}
           />
           {/* Single premium light sweep */}
           <span
