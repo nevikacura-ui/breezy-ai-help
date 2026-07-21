@@ -9,6 +9,10 @@ export const Route = createFileRoute("/splash")({
       { title: "Askeasy — Meet Easy" },
       { name: "description", content: "Meet Easy, your cute AI companion. Ask anything, learn, create, and chat — the easy way." },
     ],
+    links: [
+      // Preconnect + high-priority preload so the logo is decoded before first paint
+      { rel: "preload", as: "image", href: logoAsset.url, type: "image/png", fetchpriority: "high" },
+    ],
   }),
   component: Splash,
 });
