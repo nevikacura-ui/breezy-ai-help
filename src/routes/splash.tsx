@@ -21,9 +21,24 @@ function Splash() {
   const nav = useNavigate();
   const { state, update, hydrated } = useOnboarding();
   const [leaving, setLeaving] = useState(false);
+  const [logoReady, setLogoReady] = useState(false);
+
+  // Decode the logo bitmap before we let it paint — kills first-frame flicker.
+  useEffect(() => {
+    let cancelled = false;
+    const img = new Image();
+    img.decoding = "async";
+    (img as HTMLImageElement & { fetchPriority?: string }).fetchPriority = "high";
+    img.src = logoAsset.url;
+    const done = () => { if (!cancelled) setLogoReady(true); };
+    img.decode?.().then(done).catch(done) ?? done();
+    // Safety net if decode() never resolves
+    const fallback = window.setTimeout(done, 400);
+    return () => { cancelled = true; window.clearTimeout(fallback); };
+  }, []);
 
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || !logoReady) return;
     const leaveAt = window.setTimeout(() => setLeaving(true), 2400);
     const navAt = window.setTimeout(() => {
       update({ seenSplash: true });
@@ -33,7 +48,7 @@ function Splash() {
       window.clearTimeout(leaveAt);
       window.clearTimeout(navAt);
     };
-  }, [hydrated, nav, state.completed, update]);
+  }, [hydrated, logoReady, nav, state.completed, update]);
 
   return (
     <main
