@@ -13,16 +13,6 @@ export const Route = createFileRoute("/splash")({
   component: Splash,
 });
 
-const BUBBLES: Array<{ top: string; left: string; size: number; color: string; delay: number; float: number }> = [
-  { top: "12%", left: "8%",  size: 56, color: "#ffd84d", delay: 0.05, float: 4.5 },
-  { top: "22%", left: "78%", size: 72, color: "#c4a8e0", delay: 0.15, float: 5.2 },
-  { top: "68%", left: "12%", size: 88, color: "#f5b3c8", delay: 0.25, float: 6.0 },
-  { top: "74%", left: "80%", size: 48, color: "#a8dcc6", delay: 0.35, float: 4.8 },
-  { top: "42%", left: "4%",  size: 32, color: "#efe6d2", delay: 0.45, float: 5.5 },
-  { top: "8%",  left: "50%", size: 24, color: "#ffd84d", delay: 0.55, float: 4.2 },
-  { top: "88%", left: "45%", size: 36, color: "#c4a8e0", delay: 0.10, float: 5.8 },
-];
-
 function Splash() {
   const nav = useNavigate();
   const { state, update, hydrated } = useOnboarding();
@@ -30,11 +20,11 @@ function Splash() {
 
   useEffect(() => {
     if (!hydrated) return;
-    const leaveAt = window.setTimeout(() => setLeaving(true), 2400);
+    const leaveAt = window.setTimeout(() => setLeaving(true), 2000);
     const navAt = window.setTimeout(() => {
       update({ seenSplash: true });
       nav({ to: state.completed ? "/bots" : "/onboarding" });
-    }, 2950);
+    }, 2550);
     return () => {
       window.clearTimeout(leaveAt);
       window.clearTimeout(navAt);
@@ -46,84 +36,58 @@ function Splash() {
       className={`relative flex min-h-dvh flex-col items-center justify-center overflow-hidden px-6 ${leaving ? "animate-splash-out" : ""}`}
       style={{ background: "var(--ink)", color: "var(--cream)" }}
     >
-      {/* Ambient warm glow */}
+      {/* Soft ambient glow behind the logo */}
       <div
+        aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(55% 40% at 50% 42%, color-mix(in oklab, #c4a8e0 28%, transparent) 0%, transparent 70%), radial-gradient(40% 30% at 50% 80%, color-mix(in oklab, var(--butter) 18%, transparent) 0%, transparent 70%)",
+            "radial-gradient(45% 35% at 50% 50%, color-mix(in oklab, #c4a8e0 32%, transparent) 0%, transparent 70%)",
+        }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-1/2 h-[360px] w-[360px] -translate-x-1/2 -translate-y-1/2 rounded-full animate-logo-halo"
+        style={{
+          background:
+            "radial-gradient(circle, color-mix(in oklab, var(--butter) 22%, transparent) 0%, transparent 65%)",
+          filter: "blur(20px)",
         }}
       />
 
-      {/* Floating background bubbles */}
-      <div className="pointer-events-none absolute inset-0">
-        {BUBBLES.map((b, i) => (
-          <span
-            key={i}
-            className="absolute animate-bubble-in"
-            style={{
-              top: b.top,
-              left: b.left,
-              width: b.size,
-              height: b.size,
-              animationDelay: `${b.delay}s`,
-            }}
-          >
-            <span
-              className="block h-full w-full rounded-full animate-float-bubble"
-              style={{
-                background: b.color,
-                opacity: 0.85,
-                boxShadow: `0 10px 30px -8px ${b.color}66`,
-                animationDelay: `${b.delay + 0.6}s`,
-                animationDuration: `${b.float}s`,
-              }}
-            />
-          </span>
-        ))}
-      </div>
-
-      {/* Hero */}
-      <div className="relative flex flex-col items-center px-6">
-        <div
-          className="animate-logo-pop relative w-full max-w-md overflow-hidden rounded-3xl"
-          style={{
-            border: "1px solid color-mix(in oklab, var(--lavender) 22%, transparent)",
-            boxShadow: "0 30px 60px -20px rgba(99, 78, 150, 0.55), inset 0 0 0 1px rgba(255,255,255,0.04)",
-          }}
-        >
-          <img
-            src={logoAsset.url}
-            alt="Askeasy"
-            className="h-auto w-full object-contain"
-            width={1200}
-            height={400}
-            loading="eager"
-            decoding="async"
-          />
-        </div>
+      {/* Logo — the hero */}
+      <div className="relative flex flex-col items-center">
+        <img
+          src={logoAsset.url}
+          alt="Askeasy"
+          className="animate-logo-reveal h-auto w-[78vw] max-w-sm object-contain"
+          width={1200}
+          height={400}
+          loading="eager"
+          decoding="async"
+        />
 
         <p
-          className="animate-fade-up mt-4 max-w-[18rem] text-center text-sm opacity-70"
-          style={{ animationDelay: "1.1s" }}
+          className="animate-fade-up mt-6 text-center text-sm tracking-wide opacity-60"
+          style={{ animationDelay: "0.9s", letterSpacing: "0.14em" }}
         >
-          Meet Easy — your personal AI companion.
+          ASK ANYTHING · THE EASY WAY
         </p>
       </div>
 
-      {/* Loading dots */}
+      {/* Minimal loader */}
       <div
-        className="animate-fade-in absolute bottom-10 flex items-center gap-1.5"
-        style={{ animationDelay: "1.4s" }}
+        className="animate-fade-in absolute bottom-12 flex items-center gap-1.5"
+        style={{ animationDelay: "1.2s" }}
       >
         {[0, 1, 2].map((i) => (
           <span
             key={i}
-            className="h-1.5 w-1.5 rounded-full"
+            className="h-1 w-1 rounded-full"
             style={{
               background: "var(--cream)",
-              opacity: 0.5,
-              animation: `breathe 1.2s ease-in-out ${i * 0.18}s infinite`,
+              opacity: 0.4,
+              animation: `breathe 1.4s ease-in-out ${i * 0.2}s infinite`,
             }}
           />
         ))}
