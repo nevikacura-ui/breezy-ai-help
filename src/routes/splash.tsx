@@ -47,25 +47,37 @@ function Splash() {
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-1/2 h-[360px] w-[360px] -translate-x-1/2 -translate-y-1/2 rounded-full animate-logo-halo"
+        className="pointer-events-none absolute left-1/2 top-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full animate-logo-halo"
         style={{
           background:
-            "radial-gradient(circle, color-mix(in oklab, var(--butter) 22%, transparent) 0%, transparent 65%)",
-          filter: "blur(20px)",
+            "radial-gradient(circle, color-mix(in oklab, var(--butter) 26%, transparent) 0%, transparent 65%)",
         }}
       />
 
       {/* Logo — the hero */}
       <div className="relative flex flex-col items-center">
-        <img
-          src={logoAsset.url}
-          alt="Askeasy"
-          className="animate-logo-reveal h-auto w-[78vw] max-w-sm object-contain"
-          width={1200}
-          height={400}
-          loading="eager"
-          decoding="async"
-        />
+        <div className="animate-logo-reveal relative overflow-hidden">
+          <img
+            src={logoAsset.url}
+            alt="Askeasy"
+            className="animate-logo-breathe h-auto w-[78vw] max-w-sm object-contain [transform-origin:center]"
+            width={1200}
+            height={400}
+            loading="eager"
+            decoding="async"
+          />
+          {/* Premium light sweep */}
+          <span
+            aria-hidden
+            className="animate-logo-sheen pointer-events-none absolute inset-y-0 left-0 w-1/3"
+            style={{
+              background:
+                "linear-gradient(100deg, transparent 0%, color-mix(in oklab, var(--cream) 55%, transparent) 45%, color-mix(in oklab, var(--butter) 40%, transparent) 55%, transparent 100%)",
+              mixBlendMode: "screen",
+              filter: "blur(6px)",
+            }}
+          />
+        </div>
 
         <p
           className="animate-fade-up mt-6 text-center text-sm tracking-wide opacity-60"
