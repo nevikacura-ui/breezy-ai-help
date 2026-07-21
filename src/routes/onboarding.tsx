@@ -127,7 +127,7 @@ function Onboarding() {
 
   return (
     <main
-      className="relative min-h-dvh overflow-hidden"
+      className="relative min-h-dvh overflow-x-hidden pb-32"
       style={{ background: "var(--ink)", color: "var(--cream)" }}
     >
       {/* Header */}
