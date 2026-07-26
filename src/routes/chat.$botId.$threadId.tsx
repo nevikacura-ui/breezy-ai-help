@@ -499,17 +499,20 @@ function BotChat() {
     return () => window.removeEventListener("keydown", onKey);
   }, [listening]);
 
-  // Global keyboard shortcuts: Cmd/Ctrl+/ focus composer, Esc stop generating, Cmd/Ctrl+E export
+  // Global keyboard shortcuts: Cmd/Ctrl+/ focus composer, Esc stop generating,
+  // Cmd/Ctrl+E export, Cmd/Ctrl+K toggle history sidebar, Cmd/Ctrl+Shift+O new chat.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const mod = e.metaKey || e.ctrlKey;
       if (mod && e.key === "/") { e.preventDefault(); inputRef.current?.focus(); }
+      else if (mod && e.shiftKey && e.key.toLowerCase() === "o") { e.preventDefault(); newThread(); }
+      else if (mod && e.key.toLowerCase() === "k") { e.preventDefault(); setSidebarOpen((v) => !v); }
       else if (mod && e.key.toLowerCase() === "e") { e.preventDefault(); exportChat(); }
       else if (e.key === "Escape" && thinking) { e.preventDefault(); abortRef.current?.abort(); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [thinking, exportChat]);
+  }, [thinking, exportChat, newThread]);
 
   // sendMessage is defined below (uses the value directly, bypassing the input state race).
   const sendMessage = (text: string) => {
