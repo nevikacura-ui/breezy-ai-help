@@ -50,7 +50,15 @@ function BotChat() {
   const { threads, refresh: refreshThreads } = useThreads(botId);
   const { state: onboarding } = useOnboarding();
 
-  const chatKey = () => threadId;
+
+  const newThread = useCallback(() => {
+    if (!botId) return;
+    const t = createThread(botId);
+    refreshThreads();
+    setSidebarOpen(false);
+    nav({ to: "/chat/$botId/$threadId", params: { botId, threadId: t.id } });
+  }, [botId, nav, refreshThreads]);
+
 
 
   const [messages, setMessages] = useState<EnrichedMessage[]>([]);
