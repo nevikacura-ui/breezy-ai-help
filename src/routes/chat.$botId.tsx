@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Settings as SettingsIcon, RotateCcw, ThumbsUp, ThumbsDown, Send, Square, Mic, EyeOff, Trash2, Smile, Paperclip, FileText, X, Loader2 } from "lucide-react";
+import { ArrowLeft, Settings as SettingsIcon, RotateCcw, ThumbsUp, ThumbsDown, Send, Square, Mic, EyeOff, Trash2, Smile, Paperclip, FileText, X, Loader2, Copy, Download, Check } from "lucide-react";
 import { getBotById, useCustomBots, useOnboarding, ONBOARDING_CATEGORIES, type Bot } from "@/lib/bots";
 import { BotAvatar } from "@/components/askeasy/BotAvatar";
 import {
@@ -352,6 +352,26 @@ function BotChat() {
     }
   };
 
+  // Export current conversation as Markdown
+  const exportChat = useCallback(() => {
+    if (!bot) return;
+    const stamp = new Date().toISOString().slice(0, 10);
+    const lines = [
+      `# ${bot.name} — AskEasy chat`,
+      `_Exported ${stamp}_`,
+      "",
+      ...messages.map((m) => `**${m.role === "user" ? "You" : bot.name}:**\n\n${m.content}\n`),
+    ];
+    const blob = new Blob([lines.join("\n")], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `askeasy-${bot.name.toLowerCase().replace(/\s+/g, "-")}-${stamp}.md`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toast.success("Chat exported");
+  }, [bot, messages]);
+
   // Voice input — MediaRecorder + Gateway transcription (persona-aware).
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
@@ -455,6 +475,18 @@ function BotChat() {
     return () => window.removeEventListener("keydown", onKey);
   }, [listening]);
 
+  // Global keyboard shortcuts: Cmd/Ctrl+/ focus composer, Esc stop generating, Cmd/Ctrl+E export
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const mod = e.metaKey || e.ctrlKey;
+      if (mod && e.key === "/") { e.preventDefault(); inputRef.current?.focus(); }
+      else if (mod && e.key.toLowerCase() === "e") { e.preventDefault(); exportChat(); }
+      else if (e.key === "Escape" && thinking) { e.preventDefault(); abortRef.current?.abort(); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [thinking, exportChat]);
+
   // sendMessage is defined below (uses the value directly, bypassing the input state race).
   const sendMessage = (text: string) => {
     const value = text.trim();
@@ -543,14 +575,25 @@ function BotChat() {
           )}
           {settings.privateMode && <EyeOff className="h-3.5 w-3.5 opacity-60" aria-label="Private" />}
         </div>
-        <button
-          onClick={() => setSettingsOpen(true)}
-          className="flex h-10 w-10 items-center justify-center rounded-full"
-          style={{ background: "color-mix(in oklab, var(--cream) 10%, transparent)" }}
-          aria-label="Settings"
-        >
-          <SettingsIcon className="h-5 w-5" />
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={exportChat}
+            className="flex h-10 w-10 items-center justify-center rounded-full"
+            style={{ background: "color-mix(in oklab, var(--cream) 10%, transparent)" }}
+            aria-label="Export chat as Markdown"
+            title="Export (⌘E)"
+          >
+            <Download className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="flex h-10 w-10 items-center justify-center rounded-full"
+            style={{ background: "color-mix(in oklab, var(--cream) 10%, transparent)" }}
+            aria-label="Settings"
+          >
+            <SettingsIcon className="h-5 w-5" />
+          </button>
+        </div>
       </header>
 
       <SettingsSheet
@@ -937,10 +980,27 @@ function MessageRow({ m, bot, isLast, onForget, onQuickAsk, quickChips }: {
         <div className="mt-2 flex items-center gap-3 pl-0.5 opacity-50">
           <button aria-label="Like" className="hover:opacity-100"><ThumbsUp className="h-3.5 w-3.5" /></button>
           <button aria-label="Dislike" className="hover:opacity-100"><ThumbsDown className="h-3.5 w-3.5" /></button>
+          <CopyButton text={m.content} />
           <button aria-label="Forget this" onClick={onForget} className="ml-auto hover:opacity-100"><Trash2 className="h-3.5 w-3.5" /></button>
         </div>
       </div>
     </div>
+  );
+}
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      aria-label="Copy message"
+      onClick={async () => {
+        try { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1400); }
+        catch { toast.error("Copy failed"); }
+      }}
+      className="hover:opacity-100"
+    >
+      {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+    </button>
   );
 }
 
