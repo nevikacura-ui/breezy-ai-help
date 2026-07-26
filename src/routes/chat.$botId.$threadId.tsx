@@ -655,6 +655,30 @@ function BotChat() {
         activeLanguage={effectiveLang}
       />
 
+      {/* Threads sidebar */}
+      <ThreadsSidebar
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        threads={threads}
+        activeId={threadId}
+        onSelect={(id) => {
+          setSidebarOpen(false);
+          nav({ to: "/chat/$botId/$threadId", params: { botId: bot.id, threadId: id } });
+        }}
+        onNew={newThread}
+        onRename={(id, title) => { renameThread(id, title); refreshThreads(); }}
+        onDelete={(id) => {
+          deleteThread(id);
+          refreshThreads();
+          if (id === threadId) {
+            const remaining = threads.filter((t) => t.id !== id);
+            const next = remaining[0] ?? createThread(bot.id);
+            refreshThreads();
+            nav({ to: "/chat/$botId/$threadId", params: { botId: bot.id, threadId: next.id } });
+          }
+        }}
+      />
+
       {/* Mood check-in */}
       {askMood && (
         <div className="mx-4 mt-3 rounded-2xl border p-3 animate-fade-up"
