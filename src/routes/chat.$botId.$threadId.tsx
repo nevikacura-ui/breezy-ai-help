@@ -28,10 +28,7 @@ export const Route = createFileRoute("/chat/$botId/$threadId")({
   }),
   component: BotChat,
 });
-
-type EnrichedMessage = Message & { followUps?: string[] };
-
-function chatKey(botId: string) { return `askeasy.chat.${botId}.v2`; }
+type EnrichedMessage = ThreadMessage;
 
 const MOOD_OPTIONS: { id: NonNullable<Mood>; emoji: string; label: string }[] = [
   { id: "great", emoji: "🤩", label: "Great" },
