@@ -352,6 +352,26 @@ function BotChat() {
     }
   };
 
+  // Export current conversation as Markdown
+  const exportChat = useCallback(() => {
+    if (!bot) return;
+    const stamp = new Date().toISOString().slice(0, 10);
+    const lines = [
+      `# ${bot.name} — AskEasy chat`,
+      `_Exported ${stamp}_`,
+      "",
+      ...messages.map((m) => `**${m.role === "user" ? "You" : bot.name}:**\n\n${m.content}\n`),
+    ];
+    const blob = new Blob([lines.join("\n")], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `askeasy-${bot.name.toLowerCase().replace(/\s+/g, "-")}-${stamp}.md`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toast.success("Chat exported");
+  }, [bot, messages]);
+
   // Voice input — MediaRecorder + Gateway transcription (persona-aware).
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
