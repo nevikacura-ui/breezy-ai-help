@@ -1,13 +1,17 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Settings as SettingsIcon, RotateCcw, ThumbsUp, ThumbsDown, Send, Square, Mic, EyeOff, Trash2, Smile, Paperclip, FileText, X, Loader2, Copy, Download, Check } from "lucide-react";
+import { ArrowLeft, Settings as SettingsIcon, RotateCcw, ThumbsUp, ThumbsDown, Send, Square, Mic, EyeOff, Trash2, Smile, Paperclip, FileText, X, Loader2, Copy, Download, Check, MessageSquarePlus, PanelLeft, Pencil } from "lucide-react";
 import { getBotById, useCustomBots, useOnboarding, ONBOARDING_CATEGORIES, type Bot } from "@/lib/bots";
 import { BotAvatar } from "@/components/askeasy/BotAvatar";
 import {
   sendToAI, useAuthUser, useSettings, useUsage,
   personalityPrompt, tickStreak, splitFollowUps,
-  type Message, type Mood,
+  type Mood,
 } from "@/lib/askeasy";
+import {
+  createThread, deleteThread, renameThread, touchThread,
+  loadThreadMessages, saveThreadMessages, useThreads, type ThreadMessage,
+} from "@/lib/threads";
 import { SettingsSheet } from "@/components/askeasy/SettingsSheet";
 import { LANG_ENGLISH_NAME, LANGUAGES, isRTL, t, detectLanguage, type LangCode } from "@/lib/i18n";
 import { extractPdfText, buildDocContext, type PdfDoc } from "@/lib/pdf";
