@@ -601,6 +601,24 @@ function BotChat() {
         </div>
         <div className="flex items-center gap-1.5">
           <button
+            onClick={() => setSidebarOpen(true)}
+            className="flex h-10 w-10 items-center justify-center rounded-full"
+            style={{ background: "color-mix(in oklab, var(--cream) 10%, transparent)" }}
+            aria-label="Chat history"
+            title="History"
+          >
+            <PanelLeft className="h-4 w-4" />
+          </button>
+          <button
+            onClick={newThread}
+            className="flex h-10 w-10 items-center justify-center rounded-full"
+            style={{ background: "color-mix(in oklab, var(--cream) 10%, transparent)" }}
+            aria-label="New chat"
+            title="New chat"
+          >
+            <MessageSquarePlus className="h-4 w-4" />
+          </button>
+          <button
             onClick={exportChat}
             className="flex h-10 w-10 items-center justify-center rounded-full"
             style={{ background: "color-mix(in oklab, var(--cream) 10%, transparent)" }}
