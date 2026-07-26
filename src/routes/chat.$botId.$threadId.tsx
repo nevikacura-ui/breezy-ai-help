@@ -1070,3 +1070,118 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
+type ThreadLite = { id: string; title: string; updatedAt: number };
+function ThreadsSidebar({ open, onClose, threads, activeId, onSelect, onNew, onRename, onDelete }: {
+  open: boolean;
+  onClose: () => void;
+  threads: ThreadLite[];
+  activeId: string;
+  onSelect: (id: string) => void;
+  onNew: () => void;
+  onRename: (id: string, title: string) => void;
+  onDelete: (id: string) => void;
+}) {
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [draft, setDraft] = useState("");
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  return (
+    <>
+      <div
+        className={`fixed inset-0 z-40 transition-opacity duration-300 ${open ? "opacity-100" : "pointer-events-none opacity-0"}`}
+        style={{ background: "color-mix(in oklab, var(--ink) 60%, transparent)" }}
+        onClick={onClose}
+        aria-hidden
+      />
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 flex w-[86vw] max-w-[340px] flex-col transition-transform duration-300 ${open ? "translate-x-0" : "-translate-x-full"}`}
+        style={{ background: "var(--background)", color: "var(--foreground)", borderRight: "1px solid color-mix(in oklab, var(--cream) 12%, transparent)" }}
+        role="dialog"
+        aria-label="Chat history"
+      >
+        <div className="flex items-center justify-between px-4 pt-5 pb-3">
+          <div className="font-display text-[1.05rem]">Your chats</div>
+          <button
+            onClick={onClose}
+            className="flex h-9 w-9 items-center justify-center rounded-full"
+            style={{ background: "color-mix(in oklab, var(--cream) 10%, transparent)" }}
+            aria-label="Close"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="px-4 pb-3">
+          <button
+            onClick={onNew}
+            className="flex w-full items-center justify-center gap-1.5 rounded-full py-2.5 text-[13px] font-semibold"
+            style={{ background: "var(--butter)", color: "var(--ink)" }}
+          >
+            <MessageSquarePlus className="h-4 w-4" />
+            New chat
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto px-2 pb-6">
+          {threads.length === 0 && (
+            <div className="px-3 py-6 text-center text-[12.5px] opacity-60">No chats yet.</div>
+          )}
+          {threads.map((th) => {
+            const isActive = th.id === activeId;
+            const isEditing = editingId === th.id;
+            return (
+              <div
+                key={th.id}
+                className="group mb-1 flex items-center gap-1 rounded-xl px-2 py-1.5"
+                style={{ background: isActive ? "color-mix(in oklab, var(--cream) 12%, transparent)" : "transparent" }}
+              >
+                {isEditing ? (
+                  <input
+                    autoFocus
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    onBlur={() => { if (draft.trim()) onRename(th.id, draft.trim()); setEditingId(null); }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") { if (draft.trim()) onRename(th.id, draft.trim()); setEditingId(null); }
+                      if (e.key === "Escape") setEditingId(null);
+                    }}
+                    className="flex-1 rounded-md bg-transparent px-2 py-1.5 text-[13px] outline-none"
+                    style={{ border: "1px solid color-mix(in oklab, var(--cream) 20%, transparent)" }}
+                  />
+                ) : (
+                  <button
+                    onClick={() => onSelect(th.id)}
+                    className="flex-1 truncate rounded-md px-2 py-1.5 text-left text-[13px]"
+                    title={th.title}
+                  >
+                    {th.title || "Untitled"}
+                  </button>
+                )}
+                <button
+                  onClick={() => { setEditingId(th.id); setDraft(th.title); }}
+                  aria-label="Rename"
+                  className="hidden h-8 w-8 items-center justify-center rounded-md opacity-70 hover:opacity-100 group-hover:flex"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  onClick={() => { if (confirm("Delete this chat?")) onDelete(th.id); }}
+                  aria-label="Delete"
+                  className="hidden h-8 w-8 items-center justify-center rounded-md opacity-70 hover:opacity-100 group-hover:flex"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </aside>
+    </>
+  );
+}
+
+
