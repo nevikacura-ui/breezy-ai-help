@@ -38,7 +38,7 @@ const MOOD_OPTIONS: { id: NonNullable<Mood>; emoji: string; label: string }[] = 
 ];
 
 function BotChat() {
-  const { botId } = Route.useParams();
+  const { botId, threadId } = Route.useParams();
   const nav = useNavigate();
   const { bots: customBots } = useCustomBots();
   const bot = getBotById(botId, customBots);
@@ -46,7 +46,12 @@ function BotChat() {
   const { usage } = useUsage();
   const user = useAuthUser();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { threads, refresh: refreshThreads } = useThreads(botId);
   const { state: onboarding } = useOnboarding();
+
+  const chatKey = () => threadId;
+
 
   const [messages, setMessages] = useState<EnrichedMessage[]>([]);
   const [input, setInput] = useState("");
