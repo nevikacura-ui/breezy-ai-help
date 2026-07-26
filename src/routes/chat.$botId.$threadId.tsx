@@ -621,7 +621,7 @@ function BotChat() {
         usage={usage}
         onUpgrade={() => setSettingsOpen(false)}
         onClearConversation={() => {
-          try { window.localStorage.removeItem(chatKey(bot.id)); } catch { /* noop */ }
+          saveThreadMessages(bot.id, threadId, []);
           setMessages([{ id: "g", role: "assistant", content: bot.greeting, createdAt: Date.now() }]);
           setSettingsOpen(false);
         }}
