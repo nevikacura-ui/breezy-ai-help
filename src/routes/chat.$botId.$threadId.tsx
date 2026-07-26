@@ -742,7 +742,7 @@ function BotChat() {
 
       {/* Jump to latest */}
       {!atBottom && (
-        <div className="pointer-events-none fixed inset-x-0 bottom-36 z-30 flex justify-center px-4">
+        <div className="pointer-events-none absolute inset-x-0 bottom-36 z-30 flex justify-center px-4">
           <button
             onClick={jumpToLatest}
             className="pointer-events-auto flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12px] font-semibold shadow-lg animate-fade-in"
@@ -756,7 +756,7 @@ function BotChat() {
 
       {/* Regenerate pill */}
       {!thinking && messages.length > 1 && (
-        <div className="pointer-events-none fixed inset-x-0 bottom-24 z-20 flex justify-center px-4">
+        <div className="pointer-events-none absolute inset-x-0 bottom-24 z-20 flex justify-center px-4">
           <button
             onClick={regenerate}
             className="pointer-events-auto flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12px] font-bold"
@@ -769,8 +769,9 @@ function BotChat() {
       )}
 
       {/* Composer */}
-      <div className="fixed inset-x-0 bottom-0 z-30 px-4 pb-5 pt-3"
-        style={{ background: "linear-gradient(to top, var(--ink) 60%, transparent)" }}>
+      <div className="absolute inset-x-0 bottom-0 z-30 px-4 pt-3"
+        style={{ background: "linear-gradient(to top, var(--ink) 60%, transparent)", paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" }}>
+
         <div className="mx-auto w-full max-w-lg">
           {detectedLang && detectedLang !== effectiveLang && !dismissedLangs.has(detectedLang) && (() => {
             const meta = LANGUAGES.find((l) => l.code === detectedLang);
