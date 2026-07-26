@@ -141,13 +141,13 @@ function BotChat() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated]);
 
-  // Hydrate per-bot history + prefill first message
+  // Hydrate per-thread history + prefill first message. Remount on thread change via key.
   useEffect(() => {
     if (!bot) return;
     try {
-      const raw = settings.privateMode ? null : window.localStorage.getItem(chatKey(bot.id));
-      if (raw) {
-        setMessages(JSON.parse(raw) as EnrichedMessage[]);
+      const existing = settings.privateMode ? [] : loadThreadMessages(bot.id, threadId);
+      if (existing.length > 0) {
+        setMessages(existing);
       } else {
         const nameBit = settings.name ? `, ${settings.name}` : "";
         const greeting = bot.greeting.replace(/^Hi[!,]?/i, `Hi${nameBit}!`).replace(/^Hello[!,]?/i, `Hello${nameBit}!`);
@@ -163,13 +163,23 @@ function BotChat() {
     }
     setHydrated(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bot?.id]);
+  }, [bot?.id, threadId]);
 
   useEffect(() => {
     if (!bot || !hydrated) return;
     if (settings.privateMode) return;
-    window.localStorage.setItem(chatKey(bot.id), JSON.stringify(messages));
-  }, [messages, hydrated, bot?.id, settings.privateMode]);
+    saveThreadMessages(bot.id, threadId, messages);
+    // Auto-title from first user message
+    const firstUser = messages.find((m) => m.role === "user");
+    const existing = threads.find((t) => t.id === threadId);
+    if (firstUser && existing && existing.title === "New chat") {
+      const title = firstUser.content.slice(0, 40).trim() || "New chat";
+      renameThread(threadId, title);
+      refreshThreads();
+    } else if (existing) {
+      touchThread(threadId);
+    }
+  }, [messages, hydrated, bot?.id, threadId, settings.privateMode, threads, refreshThreads]);
 
   // Smart auto-scroll: stick to bottom while the user is near it; step aside
   // the moment they scroll up. Follows streaming token growth via ResizeObserver
