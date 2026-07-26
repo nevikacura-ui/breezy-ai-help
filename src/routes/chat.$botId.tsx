@@ -575,14 +575,25 @@ function BotChat() {
           )}
           {settings.privateMode && <EyeOff className="h-3.5 w-3.5 opacity-60" aria-label="Private" />}
         </div>
-        <button
-          onClick={() => setSettingsOpen(true)}
-          className="flex h-10 w-10 items-center justify-center rounded-full"
-          style={{ background: "color-mix(in oklab, var(--cream) 10%, transparent)" }}
-          aria-label="Settings"
-        >
-          <SettingsIcon className="h-5 w-5" />
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={exportChat}
+            className="flex h-10 w-10 items-center justify-center rounded-full"
+            style={{ background: "color-mix(in oklab, var(--cream) 10%, transparent)" }}
+            aria-label="Export chat as Markdown"
+            title="Export (⌘E)"
+          >
+            <Download className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="flex h-10 w-10 items-center justify-center rounded-full"
+            style={{ background: "color-mix(in oklab, var(--cream) 10%, transparent)" }}
+            aria-label="Settings"
+          >
+            <SettingsIcon className="h-5 w-5" />
+          </button>
+        </div>
       </header>
 
       <SettingsSheet
