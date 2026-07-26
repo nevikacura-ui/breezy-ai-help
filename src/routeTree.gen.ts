@@ -22,6 +22,7 @@ import { Route as ApiTtsRouteImport } from './routes/api/tts'
 import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiBotGenerateRouteImport } from './routes/api/bot-generate'
+import { Route as ChatBotIdThreadIdRouteImport } from './routes/chat.$botId.$threadId'
 import { Route as ApiPublicCashfreeWebhookRouteImport } from './routes/api/public/cashfree-webhook'
 
 const SplashRoute = SplashRouteImport.update({
@@ -89,6 +90,11 @@ const ApiBotGenerateRoute = ApiBotGenerateRouteImport.update({
   path: '/api/bot-generate',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChatBotIdThreadIdRoute = ChatBotIdThreadIdRouteImport.update({
+  id: '/$threadId',
+  path: '/$threadId',
+  getParentRoute: () => ChatBotIdRoute,
+} as any)
 const ApiPublicCashfreeWebhookRoute =
   ApiPublicCashfreeWebhookRouteImport.update({
     id: '/api/public/cashfree-webhook',
@@ -108,9 +114,10 @@ export interface FileRoutesByFullPath {
   '/api/tts': typeof ApiTtsRoute
   '/bots/$botId': typeof BotsBotIdRoute
   '/bots/new': typeof BotsNewRoute
-  '/chat/$botId': typeof ChatBotIdRoute
+  '/chat/$botId': typeof ChatBotIdRouteWithChildren
   '/upgrade/success': typeof UpgradeSuccessRoute
   '/api/public/cashfree-webhook': typeof ApiPublicCashfreeWebhookRoute
+  '/chat/$botId/$threadId': typeof ChatBotIdThreadIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -124,9 +131,10 @@ export interface FileRoutesByTo {
   '/api/tts': typeof ApiTtsRoute
   '/bots/$botId': typeof BotsBotIdRoute
   '/bots/new': typeof BotsNewRoute
-  '/chat/$botId': typeof ChatBotIdRoute
+  '/chat/$botId': typeof ChatBotIdRouteWithChildren
   '/upgrade/success': typeof UpgradeSuccessRoute
   '/api/public/cashfree-webhook': typeof ApiPublicCashfreeWebhookRoute
+  '/chat/$botId/$threadId': typeof ChatBotIdThreadIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -141,9 +149,10 @@ export interface FileRoutesById {
   '/api/tts': typeof ApiTtsRoute
   '/bots/$botId': typeof BotsBotIdRoute
   '/bots/new': typeof BotsNewRoute
-  '/chat/$botId': typeof ChatBotIdRoute
+  '/chat/$botId': typeof ChatBotIdRouteWithChildren
   '/upgrade/success': typeof UpgradeSuccessRoute
   '/api/public/cashfree-webhook': typeof ApiPublicCashfreeWebhookRoute
+  '/chat/$botId/$threadId': typeof ChatBotIdThreadIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -162,6 +171,7 @@ export interface FileRouteTypes {
     | '/chat/$botId'
     | '/upgrade/success'
     | '/api/public/cashfree-webhook'
+    | '/chat/$botId/$threadId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -178,6 +188,7 @@ export interface FileRouteTypes {
     | '/chat/$botId'
     | '/upgrade/success'
     | '/api/public/cashfree-webhook'
+    | '/chat/$botId/$threadId'
   id:
     | '__root__'
     | '/'
@@ -194,6 +205,7 @@ export interface FileRouteTypes {
     | '/chat/$botId'
     | '/upgrade/success'
     | '/api/public/cashfree-webhook'
+    | '/chat/$botId/$threadId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -206,7 +218,7 @@ export interface RootRouteChildren {
   ApiChatRoute: typeof ApiChatRoute
   ApiTranscribeRoute: typeof ApiTranscribeRoute
   ApiTtsRoute: typeof ApiTtsRoute
-  ChatBotIdRoute: typeof ChatBotIdRoute
+  ChatBotIdRoute: typeof ChatBotIdRouteWithChildren
   UpgradeSuccessRoute: typeof UpgradeSuccessRoute
   ApiPublicCashfreeWebhookRoute: typeof ApiPublicCashfreeWebhookRoute
 }
@@ -304,6 +316,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiBotGenerateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/chat/$botId/$threadId': {
+      id: '/chat/$botId/$threadId'
+      path: '/$threadId'
+      fullPath: '/chat/$botId/$threadId'
+      preLoaderRoute: typeof ChatBotIdThreadIdRouteImport
+      parentRoute: typeof ChatBotIdRoute
+    }
     '/api/public/cashfree-webhook': {
       id: '/api/public/cashfree-webhook'
       path: '/api/public/cashfree-webhook'
@@ -326,6 +345,18 @@ const BotsRouteChildren: BotsRouteChildren = {
 
 const BotsRouteWithChildren = BotsRoute._addFileChildren(BotsRouteChildren)
 
+interface ChatBotIdRouteChildren {
+  ChatBotIdThreadIdRoute: typeof ChatBotIdThreadIdRoute
+}
+
+const ChatBotIdRouteChildren: ChatBotIdRouteChildren = {
+  ChatBotIdThreadIdRoute: ChatBotIdThreadIdRoute,
+}
+
+const ChatBotIdRouteWithChildren = ChatBotIdRoute._addFileChildren(
+  ChatBotIdRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
@@ -336,7 +367,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiChatRoute: ApiChatRoute,
   ApiTranscribeRoute: ApiTranscribeRoute,
   ApiTtsRoute: ApiTtsRoute,
-  ChatBotIdRoute: ChatBotIdRoute,
+  ChatBotIdRoute: ChatBotIdRouteWithChildren,
   UpgradeSuccessRoute: UpgradeSuccessRoute,
   ApiPublicCashfreeWebhookRoute: ApiPublicCashfreeWebhookRoute,
 }
