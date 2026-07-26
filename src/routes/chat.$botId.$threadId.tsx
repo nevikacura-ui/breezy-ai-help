@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { StreamText } from "@/components/askeasy/StreamText";
 
 
-export const Route = createFileRoute("/chat/$botId")({
+export const Route = createFileRoute("/chat/$botId/$threadId")({
   head: ({ params }) => ({
     meta: [
       { title: `Chat — ${params.botId}` },
