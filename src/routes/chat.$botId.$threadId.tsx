@@ -6,7 +6,7 @@ import { BotAvatar } from "@/components/askeasy/BotAvatar";
 import {
   sendToAI, useAuthUser, useSettings, useUsage,
   personalityPrompt, tickStreak, splitFollowUps,
-  type Mood,,
+  type Mood,
   sendToAIDetailed,
   requestCubixHandoff,
 } from "@/lib/askeasy";
