@@ -267,74 +267,180 @@ export const Route = createFileRoute("/api/chat")({
         }
 
         const useWebSearch = !!body.webSearch;
-        const upstreamBody: Record<string, unknown> = {
-          model: upstreamModel,
-          messages: [sys, ...history],
-          usage: { include: true }, // ask OpenRouter to return token + cost accounting
-        };
-        if (useWebSearch) upstreamBody.plugins = [{ id: "web", max_results: 5 }];
-
-        const upstream = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-            "HTTP-Referer": "https://askeasy.lovable.app",
-            "X-Title": "AskEasy",
-          },
-          body: JSON.stringify(upstreamBody),
-        });
-
-        if (!upstream.ok) {
-          const errText = await upstream.text();
-          return j({ error: "Upstream error", status: upstream.status, detail: errText.slice(0, 500) }, upstream.status);
-        }
 
         type Annotation = { type?: string; url_citation?: { url?: string; title?: string } };
         type UsageBlock = { prompt_tokens?: number; completion_tokens?: number; cost?: number };
-        const data = (await upstream.json()) as {
-          choices?: { message?: { content?: string; annotations?: Annotation[] } }[];
-          citations?: (string | { url?: string; title?: string })[];
-          usage?: UsageBlock;
+        type ToolCall = { id: string; type?: string; function: { name: string; arguments: string } };
+        type UpstreamMsg = {
+          role?: string;
+          content?: string | null;
+          annotations?: Annotation[];
+          tool_calls?: ToolCall[];
         };
-        const msg = data.choices?.[0]?.message;
-        const reply = msg?.content ?? "";
-
-        // --- Record spend (best-effort; failures never block the reply) ---
-        try {
-          const usage = data.usage ?? {};
-          const promptTok = Number(usage.prompt_tokens ?? 0);
-          const completionTok = Number(usage.completion_tokens ?? 0);
-          let costUsd = Number(usage.cost ?? 0);
-          if (!costUsd || !Number.isFinite(costUsd)) {
-            const p = MODEL_PRICING[upstreamModel];
-            if (p) costUsd = (promptTok * p.in + completionTok * p.out) / 1_000_000;
-          }
-          if (Number.isFinite(costUsd) && costUsd > 0) {
-            await supabaseAdmin.rpc("bump_openrouter_spend", {
-              _model: upstreamModel,
-              _cost: costUsd,
-              _prompt_tokens: promptTok,
-              _completion_tokens: completionTok,
-            });
-          }
-        } catch (e) {
-          console.error("[spend-cap] failed to record spend:", e);
-        }
 
         const citations: { title?: string; url: string }[] = [];
         const seen = new Set<string>();
-        for (const a of msg?.annotations ?? []) {
-          const c = a?.url_citation;
-          if (c?.url && !seen.has(c.url)) { seen.add(c.url); citations.push({ url: c.url, title: c.title }); }
-        }
-        for (const c of data.citations ?? []) {
-          const url = typeof c === "string" ? c : c?.url;
-          const title = typeof c === "string" ? undefined : c?.title;
-          if (url && !seen.has(url)) { seen.add(url); citations.push({ url, title }); }
+        const collectCitations = (msg: UpstreamMsg | undefined, top: (string | { url?: string; title?: string })[] = []) => {
+          for (const a of msg?.annotations ?? []) {
+            const c = a?.url_citation;
+            if (c?.url && !seen.has(c.url)) { seen.add(c.url); citations.push({ url: c.url, title: c.title }); }
+          }
+          for (const c of top) {
+            const url = typeof c === "string" ? c : c?.url;
+            const title = typeof c === "string" ? undefined : c?.title;
+            if (url && !seen.has(url)) { seen.add(url); citations.push({ url, title }); }
+          }
+        };
+
+        const recordSpend = async (usage: UsageBlock | undefined) => {
+          try {
+            const promptTok = Number(usage?.prompt_tokens ?? 0);
+            const completionTok = Number(usage?.completion_tokens ?? 0);
+            let costUsd = Number(usage?.cost ?? 0);
+            if (!costUsd || !Number.isFinite(costUsd)) {
+              const p = MODEL_PRICING[upstreamModel];
+              if (p) costUsd = (promptTok * p.in + completionTok * p.out) / 1_000_000;
+            }
+            if (Number.isFinite(costUsd) && costUsd > 0) {
+              await supabaseAdmin.rpc("bump_openrouter_spend", {
+                _model: upstreamModel,
+                _cost: costUsd,
+                _prompt_tokens: promptTok,
+                _completion_tokens: completionTok,
+              });
+            }
+          } catch (e) {
+            console.error("[spend-cap] failed to record spend:", e);
+          }
+        };
+
+        // --- Tool-calling loop ---------------------------------------------
+        // AskEasy can DO things, not just describe them. Safe tools run
+        // server-side and their results are fed back to the model; anything
+        // that touches the outside world becomes a proposal the user approves.
+        const { toolsPayload, TOOL_BY_NAME, summarizeProposal } = await import("@/lib/tools/registry");
+        const { executeTool } = await import("@/lib/tools/execute.server");
+
+        const convo: unknown[] = [sys, ...history];
+        const proposals: {
+          id: string; tool: string; label: string; permission: string;
+          input: Record<string, unknown>; proposal: string; needsIntegration?: string;
+        }[] = [];
+        const toolsUsed: string[] = [];
+        let reply = "";
+
+        for (let round = 0; round < 3; round++) {
+          const upstreamBody: Record<string, unknown> = {
+            model: upstreamModel,
+            messages: convo,
+            usage: { include: true },
+            tools: toolsPayload(),
+            tool_choice: "auto",
+          };
+          if (useWebSearch) upstreamBody.plugins = [{ id: "web", max_results: 5 }];
+
+          const upstream = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${apiKey}`,
+              "Content-Type": "application/json",
+              "HTTP-Referer": "https://askeasy.lovable.app",
+              "X-Title": "AskEasy",
+            },
+            body: JSON.stringify(upstreamBody),
+          });
+
+          if (!upstream.ok) {
+            const errText = await upstream.text();
+            return j({ error: "Upstream error", status: upstream.status, detail: errText.slice(0, 500) }, upstream.status);
+          }
+
+          const data = (await upstream.json()) as {
+            choices?: { message?: UpstreamMsg }[];
+            citations?: (string | { url?: string; title?: string })[];
+            usage?: UsageBlock;
+          };
+          await recordSpend(data.usage);
+
+          const msg = data.choices?.[0]?.message;
+          collectCitations(msg, data.citations ?? []);
+
+          const calls = msg?.tool_calls ?? [];
+          if (calls.length === 0) {
+            reply = msg?.content ?? "";
+            break;
+          }
+
+          convo.push({
+            role: "assistant",
+            content: msg?.content ?? "",
+            tool_calls: calls,
+          });
+
+          for (const call of calls.slice(0, 4)) {
+            const name = call.function?.name ?? "";
+            const def = TOOL_BY_NAME[name];
+            let args: Record<string, unknown> = {};
+            try { args = JSON.parse(call.function?.arguments || "{}") as Record<string, unknown>; } catch { /* keep {} */ }
+
+            if (!def) {
+              convo.push({ role: "tool", tool_call_id: call.id, content: JSON.stringify({ ok: false, error: `Unknown tool ${name}` }) });
+              continue;
+            }
+
+            if (def.requiresApproval) {
+              proposals.push({
+                id: call.id,
+                tool: name,
+                label: def.label,
+                permission: def.permission,
+                input: args,
+                proposal: summarizeProposal(name, args),
+                needsIntegration: def.requiresIntegration,
+              });
+              convo.push({
+                role: "tool",
+                tool_call_id: call.id,
+                content: JSON.stringify({
+                  ok: false,
+                  status: "AWAITING_USER_APPROVAL",
+                  note: "This action has NOT happened. Tell the user what you propose and that it is waiting for their approval. Never claim it was done.",
+                }),
+              });
+              continue;
+            }
+
+            const result = await executeTool(name, args, { userId });
+            toolsUsed.push(name);
+            for (const c of result.citations ?? []) {
+              if (!seen.has(c.url)) { seen.add(c.url); citations.push(c); }
+            }
+            convo.push({
+              role: "tool",
+              tool_call_id: call.id,
+              content: JSON.stringify({
+                ok: result.ok,
+                error: result.error ?? null,
+                output: (result.output ?? "").slice(0, 20_000),
+              }),
+            });
+          }
         }
 
-        return j({ reply, model: mapped.model, tier: mapped.tier, citations, taskClass });
+        if (!reply && proposals.length > 0) {
+          reply = "I've prepared this and it's ready for your approval.";
+        }
+
+        return j({
+          reply,
+          model: mapped.model,
+          tier: mapped.tier,
+          citations,
+          taskClass,
+          proposals,
+          toolsUsed,
+        });
+
       },
     },
   },

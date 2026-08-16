@@ -9,7 +9,10 @@ import {
   type Mood,
   sendToAIDetailed,
   requestCubixHandoff,
+  approveToolCall,
+  type PendingApproval,
 } from "@/lib/askeasy";
+import { ApprovalCard } from "@/components/askeasy/ApprovalCard";
 import {
   createThread, deleteThread, renameThread, touchThread,
   loadThreadMessages, saveThreadMessages, useThreads, type ThreadMessage,
@@ -79,6 +82,7 @@ function BotChat() {
   const [dismissedLangs, setDismissedLangs] = useState<Set<LangCode>>(new Set());
   const [docs, setDocs] = useState<ParsedDoc[]>([]);
   const [automation, setAutomation] = useState<string | null>(null);
+  const [approvals, setApprovals] = useState<PendingApproval[]>([]);
   const [automating, setAutomating] = useState(false);
   const [uploadingDoc, setUploadingDoc] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -325,13 +329,14 @@ function BotChat() {
     const controller = new AbortController();
     abortRef.current = controller;
     try {
-      const { reply, automation: autoLine } = await sendToAIDetailed({
+      const { reply, automation: autoLine, proposals } = await sendToAIDetailed({
         messages: [...messages, userMsg],
         settings,
         system: systemPrompt,
         signal: controller.signal,
       });
       setAutomation(autoLine ?? null);
+      setApprovals(proposals ?? []);
       const { body, followUps } = splitFollowUps(reply);
       setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "assistant", content: body, followUps, createdAt: Date.now() }]);
       if (typeof navigator !== "undefined" && "vibrate" in navigator) {
@@ -358,6 +363,32 @@ function BotChat() {
       inputRef.current?.focus();
     }
   }, [bot, thinking, messages, settings, systemPrompt, update]);
+
+  // Approve a proposed action. The server is the only thing that can perform it,
+  // and its result — not the model's claim — is what gets shown.
+  const approve = useCallback(async (p: PendingApproval) => {
+    const out = await approveToolCall(p);
+    setApprovals((prev) => prev.filter((x) => x.id !== p.id));
+    if (out.ok) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content: out.output || `Done: ${p.label}.`,
+          createdAt: Date.now(),
+        },
+      ]);
+      toast.success(`${p.label} — done.`);
+    } else {
+      toast.error(out.error || "That action could not be completed.");
+    }
+  }, []);
+
+  const declineApproval = useCallback((p: PendingApproval) => {
+    setApprovals((prev) => prev.filter((x) => x.id !== p.id));
+    toast("Left it as a draft — nothing was sent.");
+  }, []);
 
   const send = useCallback(() => sendText(input), [input, sendText]);
 
@@ -768,6 +799,9 @@ function BotChat() {
                   : []
               }
             />
+          ))}
+          {approvals.map((p) => (
+            <ApprovalCard key={p.id} proposal={p} onApprove={approve} onCancel={declineApproval} />
           ))}
           {thinking && (
             <div className="flex items-center gap-2">
