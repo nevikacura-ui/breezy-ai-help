@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { LangCode } from "./i18n";
 import { t as translate } from "./i18n";
+import { extractAutomationLine } from "./headache";
 
 export type Attachment = {
   id: string;
@@ -387,12 +388,55 @@ export function quotaCheck(
   return { needs, overLimit, remaining };
 }
 
+async function authHeaders(): Promise<Record<string, string>> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  try {
+    const { data } = await supabase.auth.getSession();
+    const tok = data.session?.access_token;
+    if (tok) headers["Authorization"] = `Bearer ${tok}`;
+  } catch {
+    /* anon fine */
+  }
+  return headers;
+}
+
+/** Hand a recurring request to Cubix.bot as a reviewable automation draft. */
+export async function requestCubixHandoff(args: {
+  messages: Message[];
+  request: string;
+}): Promise<{
+  specId?: string;
+  spec?: { title: string; summary: string };
+  handoff: { ok: boolean; reviewUrl?: string; error?: string };
+}> {
+  const res = await fetch("/api/cubix", {
+    method: "POST",
+    headers: await authHeaders(),
+    body: JSON.stringify({
+      request: args.request,
+      messages: args.messages.slice(-12).map((m) => ({ role: m.role, content: m.content })),
+    }),
+  });
+  const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+  if (!res.ok) throw new Error((data.error as string) || "Couldn't prepare the automation.");
+  return data as never;
+}
+
 export async function sendToAI(args: {
   messages: Message[];
   settings: Settings;
   signal?: AbortSignal;
   system?: string;
 }): Promise<string> {
+  return (await sendToAIDetailed(args)).reply;
+}
+
+export async function sendToAIDetailed(args: {
+  messages: Message[];
+  settings: Settings;
+  signal?: AbortSignal;
+  system?: string;
+}): Promise<{ reply: string; automation?: string }> {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   try {
     const { data } = await supabase.auth.getSession();
@@ -411,7 +455,17 @@ export async function sendToAI(args: {
       language: args.settings.language,
       system: args.system,
       webSearch: !!args.settings.webSearch && !!args.settings.focusMode,
-      messages: args.messages.map((m) => ({ role: m.role, content: m.content })),
+      messages: args.messages.map((m) => {
+        const images = (m.attachments ?? []).filter((a) => a.type === "image");
+        if (images.length === 0) return { role: m.role, content: m.content };
+        return {
+          role: m.role,
+          content: [
+            { type: "text", text: m.content || "Look at this and handle it." },
+            ...images.map((a) => ({ type: "image_url", image_url: { url: a.dataUrl } })),
+          ],
+        };
+      }),
     }),
   });
 
@@ -424,12 +478,14 @@ export async function sendToAI(args: {
     throw err;
   }
   const data = (await res.json()) as { reply?: string; citations?: { title?: string; url: string }[] };
+  const { body, automation } = extractAutomationLine(data.reply ?? "");
   const cites = data.citations ?? [];
-  if (cites.length === 0) return data.reply ?? "";
   const sourcesBlock =
-    "\n\n**Sources**\n" +
-    cites.slice(0, 6).map((c, i) => `${i + 1}. [${c.title || c.url}](${c.url})`).join("\n");
-  return (data.reply ?? "") + sourcesBlock;
+    cites.length === 0
+      ? ""
+      : "\n\n**Sources**\n" +
+        cites.slice(0, 6).map((c, i) => `${i + 1}. [${c.title || c.url}](${c.url})`).join("\n");
+  return { reply: body + sourcesBlock, automation };
 }
 
 
