@@ -20,6 +20,7 @@ import { Route as BotsNewRouteImport } from './routes/bots.new'
 import { Route as BotsBotIdRouteImport } from './routes/bots.$botId'
 import { Route as ApiTtsRouteImport } from './routes/api/tts'
 import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
+import { Route as ApiCubixRouteImport } from './routes/api/cubix'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiBotGenerateRouteImport } from './routes/api/bot-generate'
 import { Route as ChatBotIdThreadIdRouteImport } from './routes/chat.$botId.$threadId'
@@ -80,6 +81,11 @@ const ApiTranscribeRoute = ApiTranscribeRouteImport.update({
   path: '/api/transcribe',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCubixRoute = ApiCubixRouteImport.update({
+  id: '/api/cubix',
+  path: '/api/cubix',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
@@ -110,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/splash': typeof SplashRoute
   '/api/bot-generate': typeof ApiBotGenerateRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/cubix': typeof ApiCubixRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/api/tts': typeof ApiTtsRoute
   '/bots/$botId': typeof BotsBotIdRoute
@@ -127,6 +134,7 @@ export interface FileRoutesByTo {
   '/splash': typeof SplashRoute
   '/api/bot-generate': typeof ApiBotGenerateRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/cubix': typeof ApiCubixRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/api/tts': typeof ApiTtsRoute
   '/bots/$botId': typeof BotsBotIdRoute
@@ -145,6 +153,7 @@ export interface FileRoutesById {
   '/splash': typeof SplashRoute
   '/api/bot-generate': typeof ApiBotGenerateRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/cubix': typeof ApiCubixRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/api/tts': typeof ApiTtsRoute
   '/bots/$botId': typeof BotsBotIdRoute
@@ -164,6 +173,7 @@ export interface FileRouteTypes {
     | '/splash'
     | '/api/bot-generate'
     | '/api/chat'
+    | '/api/cubix'
     | '/api/transcribe'
     | '/api/tts'
     | '/bots/$botId'
@@ -181,6 +191,7 @@ export interface FileRouteTypes {
     | '/splash'
     | '/api/bot-generate'
     | '/api/chat'
+    | '/api/cubix'
     | '/api/transcribe'
     | '/api/tts'
     | '/bots/$botId'
@@ -198,6 +209,7 @@ export interface FileRouteTypes {
     | '/splash'
     | '/api/bot-generate'
     | '/api/chat'
+    | '/api/cubix'
     | '/api/transcribe'
     | '/api/tts'
     | '/bots/$botId'
@@ -216,6 +228,7 @@ export interface RootRouteChildren {
   SplashRoute: typeof SplashRoute
   ApiBotGenerateRoute: typeof ApiBotGenerateRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiCubixRoute: typeof ApiCubixRoute
   ApiTranscribeRoute: typeof ApiTranscribeRoute
   ApiTtsRoute: typeof ApiTtsRoute
   ChatBotIdRoute: typeof ChatBotIdRouteWithChildren
@@ -302,6 +315,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTranscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/cubix': {
+      id: '/api/cubix'
+      path: '/api/cubix'
+      fullPath: '/api/cubix'
+      preLoaderRoute: typeof ApiCubixRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -365,6 +385,7 @@ const rootRouteChildren: RootRouteChildren = {
   SplashRoute: SplashRoute,
   ApiBotGenerateRoute: ApiBotGenerateRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiCubixRoute: ApiCubixRoute,
   ApiTranscribeRoute: ApiTranscribeRoute,
   ApiTtsRoute: ApiTtsRoute,
   ChatBotIdRoute: ChatBotIdRouteWithChildren,

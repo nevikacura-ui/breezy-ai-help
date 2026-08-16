@@ -107,7 +107,7 @@ export const Route = createFileRoute("/api/cubix")({
             user_id: userId,
             title: spec.title ?? "Automation",
             summary: spec.summary ?? "",
-            spec: spec as unknown as Record<string, unknown>,
+            spec: JSON.parse(JSON.stringify(spec)),
             status: "draft",
           })
           .select("id")
