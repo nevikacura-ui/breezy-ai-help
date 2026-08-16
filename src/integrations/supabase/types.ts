@@ -215,6 +215,36 @@ export type Database = {
         }
         Relationships: []
       }
+      tool_permissions: {
+        Row: {
+          allowed: boolean
+          always_ask: boolean
+          created_at: string
+          id: string
+          permission: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          allowed?: boolean
+          always_ask?: boolean
+          created_at?: string
+          id?: string
+          permission: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          allowed?: boolean
+          always_ask?: boolean
+          created_at?: string
+          id?: string
+          permission?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       usage_daily: {
         Row: {
           day: string
@@ -236,6 +266,84 @@ export type Database = {
           text_count?: number
           user_id?: string
           voice_count?: number
+        }
+        Relationships: []
+      }
+      user_context: {
+        Row: {
+          approved_contacts: Json
+          business_context: string | null
+          created_at: string
+          facts: Json
+          preferred_language: string | null
+          role: string | null
+          tone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          approved_contacts?: Json
+          business_context?: string | null
+          created_at?: string
+          facts?: Json
+          preferred_language?: string | null
+          role?: string | null
+          tone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          approved_contacts?: Json
+          business_context?: string | null
+          created_at?: string
+          facts?: Json
+          preferred_language?: string | null
+          role?: string | null
+          tone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_integrations: {
+        Row: {
+          access_token_enc: string | null
+          account_email: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          provider: string
+          refresh_token_enc: string | null
+          scopes: string[]
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token_enc?: string | null
+          account_email?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          provider: string
+          refresh_token_enc?: string | null
+          scopes?: string[]
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token_enc?: string | null
+          account_email?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          provider?: string
+          refresh_token_enc?: string | null
+          scopes?: string[]
+          status?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

@@ -431,12 +431,39 @@ export async function sendToAI(args: {
   return (await sendToAIDetailed(args)).reply;
 }
 
+export type PendingApproval = {
+  id: string;
+  tool: string;
+  label: string;
+  permission: string;
+  input: Record<string, unknown>;
+  proposal: string;
+  needsIntegration?: string;
+};
+
+/** Run a tool the user just approved. Only the server can actually perform it. */
+export async function approveToolCall(p: PendingApproval): Promise<{
+  ok: boolean;
+  output?: string;
+  error?: string;
+  code?: string;
+}> {
+  const res = await fetch("/api/tools", {
+    method: "POST",
+    headers: await authHeaders(),
+    body: JSON.stringify({ tool: p.tool, input: p.input, approved: true }),
+  });
+  const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+  if (!res.ok) return { ok: false, error: (data.error as string) || "That action could not be completed." };
+  return data as { ok: boolean; output?: string; error?: string; code?: string };
+}
+
 export async function sendToAIDetailed(args: {
   messages: Message[];
   settings: Settings;
   signal?: AbortSignal;
   system?: string;
-}): Promise<{ reply: string; automation?: string }> {
+}): Promise<{ reply: string; automation?: string; proposals: PendingApproval[]; toolsUsed: string[] }> {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   try {
     const { data } = await supabase.auth.getSession();
@@ -477,7 +504,12 @@ export async function sendToAIDetailed(args: {
     err.status = res.status;
     throw err;
   }
-  const data = (await res.json()) as { reply?: string; citations?: { title?: string; url: string }[] };
+  const data = (await res.json()) as {
+    reply?: string;
+    citations?: { title?: string; url: string }[];
+    proposals?: PendingApproval[];
+    toolsUsed?: string[];
+  };
   const { body, automation } = extractAutomationLine(data.reply ?? "");
   const cites = data.citations ?? [];
   const sourcesBlock =
@@ -485,7 +517,12 @@ export async function sendToAIDetailed(args: {
       ? ""
       : "\n\n**Sources**\n" +
         cites.slice(0, 6).map((c, i) => `${i + 1}. [${c.title || c.url}](${c.url})`).join("\n");
-  return { reply: body + sourcesBlock, automation };
+  return {
+    reply: body + sourcesBlock,
+    automation,
+    proposals: data.proposals ?? [],
+    toolsUsed: data.toolsUsed ?? [],
+  };
 }
 
 
