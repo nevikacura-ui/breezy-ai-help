@@ -33,11 +33,15 @@ export async function extractDocument(file: File): Promise<ParsedDoc> {
   }
 
   if (ext === "docx") {
-    const mammoth = await import("mammoth/mammoth.browser.js");
-    const buf = await file.arrayBuffer();
-    const { value } = await (mammoth as unknown as {
+    const mammoth = (await import(
+      /* @vite-ignore */ "mammoth/mammoth.browser.js"
+    )) as unknown as {
       extractRawText: (o: { arrayBuffer: ArrayBuffer }) => Promise<{ value: string }>;
-    }).extractRawText({ arrayBuffer: buf });
+      default?: { extractRawText: (o: { arrayBuffer: ArrayBuffer }) => Promise<{ value: string }> };
+    };
+    const api = mammoth.default ?? mammoth;
+    const buf = await file.arrayBuffer();
+    const { value } = await api.extractRawText({ arrayBuffer: buf });
     const { text, chars } = clamp(value);
     return { id: crypto.randomUUID(), name: file.name, pages: 1, text, chars, kind: "docx" };
   }
