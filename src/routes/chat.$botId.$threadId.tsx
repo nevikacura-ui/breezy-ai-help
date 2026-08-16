@@ -7,6 +7,8 @@ import {
   sendToAI, useAuthUser, useSettings, useUsage,
   personalityPrompt, tickStreak, splitFollowUps,
   type Mood,
+  sendToAIDetailed,
+  requestCubixHandoff,
 } from "@/lib/askeasy";
 import {
   createThread, deleteThread, renameThread, touchThread,
@@ -14,7 +16,7 @@ import {
 } from "@/lib/threads";
 import { SettingsSheet } from "@/components/askeasy/SettingsSheet";
 import { LANG_ENGLISH_NAME, LANGUAGES, isRTL, t, detectLanguage, type LangCode } from "@/lib/i18n";
-import { extractPdfText, buildDocContext, type PdfDoc } from "@/lib/pdf";
+import { extractDocument, buildDocContext, isSupportedDoc, type ParsedDoc } from "@/lib/docs";
 import { toast } from "sonner";
 import { StreamText } from "@/components/askeasy/StreamText";
 
@@ -29,6 +31,8 @@ export const Route = createFileRoute("/chat/$botId/$threadId")({
   component: BotChat,
 });
 type EnrichedMessage = ThreadMessage;
+
+const AUTOMATE_CHIP = "⚡ Automate this with Cubix";
 
 const MOOD_OPTIONS: { id: NonNullable<Mood>; emoji: string; label: string }[] = [
   { id: "great", emoji: "🤩", label: "Great" },
@@ -73,7 +77,9 @@ function BotChat() {
   const [reactionKey, setReactionKey] = useState(0);
   const [detectedLang, setDetectedLang] = useState<LangCode | null>(null);
   const [dismissedLangs, setDismissedLangs] = useState<Set<LangCode>>(new Set());
-  const [docs, setDocs] = useState<PdfDoc[]>([]);
+  const [docs, setDocs] = useState<ParsedDoc[]>([]);
+  const [automation, setAutomation] = useState<string | null>(null);
+  const [automating, setAutomating] = useState(false);
   const [uploadingDoc, setUploadingDoc] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -319,12 +325,13 @@ function BotChat() {
     const controller = new AbortController();
     abortRef.current = controller;
     try {
-      const reply = await sendToAI({
+      const { reply, automation: autoLine } = await sendToAIDetailed({
         messages: [...messages, userMsg],
         settings,
         system: systemPrompt,
         signal: controller.signal,
       });
+      setAutomation(autoLine ?? null);
       const { body, followUps } = splitFollowUps(reply);
       setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "assistant", content: body, followUps, createdAt: Date.now() }]);
       if (typeof navigator !== "undefined" && "vibrate" in navigator) {
@@ -353,6 +360,38 @@ function BotChat() {
   }, [bot, thinking, messages, settings, systemPrompt, update]);
 
   const send = useCallback(() => sendText(input), [input, sendText]);
+
+  // AskEasy → Cubix.bot: compile the recurring request into a reviewable draft.
+  const sendToCubix = useCallback(async () => {
+    if (!automation || automating) return;
+    setAutomating(true);
+    const toastId = toast.loading("Preparing the automation for Cubix…");
+    try {
+      const out = await requestCubixHandoff({ messages, request: automation });
+      const url = out.handoff?.reviewUrl;
+      if (out.handoff?.ok) {
+        toast.success("Automation draft sent to Cubix — review and confirm it there.", {
+          id: toastId,
+          action: url ? { label: "Open Cubix", onClick: () => window.open(url, "_blank", "noopener") } : undefined,
+        });
+      } else {
+        toast.success(`Draft saved: ${out.spec?.title ?? "Automation"}. ${out.handoff?.error ?? ""}`, { id: toastId });
+      }
+      setAutomation(null);
+    } catch (e) {
+      toast.error((e as Error).message, { id: toastId });
+    } finally {
+      setAutomating(false);
+    }
+  }, [automation, automating, messages]);
+
+  const handleChip = useCallback(
+    (chip: string) => {
+      if (chip === AUTOMATE_CHIP) { void sendToCubix(); return; }
+      void sendText(chip);
+    },
+    [sendToCubix, sendText],
+  );
   const stop = () => abortRef.current?.abort();
 
   const regenerate = async () => {
@@ -719,8 +758,15 @@ function BotChat() {
               bot={bot}
               isLast={idx === messages.length - 1}
               onForget={() => forgetMessage(m.id)}
-              onQuickAsk={sendText}
-              quickChips={idx === messages.length - 1 && m.role === "assistant" ? (m.followUps?.length ? m.followUps : suggestedQuickChips) : []}
+              onQuickAsk={handleChip}
+              quickChips={
+                idx === messages.length - 1 && m.role === "assistant"
+                  ? [
+                      ...(automation ? [AUTOMATE_CHIP] : []),
+                      ...(m.followUps?.length ? m.followUps : suggestedQuickChips),
+                    ]
+                  : []
+              }
             />
           ))}
           {thinking && (
@@ -829,7 +875,7 @@ function BotChat() {
           <input
             ref={fileInputRef}
             type="file"
-            accept="application/pdf,.pdf"
+            accept=".pdf,.docx,.xlsx,.xls,.csv,.txt,.md,.json"
             multiple
             className="hidden"
             onChange={async (e) => {
@@ -843,16 +889,20 @@ function BotChat() {
                     toast.error(`${file.name} is over 20MB.`);
                     continue;
                   }
-                  const doc = await extractPdfText(file);
+                  if (!isSupportedDoc(file)) {
+                    toast.error(`${file.name}: unsupported file type.`);
+                    continue;
+                  }
+                  const doc = await extractDocument(file);
                   if (!doc.text.trim()) {
-                    toast.error(`${file.name}: no readable text (scanned PDF?)`);
+                    toast.error(`${file.name}: no readable text (scanned file?)`);
                     continue;
                   }
                   setDocs((prev) => [...prev, doc]);
                   toast.success(`${file.name} added — ask me anything about it.`);
                 }
               } catch (err) {
-                toast.error(`Couldn't read PDF: ${(err as Error).message}`);
+                toast.error(`Couldn't read file: ${(err as Error).message}`);
               } finally {
                 setUploadingDoc(false);
               }
@@ -865,7 +915,7 @@ function BotChat() {
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploadingDoc}
-            aria-label="Attach PDF"
+            aria-label="Attach a document"
             className="flex h-9 w-9 items-center justify-center rounded-full transition disabled:opacity-50"
             style={{ background: "color-mix(in oklab, var(--cream) 10%, transparent)", color: "var(--cream)" }}
           >

@@ -1,5 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
+import {
+  HEADACHE_ENGINE_PROMPT,
+  AUTOMATION_HINT_PROMPT,
+  detectsAutomationIntent,
+  classifyTask,
+} from "@/lib/headache";
 
 // Free-tier and Pro-tier model mapping.
 const MODEL_MAP: Record<string, { model: string; tier: "free" | "pro" }> = {
@@ -13,9 +19,30 @@ const MODEL_PRICING: Record<string, { in: number; out: number }> = {
   "google/gemini-2.5-flash": { in: 0.30,  out: 2.50 },
   "openai/gpt-4o-mini":       { in: 0.15,  out: 0.60 },
   "openai/gpt-4o":            { in: 2.50,  out: 10.00 },
+  "google/gemini-2.5-pro":    { in: 1.25,  out: 10.00 },
 };
 
-type ChatMessage = { role: "user" | "assistant" | "system"; content: string };
+type ContentPart =
+  | { type: "text"; text: string }
+  | { type: "image_url"; image_url: { url: string } };
+type ChatMessage = { role: "user" | "assistant" | "system"; content: string | ContentPart[] };
+
+function textOf(content: ChatMessage["content"]): string {
+  if (typeof content === "string") return content;
+  return content.map((p) => (p.type === "text" ? p.text : "")).join(" ");
+}
+function hasImage(content: ChatMessage["content"]): boolean {
+  return Array.isArray(content) && content.some((p) => p.type === "image_url");
+}
+
+// Task-class → upstream model. Never exposed to the user.
+const ROUTED_MODEL: Record<string, string> = {
+  fast: "openai/gpt-4o-mini",
+  balanced: "google/gemini-2.5-flash",
+  reasoning: "google/gemini-2.5-pro",
+  "long-document": "google/gemini-2.5-pro",
+  vision: "google/gemini-2.5-flash",
+};
 type ChatRequestBody = { messages?: ChatMessage[]; model?: string; language?: string; system?: string; webSearch?: boolean };
 
 const LANG_NAMES: Record<string, string> = {
@@ -204,24 +231,44 @@ export const Route = createFileRoute("/api/chat")({
           : " OUTPUT LANGUAGE RULE: Reply in English.";
 
         const persona = (body.system ?? "").trim();
+
+        // --- Task routing: the user picks an intent, AskEasy picks the engine ---
+        const lastUserText = textOf(messages[messages.length - 1]?.content ?? "");
+        const totalChars = messages.reduce((n, m) => n + textOf(m.content).length, 0) + persona.length;
+        const anyImage = messages.some((m) => hasImage(m.content));
+        const taskClass = classifyTask({
+          text: lastUserText,
+          totalChars,
+          hasImages: anyImage,
+          focusMode: !!body.webSearch,
+        });
+        // "Smart" means auto-route. Eco/Ultra remain explicit user overrides.
+        const upstreamModel =
+          modelId === "askeasy/smart" ? (ROUTED_MODEL[taskClass] ?? mapped.model) : mapped.model;
+
+        const automationLikely = detectsAutomationIntent(lastUserText);
+
         const sys: ChatMessage = {
           role: "system",
           content:
-            (persona || "You are AskEasy, a warm, concise, helpful assistant. Answer clearly using markdown when useful.") +
-            langLine,
+            HEADACHE_ENGINE_PROMPT +
+            "\n\n" +
+            (persona || "You are AskEasy. Stay warm, concise and outcome-first.") +
+            langLine +
+            (automationLikely ? "\n\n" + AUTOMATION_HINT_PROMPT : ""),
         };
 
         const history = messages.map((m) => ({ role: m.role, content: m.content }));
         if (wantsLang && history.length > 0) {
           const last = history[history.length - 1];
-          if (last.role === "user") {
+          if (last.role === "user" && typeof last.content === "string") {
             last.content = `${last.content}\n\n[Reply strictly in ${langName}${script ? ` (${script})` : ""}.]`;
           }
         }
 
         const useWebSearch = !!body.webSearch;
         const upstreamBody: Record<string, unknown> = {
-          model: mapped.model,
+          model: upstreamModel,
           messages: [sys, ...history],
           usage: { include: true }, // ask OpenRouter to return token + cost accounting
         };
@@ -260,12 +307,12 @@ export const Route = createFileRoute("/api/chat")({
           const completionTok = Number(usage.completion_tokens ?? 0);
           let costUsd = Number(usage.cost ?? 0);
           if (!costUsd || !Number.isFinite(costUsd)) {
-            const p = MODEL_PRICING[mapped.model];
+            const p = MODEL_PRICING[upstreamModel];
             if (p) costUsd = (promptTok * p.in + completionTok * p.out) / 1_000_000;
           }
           if (Number.isFinite(costUsd) && costUsd > 0) {
             await supabaseAdmin.rpc("bump_openrouter_spend", {
-              _model: mapped.model,
+              _model: upstreamModel,
               _cost: costUsd,
               _prompt_tokens: promptTok,
               _completion_tokens: completionTok,
@@ -287,7 +334,7 @@ export const Route = createFileRoute("/api/chat")({
           if (url && !seen.has(url)) { seen.add(url); citations.push({ url, title }); }
         }
 
-        return j({ reply, model: mapped.model, tier: mapped.tier, citations });
+        return j({ reply, model: mapped.model, tier: mapped.tier, citations, taskClass });
       },
     },
   },

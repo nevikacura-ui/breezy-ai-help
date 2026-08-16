@@ -14,6 +14,81 @@ export type Database = {
   }
   public: {
     Tables: {
+      action_audit: {
+        Row: {
+          approved: boolean
+          created_at: string
+          id: string
+          input: Json | null
+          output: Json | null
+          status: string
+          tool: string
+          user_id: string
+        }
+        Insert: {
+          approved?: boolean
+          created_at?: string
+          id?: string
+          input?: Json | null
+          output?: Json | null
+          status?: string
+          tool: string
+          user_id: string
+        }
+        Update: {
+          approved?: boolean
+          created_at?: string
+          id?: string
+          input?: Json | null
+          output?: Json | null
+          status?: string
+          tool?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      automation_specs: {
+        Row: {
+          created_at: string
+          cubix_review_url: string | null
+          cubix_workflow_id: string | null
+          error: string | null
+          id: string
+          spec: Json
+          status: string
+          summary: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          cubix_review_url?: string | null
+          cubix_workflow_id?: string | null
+          error?: string | null
+          id?: string
+          spec: Json
+          status?: string
+          summary?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          cubix_review_url?: string | null
+          cubix_workflow_id?: string | null
+          error?: string | null
+          id?: string
+          spec?: Json
+          status?: string
+          summary?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           attachments: Json
