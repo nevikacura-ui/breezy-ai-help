@@ -11,6 +11,7 @@ import {
   trialDaysLeft, trialActive,
 } from "@/lib/askeasy";
 import { LANGUAGES, type LangCode } from "@/lib/i18n";
+import { ConnectionsPanel } from "@/components/askeasy/ConnectionsPanel";
 
 
 type Props = {
@@ -379,6 +380,9 @@ export function SettingsSheet({
               onChange={(v) => update({ voiceEnabled: v })}
             />
           </section>
+
+          {/* Connections, permissions, activity */}
+          <ConnectionsPanel />
 
           <Button variant="outline" className="w-full" onClick={onClearConversation}>
             Clear conversation
