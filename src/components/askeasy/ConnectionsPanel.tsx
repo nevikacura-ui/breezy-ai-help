@@ -66,17 +66,42 @@ export function ConnectionsPanel() {
         <div className="flex items-center gap-1.5 text-xs uppercase tracking-wider text-muted-foreground">
           <ShieldCheck className="h-3.5 w-3.5" /> What AskEasy may use
         </div>
-        <ul className="space-y-1.5">
-          {permissions.map((p) => (
-            <li key={p} className="flex items-center justify-between text-[12.5px]">
-              <span>{permissionLabel(p)}</span>
-              <span className="text-muted-foreground">
-                {TOOLS.some((t) => t.permission === p && t.requiresApproval) ? "Always asks" : "Runs for you"}
-              </span>
-            </li>
-          ))}
+        <ul className="space-y-2.5">
+          {permissions.map((p) => {
+            const forcedAsk = TOOLS.some((t) => t.permission === p && t.requiresApproval);
+            const row = policy[p];
+            const allowed = row?.allowed !== false;
+            const alwaysAsk = forcedAsk || row?.always_ask === true;
+            return (
+              <li key={p} className="flex items-center justify-between gap-3 text-[12.5px]">
+                <span className={allowed ? "" : "text-muted-foreground line-through"}>{permissionLabel(p)}</span>
+                <div className="flex shrink-0 items-center gap-1.5">
+                  <button
+                    type="button"
+                    disabled={!allowed || forcedAsk}
+                    onClick={() => savePolicy(p, { always_ask: !alwaysAsk })}
+                    className="rounded-full border px-2 py-0.5 text-[11px] disabled:opacity-50"
+                    title={forcedAsk ? "This one always asks — it can't be automatic." : undefined}
+                  >
+                    {alwaysAsk ? "Always asks" : "Runs for you"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => savePolicy(p, { allowed: !allowed })}
+                    className="rounded-full border px-2 py-0.5 text-[11px]"
+                  >
+                    {allowed ? "On" : "Off"}
+                  </button>
+                </div>
+              </li>
+            );
+          })}
         </ul>
+        <p className="text-[11.5px] text-muted-foreground">
+          Turn a capability off and AskEasy won't use it, even if it would help.
+        </p>
       </section>
+
 
       <section className="space-y-2">
         <div className="flex items-center gap-1.5 text-xs uppercase tracking-wider text-muted-foreground">
