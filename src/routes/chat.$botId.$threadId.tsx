@@ -803,25 +803,26 @@ function BotChat() {
       <section ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 pb-40 pt-5" style={{ WebkitOverflowScrolling: "touch" }}>
         <div className="mx-auto flex max-w-lg flex-col gap-4">
           {messages.map((m, idx) => (
-            <MessageRow
-              key={m.id}
-              m={m}
-              bot={bot}
-              isLast={idx === messages.length - 1}
-              onForget={() => forgetMessage(m.id)}
-              onQuickAsk={handleChip}
-              quickChips={
-                idx === messages.length - 1 && m.role === "assistant"
-                  ? [
-                      ...(automation ? [AUTOMATE_CHIP] : []),
-                      ...(m.followUps?.length ? m.followUps : suggestedQuickChips),
-                    ]
-                  : []
-              }
-            />
-          ))}
-          {approvals.map((p) => (
-            <ApprovalCard key={p.id} proposal={p} onApprove={approve} onCancel={declineApproval} />
+            <Fragment key={m.id}>
+              <MessageRow
+                m={m}
+                bot={bot}
+                isLast={idx === messages.length - 1}
+                onForget={() => forgetMessage(m.id)}
+                onQuickAsk={handleChip}
+                quickChips={
+                  idx === messages.length - 1 && m.role === "assistant"
+                    ? [
+                        ...(automation ? [AUTOMATE_CHIP] : []),
+                        ...(m.followUps?.length ? m.followUps : suggestedQuickChips),
+                      ]
+                    : []
+                }
+              />
+              {m.pending?.map((p) => (
+                <ApprovalCard key={p.id} proposal={p} onApprove={approve} onCancel={declineApproval} />
+              ))}
+            </Fragment>
           ))}
           {thinking && (
             <div className="flex items-center gap-2">
