@@ -348,3 +348,23 @@ export async function executeTool(
   await audit(ctx.userId, def, parsed.data, result, !!ctx.approved);
   return result;
 }
+
+/**
+ * Record that AskEasy *proposed* an action and is waiting for the user.
+ * Without this, the audit trail only shows things that already happened.
+ */
+export async function auditProposal(
+  userId: string,
+  name: string,
+  input: Record<string, unknown>,
+): Promise<void> {
+  const def = TOOL_BY_NAME[name];
+  if (!def) return;
+  await audit(
+    userId,
+    def,
+    input,
+    { ok: false, tool: name, code: "NEEDS_APPROVAL", error: "Awaiting user approval" },
+    false,
+  );
+}
