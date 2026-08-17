@@ -11,6 +11,10 @@ type Ctx = {
   userId: string;
   /** Set when the user explicitly approved this exact call. */
   approved?: boolean;
+  /** Prompt block describing what AskEasy already knows about the user. */
+  about?: string;
+  /** The user's preferred writing tone, if saved. */
+  tone?: string;
 };
 
 async function ai(
