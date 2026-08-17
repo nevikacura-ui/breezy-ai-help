@@ -142,15 +142,16 @@ ${items.map((it, i) => `[${i + 1}] ${it}`).join("\n\n").slice(0, 60_000)}`,
     return { ok: true, tool: "classify_batch", output: text, data: safeJson(text) };
   },
 
-  draft_message: async (input) => {
+  draft_message: async (input, ctx) => {
     const { text } = await ai(
       `You write ready-to-send messages. Output Markdown:
 **Subject:** ... then the body. Then "— Shorter version" and "— Firmer version" only if genuinely useful.
 Serve the objective exactly; never concede more than asked. No placeholders unless information is truly missing
-(then use [square brackets] and list them under "Missing").`,
+(then use [square brackets] and list them under "Missing"). Sign off using what you know about the user —
+never write [Your Name] when their name or role is known.${ctx.about ? "\n\n" + ctx.about : ""}`,
       `Objective: ${String(input.objective)}
 Recipient: ${String(input.recipient ?? "unspecified")}
-Tone: ${String(input.tone ?? "professional and warm")}
+Tone: ${String(input.tone ?? ctx.tone ?? "professional and warm")}
 
 Context:
 ${String(input.context ?? "(none given)").slice(0, 30_000)}`,
@@ -158,10 +159,10 @@ ${String(input.context ?? "(none given)").slice(0, 30_000)}`,
     return { ok: true, tool: "draft_message", output: text };
   },
 
-  generate_report: async (input) => {
+  generate_report: async (input, ctx) => {
     const { text } = await ai(
       `You prepare finished documents in Markdown. Include a title, clear sections, and only content
-supported by the brief or source material. ${RIGOUR}`,
+supported by the brief or source material. ${RIGOUR}${ctx.about ? "\n\n" + ctx.about : ""}`,
       `Title: ${String(input.title)}
 Brief: ${String(input.brief)}
 
@@ -171,12 +172,35 @@ ${String(input.source_material ?? "(none)").slice(0, 60_000)}`,
     return { ok: true, tool: "generate_report", output: text };
   },
 
+  remember_about_me: async (input, ctx) => {
+    const { rememberAboutUser } = await import("./memory.server");
+    const facts = Array.isArray(input.facts) ? (input.facts as string[]) : [];
+    const saved = await rememberAboutUser(ctx.userId, {
+      role: input.role as string | undefined,
+      business_context: input.business_context as string | undefined,
+      tone: input.tone as string | undefined,
+      facts,
+    });
+    const added = [
+      input.role ? `role: ${String(input.role)}` : "",
+      input.tone ? `tone: ${String(input.tone)}` : "",
+      ...facts,
+    ].filter(Boolean);
+    return {
+      ok: true,
+      tool: "remember_about_me",
+      output: added.length ? `Saved: ${added.join("; ")}.` : "Nothing new to save.",
+      data: { facts: saved.facts.length },
+    };
+  },
+
   send_email: async () => ({
     ok: false,
     tool: "send_email",
     code: "NEEDS_INTEGRATION",
     error: "No mailbox is connected yet. Connect Gmail or Outlook in Settings, then approve again.",
   }),
+
 
   automate_with_cubix: async (input, ctx) => {
     const { compileAndHandoff } = await import("./cubix.server");
