@@ -294,8 +294,30 @@ export async function executeTool(
     return result;
   }
 
-  if (def.requiresApproval && !ctx.approved) {
-    return { ok: false, tool: name, code: "NEEDS_APPROVAL", error: "This action needs your approval." };
+  // --- Per-user capability policy (Settings → what AskEasy may use) ---
+  const { loadPolicy, isAllowed, needsApproval } = await import("./policy.server");
+  const policy = await loadPolicy(ctx.userId);
+
+  if (!isAllowed(policy, def.permission)) {
+    const result: ToolResult = {
+      ok: false,
+      tool: name,
+      code: "FAILED",
+      error: `You've turned this capability off in Settings, so I didn't run "${def.label}".`,
+    };
+    await audit(ctx.userId, def, parsed.data, result, !!ctx.approved);
+    return result;
+  }
+
+  if (needsApproval(policy, def.permission, def.requiresApproval) && !ctx.approved) {
+    const result: ToolResult = {
+      ok: false,
+      tool: name,
+      code: "NEEDS_APPROVAL",
+      error: "This action needs your approval.",
+    };
+    await audit(ctx.userId, def, parsed.data, result, false);
+    return result;
   }
 
   if (def.requiresIntegration && !(await integrationConnected(ctx.userId, def.requiresIntegration))) {
@@ -308,6 +330,14 @@ export async function executeTool(
     await audit(ctx.userId, def, parsed.data, result, !!ctx.approved);
     return result;
   }
+
+  // --- Personalization: what AskEasy already knows about this user ---
+  if (ctx.about === undefined) {
+    const { loadUserContext, contextBlock } = await import("./memory.server");
+    const uc = await loadUserContext(ctx.userId);
+    ctx = { ...ctx, about: contextBlock(uc), tone: uc.tone ?? undefined };
+  }
+
 
   let result: ToolResult;
   try {
