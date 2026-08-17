@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import type { Message } from "./askeasy";
+import type { Message, PendingApproval } from "./askeasy";
 
 export type Thread = {
   id: string;
@@ -9,7 +9,11 @@ export type Thread = {
   createdAt: number;
 };
 
-export type ThreadMessage = Message & { followUps?: string[] };
+export type ThreadMessage = Message & {
+  followUps?: string[];
+  /** Actions AskEasy proposed with this reply and that are still awaiting a tap. */
+  pending?: PendingApproval[];
+};
 
 const THREADS_KEY = "askeasy.threads.v1";
 const messagesKey = (botId: string, threadId: string) =>
