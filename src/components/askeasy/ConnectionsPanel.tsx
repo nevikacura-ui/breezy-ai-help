@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { Mail, Plug, ShieldCheck, History } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { TOOLS, permissionLabel, type ToolPermission } from "@/lib/tools/registry";
 
 type Integration = { provider: string; status: string; account_email: string | null };
 type AuditRow = { id: string; tool: string; status: string; approved: boolean; created_at: string };
+type PolicyRow = { permission: string; allowed: boolean; always_ask: boolean };
+type PolicyMap = Record<string, { allowed: boolean; always_ask: boolean }>;
 
 const PROVIDERS: { id: string; label: string; hint: string; icon: React.ReactNode }[] = [
   { id: "google", label: "Gmail & Google", hint: "Read, triage and draft replies", icon: <Mail className="h-4 w-4" /> },
