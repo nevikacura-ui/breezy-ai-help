@@ -375,9 +375,19 @@ function BotChat() {
 
   // Approve a proposed action. The server is the only thing that can perform it,
   // and its result — not the model's claim — is what gets shown.
+  const clearPending = useCallback((id: string) => {
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.pending?.some((x) => x.id === id)
+          ? { ...m, pending: m.pending.filter((x) => x.id !== id) }
+          : m,
+      ),
+    );
+  }, []);
+
   const approve = useCallback(async (p: PendingApproval) => {
     const out = await approveToolCall(p);
-    setApprovals((prev) => prev.filter((x) => x.id !== p.id));
+    clearPending(p.id);
     if (out.ok) {
       setMessages((prev) => [
         ...prev,
@@ -392,12 +402,13 @@ function BotChat() {
     } else {
       toast.error(out.error || "That action could not be completed.");
     }
-  }, []);
+  }, [clearPending]);
 
   const declineApproval = useCallback((p: PendingApproval) => {
-    setApprovals((prev) => prev.filter((x) => x.id !== p.id));
+    clearPending(p.id);
     toast("Left it as a draft — nothing was sent.");
-  }, []);
+  }, [clearPending]);
+
 
   const send = useCallback(() => sendText(input), [input, sendText]);
 
