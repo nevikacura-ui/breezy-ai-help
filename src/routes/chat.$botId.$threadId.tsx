@@ -336,9 +336,18 @@ function BotChat() {
         signal: controller.signal,
       });
       setAutomation(autoLine ?? null);
-      setApprovals(proposals ?? []);
       const { body, followUps } = splitFollowUps(reply);
-      setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "assistant", content: body, followUps, createdAt: Date.now() }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content: body,
+          followUps,
+          pending: proposals?.length ? proposals : undefined,
+          createdAt: Date.now(),
+        },
+      ]);
       if (typeof navigator !== "undefined" && "vibrate" in navigator) {
         try { navigator.vibrate([18, 40, 18]); } catch { /* noop */ }
       }
