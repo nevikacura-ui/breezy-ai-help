@@ -82,7 +82,7 @@ function BotChat() {
   const [dismissedLangs, setDismissedLangs] = useState<Set<LangCode>>(new Set());
   const [docs, setDocs] = useState<ParsedDoc[]>([]);
   const [automation, setAutomation] = useState<string | null>(null);
-  const [approvals, setApprovals] = useState<PendingApproval[]>([]);
+  // Approvals live on the message they belong to, so a reload doesn't lose them.
   const [automating, setAutomating] = useState(false);
   const [uploadingDoc, setUploadingDoc] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
