@@ -397,29 +397,49 @@ export const Route = createFileRoute("/api/chat")({
               continue;
             }
 
-            if (def.requiresApproval) {
-              proposals.push({
-                id: call.id,
-                tool: name,
-                label: def.label,
-                permission: def.permission,
-                input: args,
-                proposal: summarizeProposal(name, args),
-                needsIntegration: def.requiresIntegration,
+            // Capability switched off in Settings → never runs, model is told.
+            if (!isAllowed(policy, def.permission)) {
+              convo.push({
+                role: "tool",
+                tool_call_id: call.id,
+                content: JSON.stringify({
+                  ok: false,
+                  status: "CAPABILITY_OFF",
+                  note: `The user turned "${def.label}" off in Settings. Do it manually if you can, or say what you'd need switched on.`,
+                }),
               });
+              continue;
+            }
+
+            if (needsApproval(policy, def.permission, def.requiresApproval)) {
+              const key = `${name}:${JSON.stringify(args)}`;
+              if (!proposedKeys.has(key)) {
+                proposedKeys.add(key);
+                proposals.push({
+                  id: call.id,
+                  tool: name,
+                  label: def.label,
+                  permission: def.permission,
+                  input: args,
+                  proposal: summarizeProposal(name, args),
+                  needsIntegration: def.requiresIntegration,
+                });
+                // The proposal itself belongs in the audit trail.
+                void auditProposal(userId, name, args);
+              }
               convo.push({
                 role: "tool",
                 tool_call_id: call.id,
                 content: JSON.stringify({
                   ok: false,
                   status: "AWAITING_USER_APPROVAL",
-                  note: "This action has NOT happened. Tell the user what you propose and that it is waiting for their approval. Never claim it was done.",
+                  note: "This action has NOT happened. Tell the user what you propose and that it is waiting for their approval. Never claim it was done. Do not call this tool again in this turn.",
                 }),
               });
               continue;
             }
 
-            const result = await executeTool(name, args, { userId });
+            const result = await executeTool(name, args, { userId, about });
             toolsUsed.push(name);
             for (const c of result.citations ?? []) {
               if (!seen.has(c.url)) { seen.add(c.url); citations.push(c); }
