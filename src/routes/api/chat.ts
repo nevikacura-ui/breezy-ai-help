@@ -319,15 +319,24 @@ export const Route = createFileRoute("/api/chat")({
         // server-side and their results are fed back to the model; anything
         // that touches the outside world becomes a proposal the user approves.
         const { toolsPayload, TOOL_BY_NAME, summarizeProposal } = await import("@/lib/tools/registry");
-        const { executeTool } = await import("@/lib/tools/execute.server");
+        const { executeTool, auditProposal } = await import("@/lib/tools/execute.server");
+        const { loadPolicy, isAllowed, needsApproval } = await import("@/lib/tools/policy.server");
+        const { loadUserContext, contextBlock } = await import("@/lib/tools/memory.server");
+
+        const [policy, userCtx] = await Promise.all([loadPolicy(userId), loadUserContext(userId)]);
+        const about = contextBlock(userCtx);
+        if (about) sys.content = `${sys.content}\n\n${about}`;
 
         const convo: unknown[] = [sys, ...history];
         const proposals: {
           id: string; tool: string; label: string; permission: string;
           input: Record<string, unknown>; proposal: string; needsIntegration?: string;
         }[] = [];
+        // Guard against the model re-emitting the same call across rounds.
+        const proposedKeys = new Set<string>();
         const toolsUsed: string[] = [];
         let reply = "";
+
 
         for (let round = 0; round < 3; round++) {
           const upstreamBody: Record<string, unknown> = {
@@ -388,29 +397,49 @@ export const Route = createFileRoute("/api/chat")({
               continue;
             }
 
-            if (def.requiresApproval) {
-              proposals.push({
-                id: call.id,
-                tool: name,
-                label: def.label,
-                permission: def.permission,
-                input: args,
-                proposal: summarizeProposal(name, args),
-                needsIntegration: def.requiresIntegration,
+            // Capability switched off in Settings → never runs, model is told.
+            if (!isAllowed(policy, def.permission)) {
+              convo.push({
+                role: "tool",
+                tool_call_id: call.id,
+                content: JSON.stringify({
+                  ok: false,
+                  status: "CAPABILITY_OFF",
+                  note: `The user turned "${def.label}" off in Settings. Do it manually if you can, or say what you'd need switched on.`,
+                }),
               });
+              continue;
+            }
+
+            if (needsApproval(policy, def.permission, def.requiresApproval)) {
+              const key = `${name}:${JSON.stringify(args)}`;
+              if (!proposedKeys.has(key)) {
+                proposedKeys.add(key);
+                proposals.push({
+                  id: call.id,
+                  tool: name,
+                  label: def.label,
+                  permission: def.permission,
+                  input: args,
+                  proposal: summarizeProposal(name, args),
+                  needsIntegration: def.requiresIntegration,
+                });
+                // The proposal itself belongs in the audit trail.
+                void auditProposal(userId, name, args);
+              }
               convo.push({
                 role: "tool",
                 tool_call_id: call.id,
                 content: JSON.stringify({
                   ok: false,
                   status: "AWAITING_USER_APPROVAL",
-                  note: "This action has NOT happened. Tell the user what you propose and that it is waiting for their approval. Never claim it was done.",
+                  note: "This action has NOT happened. Tell the user what you propose and that it is waiting for their approval. Never claim it was done. Do not call this tool again in this turn.",
                 }),
               });
               continue;
             }
 
-            const result = await executeTool(name, args, { userId });
+            const result = await executeTool(name, args, { userId, about });
             toolsUsed.push(name);
             for (const c of result.citations ?? []) {
               if (!seen.has(c.url)) { seen.add(c.url); citations.push(c); }

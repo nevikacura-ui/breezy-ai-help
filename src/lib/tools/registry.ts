@@ -188,6 +188,30 @@ export const TOOLS: ToolDef[] = [
     },
   },
   {
+    name: "remember_about_me",
+    label: "Remember this about you",
+    description:
+      "Save durable facts about the user (their role, business, tone preference, how they sign off, recurring constraints) so future answers don't ask again. Call this whenever the user states something about themselves worth keeping. Never store passwords, card numbers or one-off details.",
+    permission: "none",
+    requiresApproval: false,
+    auditEvent: "tool.remember_about_me",
+    input: z.object({
+      role: z.string().optional(),
+      business_context: z.string().optional(),
+      tone: z.string().optional(),
+      facts: z.array(z.string()).optional(),
+    }),
+    parameters: {
+      type: "object",
+      properties: {
+        role: str("What the user does, e.g. 'runs a 6-person dental clinic'"),
+        business_context: str("Their business or situation in one or two sentences"),
+        tone: str("How they like replies written"),
+        facts: { type: "array", items: { type: "string" }, description: "Short durable facts worth remembering" },
+      },
+    },
+  },
+  {
     name: "send_email",
     label: "Send an email",
     description:

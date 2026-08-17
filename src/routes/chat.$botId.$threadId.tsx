@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Settings as SettingsIcon, RotateCcw, ThumbsUp, ThumbsDown, Send, Square, Mic, EyeOff, Trash2, Smile, Paperclip, FileText, X, Loader2, Copy, Download, Check, MessageSquarePlus, PanelLeft, Pencil } from "lucide-react";
 import { getBotById, useCustomBots, useOnboarding, ONBOARDING_CATEGORIES, type Bot } from "@/lib/bots";
 import { BotAvatar } from "@/components/askeasy/BotAvatar";
@@ -82,7 +82,7 @@ function BotChat() {
   const [dismissedLangs, setDismissedLangs] = useState<Set<LangCode>>(new Set());
   const [docs, setDocs] = useState<ParsedDoc[]>([]);
   const [automation, setAutomation] = useState<string | null>(null);
-  const [approvals, setApprovals] = useState<PendingApproval[]>([]);
+  // Approvals live on the message they belong to, so a reload doesn't lose them.
   const [automating, setAutomating] = useState(false);
   const [uploadingDoc, setUploadingDoc] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -336,9 +336,18 @@ function BotChat() {
         signal: controller.signal,
       });
       setAutomation(autoLine ?? null);
-      setApprovals(proposals ?? []);
       const { body, followUps } = splitFollowUps(reply);
-      setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "assistant", content: body, followUps, createdAt: Date.now() }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content: body,
+          followUps,
+          pending: proposals?.length ? proposals : undefined,
+          createdAt: Date.now(),
+        },
+      ]);
       if (typeof navigator !== "undefined" && "vibrate" in navigator) {
         try { navigator.vibrate([18, 40, 18]); } catch { /* noop */ }
       }
@@ -366,9 +375,19 @@ function BotChat() {
 
   // Approve a proposed action. The server is the only thing that can perform it,
   // and its result — not the model's claim — is what gets shown.
+  const clearPending = useCallback((id: string) => {
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.pending?.some((x) => x.id === id)
+          ? { ...m, pending: m.pending.filter((x) => x.id !== id) }
+          : m,
+      ),
+    );
+  }, []);
+
   const approve = useCallback(async (p: PendingApproval) => {
     const out = await approveToolCall(p);
-    setApprovals((prev) => prev.filter((x) => x.id !== p.id));
+    clearPending(p.id);
     if (out.ok) {
       setMessages((prev) => [
         ...prev,
@@ -383,12 +402,13 @@ function BotChat() {
     } else {
       toast.error(out.error || "That action could not be completed.");
     }
-  }, []);
+  }, [clearPending]);
 
   const declineApproval = useCallback((p: PendingApproval) => {
-    setApprovals((prev) => prev.filter((x) => x.id !== p.id));
+    clearPending(p.id);
     toast("Left it as a draft — nothing was sent.");
-  }, []);
+  }, [clearPending]);
+
 
   const send = useCallback(() => sendText(input), [input, sendText]);
 
@@ -783,25 +803,26 @@ function BotChat() {
       <section ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 pb-40 pt-5" style={{ WebkitOverflowScrolling: "touch" }}>
         <div className="mx-auto flex max-w-lg flex-col gap-4">
           {messages.map((m, idx) => (
-            <MessageRow
-              key={m.id}
-              m={m}
-              bot={bot}
-              isLast={idx === messages.length - 1}
-              onForget={() => forgetMessage(m.id)}
-              onQuickAsk={handleChip}
-              quickChips={
-                idx === messages.length - 1 && m.role === "assistant"
-                  ? [
-                      ...(automation ? [AUTOMATE_CHIP] : []),
-                      ...(m.followUps?.length ? m.followUps : suggestedQuickChips),
-                    ]
-                  : []
-              }
-            />
-          ))}
-          {approvals.map((p) => (
-            <ApprovalCard key={p.id} proposal={p} onApprove={approve} onCancel={declineApproval} />
+            <Fragment key={m.id}>
+              <MessageRow
+                m={m}
+                bot={bot}
+                isLast={idx === messages.length - 1}
+                onForget={() => forgetMessage(m.id)}
+                onQuickAsk={handleChip}
+                quickChips={
+                  idx === messages.length - 1 && m.role === "assistant"
+                    ? [
+                        ...(automation ? [AUTOMATE_CHIP] : []),
+                        ...(m.followUps?.length ? m.followUps : suggestedQuickChips),
+                      ]
+                    : []
+                }
+              />
+              {m.pending?.map((p) => (
+                <ApprovalCard key={p.id} proposal={p} onApprove={approve} onCancel={declineApproval} />
+              ))}
+            </Fragment>
           ))}
           {thinking && (
             <div className="flex items-center gap-2">
