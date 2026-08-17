@@ -319,15 +319,24 @@ export const Route = createFileRoute("/api/chat")({
         // server-side and their results are fed back to the model; anything
         // that touches the outside world becomes a proposal the user approves.
         const { toolsPayload, TOOL_BY_NAME, summarizeProposal } = await import("@/lib/tools/registry");
-        const { executeTool } = await import("@/lib/tools/execute.server");
+        const { executeTool, auditProposal } = await import("@/lib/tools/execute.server");
+        const { loadPolicy, isAllowed, needsApproval } = await import("@/lib/tools/policy.server");
+        const { loadUserContext, contextBlock } = await import("@/lib/tools/memory.server");
+
+        const [policy, userCtx] = await Promise.all([loadPolicy(userId), loadUserContext(userId)]);
+        const about = contextBlock(userCtx);
+        if (about) sys.content = `${sys.content}\n\n${about}`;
 
         const convo: unknown[] = [sys, ...history];
         const proposals: {
           id: string; tool: string; label: string; permission: string;
           input: Record<string, unknown>; proposal: string; needsIntegration?: string;
         }[] = [];
+        // Guard against the model re-emitting the same call across rounds.
+        const proposedKeys = new Set<string>();
         const toolsUsed: string[] = [];
         let reply = "";
+
 
         for (let round = 0; round < 3; round++) {
           const upstreamBody: Record<string, unknown> = {
