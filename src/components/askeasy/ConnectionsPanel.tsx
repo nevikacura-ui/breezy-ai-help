@@ -15,29 +15,52 @@ const PROVIDERS: { id: string; label: string; hint: string; icon: React.ReactNod
 export function ConnectionsPanel() {
   const [integrations, setIntegrations] = useState<Integration[]>([]);
   const [audit, setAudit] = useState<AuditRow[]>([]);
+  const [policy, setPolicy] = useState<PolicyMap>({});
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const [{ data: ints }, { data: rows }] = await Promise.all([
+      const [{ data: ints }, { data: rows }, { data: perms }] = await Promise.all([
         supabase.from("user_integrations").select("provider, status, account_email"),
         supabase
           .from("action_audit")
           .select("id, tool, status, approved, created_at")
           .order("created_at", { ascending: false })
           .limit(8),
+        supabase.from("tool_permissions").select("permission, allowed, always_ask"),
       ]);
       if (cancelled) return;
       setIntegrations((ints as Integration[] | null) ?? []);
       setAudit((rows as AuditRow[] | null) ?? []);
+      const map: PolicyMap = {};
+      for (const r of (perms as PolicyRow[] | null) ?? []) {
+        map[r.permission] = { allowed: r.allowed, always_ask: r.always_ask };
+      }
+      setPolicy(map);
     })();
     return () => { cancelled = true; };
   }, []);
+
+  // Optimistic: the switch flips instantly, then persists for the server to read.
+  const savePolicy = async (permission: string, patch: Partial<PolicyRow>) => {
+    const next = {
+      allowed: patch.allowed ?? policy[permission]?.allowed ?? true,
+      always_ask: patch.always_ask ?? policy[permission]?.always_ask ?? false,
+    };
+    setPolicy((prev) => ({ ...prev, [permission]: next }));
+    const { data: auth } = await supabase.auth.getUser();
+    if (!auth.user) return;
+    const { error } = await supabase
+      .from("tool_permissions")
+      .upsert({ user_id: auth.user.id, permission, ...next }, { onConflict: "user_id,permission" });
+    if (error) toast.error("Couldn't save that preference.");
+  };
 
   const statusOf = (id: string) =>
     integrations.find((i) => i.provider === id)?.status === "connected" ? "Connected" : "Not connected";
 
   const permissions = Array.from(new Set(TOOLS.map((t) => t.permission))) as ToolPermission[];
+
 
   return (
     <div className="space-y-6">
