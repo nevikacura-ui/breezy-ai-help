@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SplashRouteImport } from './routes/splash'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as OauthDebugRouteImport } from './routes/oauth-debug'
 import { Route as BotsRouteImport } from './routes/bots'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
@@ -35,6 +36,11 @@ const SplashRoute = SplashRouteImport.update({
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OauthDebugRoute = OauthDebugRouteImport.update({
+  id: '/oauth-debug',
+  path: '/oauth-debug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BotsRoute = BotsRouteImport.update({
@@ -118,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/bots': typeof BotsRouteWithChildren
+  '/oauth-debug': typeof OauthDebugRoute
   '/onboarding': typeof OnboardingRoute
   '/splash': typeof SplashRoute
   '/api/bot-generate': typeof ApiBotGenerateRoute
@@ -137,6 +144,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/bots': typeof BotsRouteWithChildren
+  '/oauth-debug': typeof OauthDebugRoute
   '/onboarding': typeof OnboardingRoute
   '/splash': typeof SplashRoute
   '/api/bot-generate': typeof ApiBotGenerateRoute
@@ -157,6 +165,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/bots': typeof BotsRouteWithChildren
+  '/oauth-debug': typeof OauthDebugRoute
   '/onboarding': typeof OnboardingRoute
   '/splash': typeof SplashRoute
   '/api/bot-generate': typeof ApiBotGenerateRoute
@@ -178,6 +187,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/bots'
+    | '/oauth-debug'
     | '/onboarding'
     | '/splash'
     | '/api/bot-generate'
@@ -197,6 +207,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/bots'
+    | '/oauth-debug'
     | '/onboarding'
     | '/splash'
     | '/api/bot-generate'
@@ -216,6 +227,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/bots'
+    | '/oauth-debug'
     | '/onboarding'
     | '/splash'
     | '/api/bot-generate'
@@ -236,6 +248,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   BotsRoute: typeof BotsRouteWithChildren
+  OauthDebugRoute: typeof OauthDebugRoute
   OnboardingRoute: typeof OnboardingRoute
   SplashRoute: typeof SplashRoute
   ApiBotGenerateRoute: typeof ApiBotGenerateRoute
@@ -263,6 +276,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/oauth-debug': {
+      id: '/oauth-debug'
+      path: '/oauth-debug'
+      fullPath: '/oauth-debug'
+      preLoaderRoute: typeof OauthDebugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/bots': {
@@ -401,6 +421,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   BotsRoute: BotsRouteWithChildren,
+  OauthDebugRoute: OauthDebugRoute,
   OnboardingRoute: OnboardingRoute,
   SplashRoute: SplashRoute,
   ApiBotGenerateRoute: ApiBotGenerateRoute,
