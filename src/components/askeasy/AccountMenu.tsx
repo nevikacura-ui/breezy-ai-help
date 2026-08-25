@@ -65,7 +65,8 @@ export function AccountMenu() {
           </div>
           <button
             onClick={async () => {
-              await supabase.auth.signOut();
+              const { puvioAuth } = await import("@/lib/puvio-auth");
+              await puvioAuth.signOut();
               setOpen(false);
             }}
             className="mt-1 flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-left text-[13px] text-foreground/80 hover:bg-foreground/[0.04]"
