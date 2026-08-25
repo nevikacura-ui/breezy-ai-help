@@ -69,7 +69,14 @@ async def run() -> int:
                 log("consent", "not shown")
 
             # 4. Callback processes the code and navigates to the app.
-            await page.wait_for_url(f"{BASE_URL}/**", timeout=STEP_TIMEOUT)
+            try:
+                await page.wait_for_url(f"{BASE_URL}/**", timeout=STEP_TIMEOUT)
+            except Exception:
+                if "puvio.ai" in page.url:
+                    await page.screenshot(path=str(SHOTS / "3_login_stuck.png"))
+                    log("FAIL", "still on Puvio after submitting credentials (login rejected or extra step required)")
+                    return 1
+                raise
             await page.screenshot(path=str(SHOTS / "3_callback.png"))
             log("callback", page.url)
 
