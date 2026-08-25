@@ -15,6 +15,7 @@ import { Route as OauthDebugRouteImport } from './routes/oauth-debug'
 import { Route as BotsRouteImport } from './routes/bots'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthIndexRouteImport } from './routes/auth.index'
 import { Route as UpgradeSuccessRouteImport } from './routes/upgrade.success'
 import { Route as ChatBotIdRouteImport } from './routes/chat.$botId'
 import { Route as BotsNewRouteImport } from './routes/bots.new'
@@ -58,6 +59,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthIndexRoute = AuthIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthRoute,
 } as any)
 const UpgradeSuccessRoute = UpgradeSuccessRouteImport.update({
   id: '/upgrade/success',
@@ -144,12 +150,12 @@ export interface FileRoutesByFullPath {
   '/bots/new': typeof BotsNewRoute
   '/chat/$botId': typeof ChatBotIdRouteWithChildren
   '/upgrade/success': typeof UpgradeSuccessRoute
+  '/auth/': typeof AuthIndexRoute
   '/api/public/cashfree-webhook': typeof ApiPublicCashfreeWebhookRoute
   '/chat/$botId/$threadId': typeof ChatBotIdThreadIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRouteWithChildren
   '/bots': typeof BotsRouteWithChildren
   '/oauth-debug': typeof OauthDebugRoute
   '/onboarding': typeof OnboardingRoute
@@ -165,6 +171,7 @@ export interface FileRoutesByTo {
   '/bots/new': typeof BotsNewRoute
   '/chat/$botId': typeof ChatBotIdRouteWithChildren
   '/upgrade/success': typeof UpgradeSuccessRoute
+  '/auth': typeof AuthIndexRoute
   '/api/public/cashfree-webhook': typeof ApiPublicCashfreeWebhookRoute
   '/chat/$botId/$threadId': typeof ChatBotIdThreadIdRoute
 }
@@ -187,6 +194,7 @@ export interface FileRoutesById {
   '/bots/new': typeof BotsNewRoute
   '/chat/$botId': typeof ChatBotIdRouteWithChildren
   '/upgrade/success': typeof UpgradeSuccessRoute
+  '/auth/': typeof AuthIndexRoute
   '/api/public/cashfree-webhook': typeof ApiPublicCashfreeWebhookRoute
   '/chat/$botId/$threadId': typeof ChatBotIdThreadIdRoute
 }
@@ -210,12 +218,12 @@ export interface FileRouteTypes {
     | '/bots/new'
     | '/chat/$botId'
     | '/upgrade/success'
+    | '/auth/'
     | '/api/public/cashfree-webhook'
     | '/chat/$botId/$threadId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/auth'
     | '/bots'
     | '/oauth-debug'
     | '/onboarding'
@@ -231,6 +239,7 @@ export interface FileRouteTypes {
     | '/bots/new'
     | '/chat/$botId'
     | '/upgrade/success'
+    | '/auth'
     | '/api/public/cashfree-webhook'
     | '/chat/$botId/$threadId'
   id:
@@ -252,6 +261,7 @@ export interface FileRouteTypes {
     | '/bots/new'
     | '/chat/$botId'
     | '/upgrade/success'
+    | '/auth/'
     | '/api/public/cashfree-webhook'
     | '/chat/$botId/$threadId'
   fileRoutesById: FileRoutesById
@@ -317,6 +327,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/auth/': {
+      id: '/auth/'
+      path: '/'
+      fullPath: '/auth/'
+      preLoaderRoute: typeof AuthIndexRouteImport
+      parentRoute: typeof AuthRoute
     }
     '/upgrade/success': {
       id: '/upgrade/success'
@@ -414,10 +431,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthRouteChildren {
   AuthCallbackRoute: typeof AuthCallbackRoute
+  AuthIndexRoute: typeof AuthIndexRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthCallbackRoute: AuthCallbackRoute,
+  AuthIndexRoute: AuthIndexRoute,
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
