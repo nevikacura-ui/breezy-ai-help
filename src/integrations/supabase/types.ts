@@ -146,6 +146,72 @@ export type Database = {
         }
         Relationships: []
       }
+      otp_audit: {
+        Row: {
+          action: string
+          context: string | null
+          created_at: string
+          error: string | null
+          id: string
+          ip: string | null
+          phone: string
+          status: string
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          context?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          ip?: string | null
+          phone: string
+          status: string
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          context?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          ip?: string | null
+          phone?: string
+          status?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
+      otp_codes: {
+        Row: {
+          attempts: number
+          code_hash: string
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          phone: string
+        }
+        Insert: {
+          attempts?: number
+          code_hash: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          phone: string
+        }
+        Update: {
+          attempts?: number
+          code_hash?: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          phone?: string
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount: number
