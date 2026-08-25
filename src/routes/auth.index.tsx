@@ -1,0 +1,71 @@
+import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
+import { puvioAuth } from "@/lib/puvio-auth";
+import { toast } from "sonner";
+import { Sparkles } from "lucide-react";
+
+export const Route = createFileRoute("/auth/")({
+  validateSearch: z.object({ next: z.string().optional() }),
+  head: () => ({
+    meta: [
+      { title: "Sign in — AskEasy" },
+      { name: "description", content: "Sign in to AskEasy with Puvio to save your chats, sync across devices and unlock Pro." },
+      { property: "og:title", content: "Sign in — AskEasy" },
+      { property: "og:description", content: "Sign in to AskEasy with Puvio to save your chats, sync across devices and unlock Pro." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
+  component: AuthPage,
+});
+
+function AuthPage() {
+  const navigate = useNavigate();
+  const { next } = useSearch({ from: "/auth/" });
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) navigate({ to: (next ?? "/") as "/" });
+    });
+  }, [navigate, next]);
+
+  const signIn = async () => {
+    setBusy(true);
+    try {
+      await puvioAuth.signIn(next && next.startsWith("/") ? next : "/");
+    } catch (e) {
+      toast.error("Sign-in failed", { description: e instanceof Error ? e.message : String(e) });
+      setBusy(false);
+    }
+  };
+
+  return (
+    <main className="flex min-h-dvh flex-col items-center justify-center px-6">
+      <div className="glass w-full max-w-sm rounded-3xl p-8 text-center">
+        <div
+          className="mx-auto flex h-14 w-14 items-center justify-center rounded-full text-white"
+          style={{ background: "var(--send-gradient)" }}
+        >
+          <Sparkles className="h-6 w-6" />
+        </div>
+        <h1 className="font-display mt-5 text-2xl font-semibold tracking-tight">Sign in to AskEasy</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Save your chats, sync across devices, and unlock Pro securely.
+        </p>
+        <button
+          onClick={signIn}
+          disabled={busy}
+          className="mt-6 flex w-full items-center justify-center gap-2 rounded-full border border-border/60 bg-background px-4 py-2.5 text-[14px] font-medium text-foreground shadow-sm transition hover:bg-foreground/5 disabled:opacity-60"
+        >
+          {busy ? "Redirecting…" : "Continue with Puvio"}
+        </button>
+        <p className="mt-6 text-[11px] text-muted-foreground">
+          By continuing you agree to our terms & privacy.
+        </p>
+      </div>
+    </main>
+  );
+}
