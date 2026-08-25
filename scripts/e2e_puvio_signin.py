@@ -54,10 +54,12 @@ async def run() -> int:
             await page.screenshot(path=str(SHOTS / "2_puvio_login.png"))
             log("puvio-redirect", page.url.split("?")[0])
 
-            # 3. Authenticate with the test account.
-            await page.get_by_label("Email", exact=False).first.fill(EMAIL)
-            await page.get_by_label("Password", exact=False).first.fill(PASSWORD)
-            await page.get_by_role("button", name="Sign in", exact=False).first.click()
+            # 3. Authenticate with the test account (form hydrates client-side).
+            email_input = page.locator('input[type="email"], input[placeholder="Email"]').first
+            await email_input.wait_for(state="visible", timeout=STEP_TIMEOUT)
+            await email_input.fill(EMAIL)
+            await page.locator('input[type="password"]').first.fill(PASSWORD)
+            await page.get_by_role("button", name="Sign in", exact=True).first.click()
 
             # Puvio may show a consent screen before redirecting back.
             try:
