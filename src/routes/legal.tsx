@@ -1,15 +1,16 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
+import { trackLegalLinkClick, type LegalDocId } from "@/lib/analytics";
 
 export const Route = createFileRoute("/legal")({
   component: LegalLayout,
 });
 
-const TABS = [
-  { to: "/legal/privacy", label: "Privacy" },
-  { to: "/legal/terms", label: "Terms" },
-  { to: "/legal/refunds", label: "Refunds" },
-  { to: "/legal/contact", label: "Contact" },
-] as const;
+const TABS: Array<{ to: string; label: string; doc: LegalDocId }> = [
+  { to: "/legal/privacy", label: "Privacy", doc: "privacy" },
+  { to: "/legal/terms", label: "Terms", doc: "terms" },
+  { to: "/legal/refunds", label: "Refunds", doc: "refunds" },
+  { to: "/legal/contact", label: "Contact", doc: "contact" },
+];
 
 function LegalLayout() {
   return (
@@ -26,6 +27,7 @@ function LegalLayout() {
                 to={t.to}
                 className="rounded-full px-3 py-1.5 text-[13px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                 activeProps={{ className: "rounded-full px-3 py-1.5 text-[13px] bg-accent text-foreground font-medium" }}
+                onClick={() => trackLegalLinkClick(t.doc, "legal_nav")}
               >
                 {t.label}
               </Link>

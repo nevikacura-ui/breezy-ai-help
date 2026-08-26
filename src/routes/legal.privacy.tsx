@@ -22,7 +22,7 @@ export const Route = createFileRoute("/legal/privacy")({
 
 function Privacy() {
   return (
-    <LegalDoc title="Privacy Policy" updated="26 August 2026">
+    <LegalDoc title="Privacy Policy" updated="2026-08-26">
       <p>
         AskEasy ("we", "us") builds a personal AI assistant available at askeasy.ai. This policy explains what we
         collect, why, and the control you have over it.

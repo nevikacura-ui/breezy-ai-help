@@ -22,7 +22,7 @@ export const Route = createFileRoute("/legal/refunds")({
 
 function Refunds() {
   return (
-    <LegalDoc title="Refund & Cancellation Policy" updated="26 August 2026">
+    <LegalDoc title="Refund & Cancellation Policy" updated="2026-08-26">
       <h2>Subscription</h2>
       <p>
         AskEasy Pro costs ₹499 per month (inclusive of applicable taxes) and renews automatically until you cancel.

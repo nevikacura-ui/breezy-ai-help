@@ -21,7 +21,7 @@ export const Route = createFileRoute("/legal/contact")({
 
 function Contact() {
   return (
-    <LegalDoc title="Contact & Support" updated="26 August 2026">
+    <LegalDoc title="Contact & Support" updated="2026-08-26">
       <p>We're a small team and read every message.</p>
       <h2>Support</h2>
       <p>

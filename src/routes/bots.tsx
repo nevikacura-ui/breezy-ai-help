@@ -62,7 +62,11 @@ export const Route = createFileRoute("/bots")({
       { name: "description", content: "Browse a collection of personalized AI agents led by Easy, your cute AI companion. Cook, code, learn, plan, and get things done — pick your agent and start a conversation." },
       { property: "og:title", content: "Askeasy — Personalized AI agents" },
       { property: "og:description", content: "Browse a collection of personalized AI agents led by Easy, your cute AI companion." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://askeasy.ai/bots" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "https://askeasy.ai/bots" }],
   }),
   component: BotsHome,
 });

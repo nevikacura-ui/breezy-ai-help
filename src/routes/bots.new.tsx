@@ -10,7 +10,13 @@ export const Route = createFileRoute("/bots/new")({
     meta: [
       { title: "Create your own agent — Askeasy" },
       { name: "description", content: "Create a custom AI agent with its own personality, goals, and agentic capabilities." },
+      { property: "og:title", content: "Create your own agent — Askeasy" },
+      { property: "og:description", content: "Create a custom AI agent with its own personality, goals, and agentic capabilities." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://askeasy.ai/bots/new" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "https://askeasy.ai/bots/new" }],
   }),
   component: NewBot,
 });

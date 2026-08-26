@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
 const EventSchema = z.object({
-  event: z.enum(["category_select", "category_deselect", "onboarding_complete"]),
+  event: z.enum(["category_select", "category_deselect", "onboarding_complete", "legal_link_click"]),
   properties: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).default({}),
   session_id: z.string().max(64).default("anonymous"),
   path: z.string().max(200).default("/"),

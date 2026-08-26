@@ -1,3 +1,4 @@
+import { trackLegalLinkClick } from "@/lib/analytics";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
@@ -392,10 +393,16 @@ export function SettingsSheet({
           <section className="space-y-2 border-t border-border/60 pt-4">
             <div className="text-xs uppercase tracking-wider text-muted-foreground">Legal</div>
             <nav className="flex flex-wrap gap-x-4 gap-y-1.5 text-[12.5px] text-muted-foreground">
-              <a className="underline-offset-2 hover:text-foreground hover:underline" href="/legal/privacy">Privacy</a>
-              <a className="underline-offset-2 hover:text-foreground hover:underline" href="/legal/terms">Terms</a>
-              <a className="underline-offset-2 hover:text-foreground hover:underline" href="/legal/refunds">Refunds</a>
-              <a className="underline-offset-2 hover:text-foreground hover:underline" href="/legal/contact">Contact</a>
+              {(["privacy", "terms", "refunds", "contact"] as const).map((doc) => (
+                <a
+                  key={doc}
+                  className="capitalize underline-offset-2 hover:text-foreground hover:underline"
+                  href={`/legal/${doc}`}
+                  onClick={() => trackLegalLinkClick(doc, "settings")}
+                >
+                  {doc}
+                </a>
+              ))}
             </nav>
           </section>
         </div>

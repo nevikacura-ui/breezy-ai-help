@@ -4,7 +4,18 @@
 export type AnalyticsEventName =
   | "category_select"
   | "category_deselect"
-  | "onboarding_complete";
+  | "onboarding_complete"
+  | "legal_link_click";
+
+/** Which legal document was opened. */
+export type LegalDocId = "privacy" | "terms" | "refunds" | "contact";
+
+/** Where the link lived, so we can split onboarding vs checkout usage. */
+export type LegalLinkSurface = "settings" | "checkout" | "legal_nav" | "onboarding" | "footer";
+
+export function trackLegalLinkClick(doc: LegalDocId, surface: LegalLinkSurface): void {
+  trackEvent({ event: "legal_link_click", properties: { doc, surface } });
+}
 
 export interface AnalyticsPayload {
   event: AnalyticsEventName;
