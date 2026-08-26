@@ -569,3 +569,8 @@ export function useOnboarding() {
   const reset = useCallback(() => setState(ONBOARDING_DEFAULT), []);
   return { state, update, reset, hydrated };
 }
+
+/** Character family of an agent (custom + legacy agents default to toons). */
+export function familyOf(bot: Bot): AgentFamily {
+  return bot.family ?? "toons";
+}
