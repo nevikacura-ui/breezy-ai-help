@@ -5,10 +5,15 @@ import {
   PRESET_BOTS,
   CATEGORY_LABELS,
   CATEGORY_CAPABILITY,
+  AGENT_FAMILIES,
+  FAMILY_LABELS,
+  FAMILY_TAGLINES,
+  familyOf,
   useCustomBots,
   useOnboarding,
   type Bot,
   type BotCategory,
+  type AgentFamily,
 } from "@/lib/bots";
 import { SettingsSheet } from "@/components/askeasy/SettingsSheet";
 import { BotAvatar, preloadBotAvatars } from "@/components/askeasy/BotAvatar";
