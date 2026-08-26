@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SplashRouteImport } from './routes/splash'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as OauthDebugRouteImport } from './routes/oauth-debug'
 import { Route as LegalRouteImport } from './routes/legal'
@@ -41,6 +42,11 @@ import { Route as ApiPublicOtpSendRouteImport } from './routes/api/public/otp/se
 const SplashRoute = SplashRouteImport.update({
   id: '/splash',
   path: '/splash',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingRoute = OnboardingRouteImport.update({
@@ -187,6 +193,7 @@ export interface FileRoutesByFullPath {
   '/legal': typeof LegalRouteWithChildren
   '/oauth-debug': typeof OauthDebugRoute
   '/onboarding': typeof OnboardingRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/splash': typeof SplashRoute
   '/api/bot-generate': typeof ApiBotGenerateRoute
   '/api/chat': typeof ApiChatRoute
@@ -216,6 +223,7 @@ export interface FileRoutesByTo {
   '/legal': typeof LegalRouteWithChildren
   '/oauth-debug': typeof OauthDebugRoute
   '/onboarding': typeof OnboardingRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/splash': typeof SplashRoute
   '/api/bot-generate': typeof ApiBotGenerateRoute
   '/api/chat': typeof ApiChatRoute
@@ -247,6 +255,7 @@ export interface FileRoutesById {
   '/legal': typeof LegalRouteWithChildren
   '/oauth-debug': typeof OauthDebugRoute
   '/onboarding': typeof OnboardingRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/splash': typeof SplashRoute
   '/api/bot-generate': typeof ApiBotGenerateRoute
   '/api/chat': typeof ApiChatRoute
@@ -279,6 +288,7 @@ export interface FileRouteTypes {
     | '/legal'
     | '/oauth-debug'
     | '/onboarding'
+    | '/sitemap.xml'
     | '/splash'
     | '/api/bot-generate'
     | '/api/chat'
@@ -308,6 +318,7 @@ export interface FileRouteTypes {
     | '/legal'
     | '/oauth-debug'
     | '/onboarding'
+    | '/sitemap.xml'
     | '/splash'
     | '/api/bot-generate'
     | '/api/chat'
@@ -338,6 +349,7 @@ export interface FileRouteTypes {
     | '/legal'
     | '/oauth-debug'
     | '/onboarding'
+    | '/sitemap.xml'
     | '/splash'
     | '/api/bot-generate'
     | '/api/chat'
@@ -369,6 +381,7 @@ export interface RootRouteChildren {
   LegalRoute: typeof LegalRouteWithChildren
   OauthDebugRoute: typeof OauthDebugRoute
   OnboardingRoute: typeof OnboardingRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SplashRoute: typeof SplashRoute
   ApiBotGenerateRoute: typeof ApiBotGenerateRoute
   ApiChatRoute: typeof ApiChatRoute
@@ -391,6 +404,13 @@ declare module '@tanstack/react-router' {
       path: '/splash'
       fullPath: '/splash'
       preLoaderRoute: typeof SplashRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding': {
@@ -644,6 +664,7 @@ const rootRouteChildren: RootRouteChildren = {
   LegalRoute: LegalRouteWithChildren,
   OauthDebugRoute: OauthDebugRoute,
   OnboardingRoute: OnboardingRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   SplashRoute: SplashRoute,
   ApiBotGenerateRoute: ApiBotGenerateRoute,
   ApiChatRoute: ApiChatRoute,
