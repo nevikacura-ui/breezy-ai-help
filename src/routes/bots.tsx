@@ -132,17 +132,18 @@ function BotsHome() {
       className="relative min-h-dvh overflow-x-hidden pb-6"
       style={{ background: "var(--ink)", color: "var(--cream)" }}
     >
-      {/* Header — transparent logo blends with page background */}
+      {/* Header — cream band matched to the logo artwork background */}
       <header
-        className="relative flex items-center justify-between px-4 pb-3 pt-4"
+        className="relative flex items-center justify-between rounded-b-[2rem] px-4 pb-3 pt-4"
+        style={{ background: "var(--logo-cream)", color: "var(--ink)" }}
       >
         <button
           onClick={() => setSettingsOpen(true)}
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-transform active:scale-95"
-          style={{ background: "color-mix(in oklab, #ffffff 8%, transparent)" }}
+          style={{ background: "color-mix(in oklab, var(--ink) 7%, transparent)" }}
           aria-label="Settings"
         >
-          <Settings2 className="h-5 w-5" style={{ color: "#faf8f5" }} />
+          <Settings2 className="h-5 w-5" style={{ color: "var(--ink)" }} />
         </button>
 
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
@@ -159,10 +160,10 @@ function BotsHome() {
 
         <button
           className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-transform active:scale-95"
-          style={{ background: "color-mix(in oklab, #ffffff 8%, transparent)" }}
+          style={{ background: "color-mix(in oklab, var(--ink) 7%, transparent)" }}
           aria-label="Notifications"
         >
-          <Bell className="h-5 w-5" style={{ color: "#faf8f5" }} />
+          <Bell className="h-5 w-5" style={{ color: "var(--ink)" }} />
           <span
             className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full"
             style={{ background: "var(--butter)" }}
