@@ -1,4 +1,5 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
+import { trackLegalLinkClick, type LegalDocId } from "@/lib/analytics";
 
 export const Route = createFileRoute("/legal")({
   component: LegalLayout,

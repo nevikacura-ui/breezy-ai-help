@@ -97,9 +97,9 @@ export function UpgradeDialog({ open, onOpenChange, reason, labels }: Props) {
         </p>
         <p className="mt-1.5 text-center text-[11px] text-muted-foreground">
           ₹499/month, auto-renews. Cancel anytime ·{" "}
-          <a className="underline underline-offset-2" href="/legal/terms">Terms</a> ·{" "}
-          <a className="underline underline-offset-2" href="/legal/refunds">Refunds</a> ·{" "}
-          <a className="underline underline-offset-2" href="/legal/privacy">Privacy</a>
+          <a className="underline underline-offset-2" href="/legal/terms" onClick={() => trackLegalLinkClick("terms", "checkout")}>Terms</a> ·{" "}
+          <a className="underline underline-offset-2" href="/legal/refunds" onClick={() => trackLegalLinkClick("refunds", "checkout")}>Refunds</a> ·{" "}
+          <a className="underline underline-offset-2" href="/legal/privacy" onClick={() => trackLegalLinkClick("privacy", "checkout")}>Privacy</a>
         </p>
       </DialogContent>
     </Dialog>
