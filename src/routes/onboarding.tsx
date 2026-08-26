@@ -41,13 +41,22 @@ function Onboarding() {
   const toggle = (id: string) =>
     setSelected((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      if (next.has(id)) {
+        next.delete(id);
+        trackEvent({ event: "category_deselect", properties: { category: id, selected_count: next.size } });
+      } else {
+        next.add(id);
+        trackEvent({ event: "category_select", properties: { category: id, selected_count: next.size } });
+      }
       return next;
     });
 
   const handleContinue = () => {
     if (!canContinue) return;
+    trackEvent({
+      event: "onboarding_complete",
+      properties: { categories: Array.from(selected).join(","), count: selected.size },
+    });
     update({ categories: Array.from(selected), completed: true, step: 0, draftCategories: [] });
     nav({ to: "/bots" });
   };
