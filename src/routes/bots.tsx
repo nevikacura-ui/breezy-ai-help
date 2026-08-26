@@ -304,6 +304,29 @@ function BotsHome() {
           </button>
         </div>
 
+        {/* Character family tabs */}
+        <div className="mt-3 flex gap-1.5">
+          {(["all", ...AGENT_FAMILIES] as (AgentFamily | "all")[]).map((f) => {
+            const on = activeFamily === f;
+            return (
+              <button
+                key={f}
+                onClick={() => setActiveFamily(f)}
+                className="flex-1 rounded-2xl px-2 py-2 text-[12px] font-semibold transition-all"
+                style={{
+                  background: on ? "var(--ink)" : "color-mix(in oklab, var(--ink) 6%, transparent)",
+                  color: on ? "var(--butter)" : "var(--ink)",
+                }}
+              >
+                <span className="block">{f === "all" ? "Everyone" : FAMILY_LABELS[f]}</span>
+                <span className="block text-[10px] font-medium opacity-60">
+                  {f === "all" ? "All characters" : FAMILY_TAGLINES[f]}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
         {/* Category chips */}
         <div className="-mx-1 mt-3 flex gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {(Object.keys(CATEGORY_LABELS) as BotCategory[]).map((c) => (
