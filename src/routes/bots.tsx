@@ -349,9 +349,7 @@ function BotsHome() {
           {filtered.length === 0 && (
             <p className="rounded-2xl px-4 py-6 text-center text-[13px] font-medium opacity-60"
                style={{ background: "color-mix(in oklab, var(--ink) 5%, transparent)" }}>
-              {activeFamily === "avatars"
-                ? "Avatars are landing soon — your own look-alike agents."
-                : "No agents here yet."}
+              No agents here yet.
             </p>
           )}
           {filtered.map((b) => (
