@@ -27,6 +27,7 @@ function LegalLayout() {
                 to={t.to}
                 className="rounded-full px-3 py-1.5 text-[13px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                 activeProps={{ className: "rounded-full px-3 py-1.5 text-[13px] bg-accent text-foreground font-medium" }}
+                onClick={() => trackLegalLinkClick(t.doc, "legal_nav")}
               >
                 {t.label}
               </Link>
