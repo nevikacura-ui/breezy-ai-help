@@ -70,7 +70,7 @@ export const Route = createFileRoute("/bots")({
 function BotsHome() {
   const nav = useNavigate();
   const { state, hydrated } = useOnboarding();
-  const { bots: customBots } = useCustomBots();
+  const { bots: customBots, addBot } = useCustomBots();
   const { settings, update } = useSettings();
   const { usage } = useUsage();
   const user = useAuthUser();
@@ -360,7 +360,20 @@ function BotsHome() {
 
       </section>
 
+      <BotPreviewModal bot={preview} onClose={() => setPreview(null)} />
+      <UploadCharacterModal
+        open={uploadOpen}
+        family={activeFamily}
+        onClose={() => setUploadOpen(false)}
+        onCreate={(bot) => {
+          addBot(bot);
+          setUploadOpen(false);
+          setActiveFamily(bot.family ?? "toons");
+        }}
+      />
+
       <SettingsSheet
+
         open={settingsOpen}
         onOpenChange={setSettingsOpen}
         settings={settings}
