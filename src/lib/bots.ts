@@ -15,6 +15,8 @@ import kidBo from "@/assets/bots/kid-bo.png";
 import avatarZane from "@/assets/bots/avatar-zane.png";
 import avatarMira from "@/assets/bots/avatar-mira.png";
 import avatarLia from "@/assets/bots/avatar-lia.png";
+import palMimi from "@/assets/bots/pal-mimi.png";
+import palTobi from "@/assets/bots/pal-tobi.png";
 
 export type BotTier = "free" | "trial" | "pro";
 /**
@@ -413,13 +415,13 @@ export const PRESET_BOTS: Bot[] = [
       { title: "Habit help", hint: "Small steps, big wins.", emoji: "✅" },
     ],
   },
-  // ---- Kids (Toons): small-kid characters, ages 6–12 ----
+  // ---- Pals: children characters ----
   {
     id: "pip",
     name: "Pip",
     tagline: "Homework helper for kids",
     category: "learn",
-    family: "toons",
+    family: "pals",
     rating: 4.9,
     price: "Free",
     tier: "free",
@@ -440,7 +442,7 @@ export const PRESET_BOTS: Bot[] = [
     name: "Bo",
     tagline: "Play & good habits kid",
     category: "friend",
-    family: "toons",
+    family: "pals",
     rating: 4.8,
     price: "Free",
     tier: "free",
@@ -455,13 +457,13 @@ export const PRESET_BOTS: Bot[] = [
       { title: "Daily wins", hint: "Tiny good habits.", emoji: "⭐" },
     ],
   },
-  // ---- Teens (Avatars): 3D avatar characters, ages 16–20 ----
+  // ---- Guides: young boys & girls ----
   {
     id: "zane",
     name: "Zane",
     tagline: "Exams & campus buddy",
     category: "learn",
-    family: "avatars",
+    family: "guides",
     rating: 4.9,
     price: "Free",
     tier: "free",
@@ -482,7 +484,7 @@ export const PRESET_BOTS: Bot[] = [
     name: "Mira",
     tagline: "Confidence & life skills",
     category: "friend",
-    family: "avatars",
+    family: "guides",
     rating: 4.8,
     price: "Free",
     tier: "free",
@@ -503,7 +505,7 @@ export const PRESET_BOTS: Bot[] = [
     name: "Lia",
     tagline: "Creator & style agent",
     category: "designer",
-    family: "avatars",
+    family: "guides",
     rating: 4.7,
     price: "Free",
     tier: "free",
@@ -518,13 +520,13 @@ export const PRESET_BOTS: Bot[] = [
       { title: "Style tips", hint: "Your vibe, upgraded.", emoji: "👟" },
     ],
   },
-  // ---- Grown-ups (Buddies): human-like 3D characters, 21+ ----
+
   {
     id: "vera",
     name: "Vera",
     tagline: "Explorer & trip buddy",
     category: "travel",
-    family: "buddies",
+    family: "guides",
     rating: 4.9,
     price: "Free",
     tier: "free",
@@ -545,7 +547,7 @@ export const PRESET_BOTS: Bot[] = [
     name: "Arjun",
     tagline: "Study & career buddy",
     category: "learn",
-    family: "buddies",
+    family: "guides",
     rating: 4.8,
     price: "Free",
     tier: "free",
@@ -566,7 +568,7 @@ export const PRESET_BOTS: Bot[] = [
     name: "Rio",
     tagline: "Fitness & habits buddy",
     category: "health",
-    family: "buddies",
+    family: "pals",
     rating: 4.8,
     price: "Free",
     tier: "free",
@@ -586,7 +588,7 @@ export const PRESET_BOTS: Bot[] = [
     name: "Neo",
     tagline: "Daily life & tasks buddy",
     category: "productivity",
-    family: "buddies",
+    family: "pals",
     rating: 4.7,
     price: "Free",
     tier: "free",
