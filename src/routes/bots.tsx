@@ -70,7 +70,7 @@ export const Route = createFileRoute("/bots")({
 function BotsHome() {
   const nav = useNavigate();
   const { state, hydrated } = useOnboarding();
-  const { bots: customBots } = useCustomBots();
+  const { bots: customBots, addBot } = useCustomBots();
   const { settings, update } = useSettings();
   const { usage } = useUsage();
   const user = useAuthUser();
@@ -79,6 +79,9 @@ function BotsHome() {
   const [activeCategory, setActiveCategory] = useState<BotCategory>("all");
   const [activeFamily, setActiveFamily] = useState<AgentFamily>("pals");
   const [welcomeVisible, setWelcomeVisible] = useState(false);
+  const [preview, setPreview] = useState<Bot | null>(null);
+  const [uploadOpen, setUploadOpen] = useState(false);
+
 
   // Show the personalized welcome the first time the user lands post-onboarding,
   // and again if their persona changes.
@@ -339,29 +342,38 @@ function BotsHome() {
           ))}
         </div>
 
-        {/* List */}
-        <div className="mt-4 space-y-2.5">
-          {filtered.length === 0 && (
-            <p className="rounded-2xl px-4 py-6 text-center text-[13px] font-medium opacity-60"
-               style={{ background: "color-mix(in oklab, var(--ink) 5%, transparent)" }}>
-              No agents here yet.
-            </p>
-          )}
+        {/* Clean card grid */}
+        <div className="mt-4 grid grid-cols-3 gap-2.5">
           {filtered.map((b) => (
-            <BotListRow key={b.id} bot={b} />
+            <BotGridCard key={b.id} bot={b} onOpen={() => setPreview(b)} />
           ))}
 
-          <Link
-            to="/bots/new"
-            className="mt-3 flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed py-3.5 text-[13.5px] font-semibold"
-            style={{ borderColor: "color-mix(in oklab, var(--ink) 20%, transparent)", color: "var(--ink)" }}
+          <button
+            onClick={() => setUploadOpen(true)}
+            className="flex flex-col items-center justify-center gap-1.5 rounded-3xl border-2 border-dashed p-3 text-center transition-all active:scale-[0.97]"
+            style={{ borderColor: "color-mix(in oklab, var(--ink) 20%, transparent)", color: "var(--ink)", minHeight: 124 }}
           >
-            <Plus className="h-4 w-4" /> Create your own agent
-          </Link>
+            <Plus className="h-5 w-5" />
+            <span className="text-[11.5px] font-semibold leading-tight">Add character</span>
+          </button>
         </div>
+
       </section>
 
+      <BotPreviewModal bot={preview} onClose={() => setPreview(null)} />
+      <UploadCharacterModal
+        open={uploadOpen}
+        family={activeFamily}
+        onClose={() => setUploadOpen(false)}
+        onCreate={(bot) => {
+          addBot(bot);
+          setUploadOpen(false);
+          setActiveFamily(bot.family ?? "toons");
+        }}
+      />
+
       <SettingsSheet
+
         open={settingsOpen}
         onOpenChange={setSettingsOpen}
         settings={settings}
@@ -424,43 +436,211 @@ function BotFeatureCard({ bot }: { bot: Bot }) {
   );
 }
 
-function BotListRow({ bot }: { bot: Bot }) {
-  const isVoice = bot.id === "news-ani";
+
+/** Clean square character card — image + name only. */
+function BotGridCard({ bot, onOpen }: { bot: Bot; onOpen: () => void }) {
   return (
-    <Link
-      to="/chat/$botId"
-      params={{ botId: bot.id }}
-      className="flex items-center gap-3 rounded-2xl border p-2.5 transition-all active:scale-[0.99]"
-      style={{ background: "#fff", borderColor: "color-mix(in oklab, var(--ink) 10%, transparent)" }}
+    <button
+      onClick={onOpen}
+      className="animate-tile-in flex flex-col items-center gap-2 rounded-3xl border p-3 transition-all active:scale-[0.97]"
+      style={{ background: "#fff", borderColor: "color-mix(in oklab, var(--ink) 10%, transparent)", minHeight: 124 }}
     >
-      <BotAvatar bot={bot} size={44} />
-      <div className="min-w-0 flex-1">
-        <div className="truncate text-[13.5px] font-bold">{bot.name}</div>
-        <div className="truncate text-[11.5px] opacity-60">{bot.tagline}</div>
-        <div
-          className="mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold"
-          style={{ background: "color-mix(in oklab, var(--butter) 22%, transparent)", color: "var(--ink)" }}
-        >
-          {CATEGORY_CAPABILITY[bot.category]}
-        </div>
-      </div>
-      <div className="flex flex-col items-end gap-1">
-        {bot.tier === "pro" && bot.price !== "Unlocked" ? (
-          <span
-            className="rounded-full px-2 py-0.5 text-[10.5px] font-bold"
-            style={{ background: "var(--lavender)", color: "var(--ink)" }}
-          >
-            {bot.price}
-          </span>
-        ) : bot.price === "Unlocked" ? (
-          <span
-            className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10.5px] font-bold"
-            style={{ background: "color-mix(in oklab, var(--ink) 8%, transparent)" }}
-          >
-            {isVoice ? "🔊" : "🔓"} Unlocked
-          </span>
-        ) : null}
-      </div>
-    </Link>
+      <BotAvatar bot={bot} size={62} />
+      <span className="line-clamp-2 text-[12px] font-bold leading-tight">{bot.name}</span>
+    </button>
   );
+}
+
+/** Character preview → start a conversation immediately. */
+function BotPreviewModal({ bot, onClose }: { bot: Bot | null; onClose: () => void }) {
+  const nav = useNavigate();
+  if (!bot) return null;
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center sm:items-center"
+      style={{ background: "rgba(0,0,0,0.55)" }}
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${bot.name} preview`}
+    >
+      <div
+        className="animate-tile-in w-full max-w-sm rounded-[2rem] p-6 text-center"
+        style={{ background: "var(--cream)", color: "var(--ink)" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-center">
+          <BotAvatar bot={bot} size={132} eager />
+        </div>
+        <h3 className="mt-4 font-display text-[1.5rem] leading-tight">{bot.name}</h3>
+        <p className="mt-1 text-[13px] opacity-70">{bot.tagline}</p>
+        <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider opacity-50">
+          {FAMILY_LABELS[familyOf(bot)]} · {CATEGORY_CAPABILITY[bot.category]}
+        </p>
+
+        <button
+          onClick={() => nav({ to: "/chat/$botId", params: { botId: bot.id } })}
+          className="mt-5 w-full rounded-full py-3 text-[14px] font-bold"
+          style={{ background: "var(--ink)", color: "var(--butter)" }}
+        >
+          Start new conversation
+        </button>
+        <button onClick={onClose} className="mt-2 w-full rounded-full py-2.5 text-[13px] font-semibold opacity-60">
+          Close
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** Upload a character image and file it under a family tab. */
+function UploadCharacterModal({
+  open,
+  family,
+  onClose,
+  onCreate,
+}: {
+  open: boolean;
+  family: AgentFamily;
+  onClose: () => void;
+  onCreate: (bot: Bot) => void;
+}) {
+  const [name, setName] = useState("");
+  const [tagline, setTagline] = useState("");
+  const [fam, setFam] = useState<AgentFamily>(family);
+  const [image, setImage] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => { setFam(family); }, [family, open]);
+
+  if (!open) return null;
+
+  const pick = async (file: File) => {
+    setBusy(true);
+    try {
+      const url = await downscaleImage(file, 256);
+      setImage(url);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const create = () => {
+    const trimmed = name.trim();
+    if (!trimmed || !image) return;
+    onCreate({
+      id: `custom-${Date.now().toString(36)}`,
+      name: trimmed,
+      tagline: tagline.trim() || "Your custom character",
+      category: "friend",
+      family: fam,
+      rating: 5,
+      price: "Free",
+      tier: "free",
+      avatar: image,
+      accent: "lavender",
+      systemPrompt: `You are ${trimmed} — ${tagline.trim() || "a friendly personal AI character"}. Stay in character, be warm, concise and helpful.`,
+      greeting: `Hi, I'm ${trimmed}! What shall we do?`,
+      instructions: [
+        { title: "Ask anything", hint: "I'm here to help.", emoji: "✨" },
+        { title: "Stay in character", hint: "I'll keep my personality.", emoji: "🎭" },
+        { title: "Get things done", hint: "Plans, ideas, answers.", emoji: "🚀" },
+      ],
+      custom: true,
+    });
+    setName(""); setTagline(""); setImage(null);
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center sm:items-center"
+      style={{ background: "rgba(0,0,0,0.55)" }}
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Add a character"
+    >
+      <div
+        className="animate-tile-in w-full max-w-sm rounded-[2rem] p-6"
+        style={{ background: "var(--cream)", color: "var(--ink)" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3 className="font-display text-[1.35rem] leading-tight">Add a character</h3>
+
+        <label className="mt-4 flex cursor-pointer flex-col items-center gap-2 rounded-3xl border-2 border-dashed p-4"
+               style={{ borderColor: "color-mix(in oklab, var(--ink) 20%, transparent)" }}>
+          {image ? (
+            <img src={image} alt="" width={96} height={96} className="h-24 w-24 rounded-full object-cover" />
+          ) : (
+            <>
+              <Plus className="h-5 w-5" />
+              <span className="text-[12.5px] font-semibold">{busy ? "Processing…" : "Choose an image"}</span>
+            </>
+          )}
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) void pick(f); }}
+          />
+        </label>
+
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Character name"
+          className="mt-3 w-full rounded-2xl px-4 py-3 text-[14px] outline-none"
+          style={{ background: "#fff", border: "1px solid color-mix(in oklab, var(--ink) 14%, transparent)" }}
+        />
+        <input
+          value={tagline}
+          onChange={(e) => setTagline(e.target.value)}
+          placeholder="Short tagline (what they help with)"
+          className="mt-2 w-full rounded-2xl px-4 py-3 text-[14px] outline-none"
+          style={{ background: "#fff", border: "1px solid color-mix(in oklab, var(--ink) 14%, transparent)" }}
+        />
+
+        <div className="mt-3 flex gap-1.5">
+          {AGENT_FAMILIES.map((f) => (
+            <button
+              key={f}
+              onClick={() => setFam(f)}
+              className="flex-1 rounded-2xl px-2 py-2 text-[12px] font-semibold transition-all"
+              style={{
+                background: fam === f ? "var(--ink)" : "color-mix(in oklab, var(--ink) 6%, transparent)",
+                color: fam === f ? "var(--butter)" : "var(--ink)",
+              }}
+            >
+              {FAMILY_LABELS[f]}
+            </button>
+          ))}
+        </div>
+
+        <button
+          onClick={create}
+          disabled={!name.trim() || !image}
+          className="mt-5 w-full rounded-full py-3 text-[14px] font-bold disabled:opacity-40"
+          style={{ background: "var(--ink)", color: "var(--butter)" }}
+        >
+          Add character
+        </button>
+        <button onClick={onClose} className="mt-2 w-full rounded-full py-2.5 text-[13px] font-semibold opacity-60">
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** Downscale an uploaded image to a square data URL so it fits in localStorage. */
+async function downscaleImage(file: File, size: number): Promise<string> {
+  const bitmap = await createImageBitmap(file);
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d")!;
+  const s = Math.min(bitmap.width, bitmap.height);
+  ctx.drawImage(bitmap, (bitmap.width - s) / 2, (bitmap.height - s) / 2, s, s, 0, 0, size, size);
+  bitmap.close?.();
+  return canvas.toDataURL("image/webp", 0.85);
 }
