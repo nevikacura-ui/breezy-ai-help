@@ -22,3 +22,7 @@
 - /chat/$botId — Chat
 - /auth — Sign in
 - /onboarding — First-run persona setup
+- /legal/privacy — Privacy Policy
+- /legal/terms — Terms of Service
+- /legal/refunds — Refund & Cancellation Policy
+- /legal/contact — Contact & Support
