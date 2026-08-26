@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /oauth-debug
+Disallow: /auth/callback
+
+Sitemap: https://askeasy.ai/sitemap.xml

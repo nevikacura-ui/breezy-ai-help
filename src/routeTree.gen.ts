@@ -12,11 +12,16 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SplashRouteImport } from './routes/splash'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as OauthDebugRouteImport } from './routes/oauth-debug'
+import { Route as LegalRouteImport } from './routes/legal'
 import { Route as BotsRouteImport } from './routes/bots'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthIndexRouteImport } from './routes/auth.index'
 import { Route as UpgradeSuccessRouteImport } from './routes/upgrade.success'
+import { Route as LegalTermsRouteImport } from './routes/legal.terms'
+import { Route as LegalRefundsRouteImport } from './routes/legal.refunds'
+import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
+import { Route as LegalContactRouteImport } from './routes/legal.contact'
 import { Route as ChatBotIdRouteImport } from './routes/chat.$botId'
 import { Route as BotsNewRouteImport } from './routes/bots.new'
 import { Route as BotsBotIdRouteImport } from './routes/bots.$botId'
@@ -48,6 +53,11 @@ const OauthDebugRoute = OauthDebugRouteImport.update({
   path: '/oauth-debug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LegalRoute = LegalRouteImport.update({
+  id: '/legal',
+  path: '/legal',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BotsRoute = BotsRouteImport.update({
   id: '/bots',
   path: '/bots',
@@ -72,6 +82,26 @@ const UpgradeSuccessRoute = UpgradeSuccessRouteImport.update({
   id: '/upgrade/success',
   path: '/upgrade/success',
   getParentRoute: () => rootRouteImport,
+} as any)
+const LegalTermsRoute = LegalTermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => LegalRoute,
+} as any)
+const LegalRefundsRoute = LegalRefundsRouteImport.update({
+  id: '/refunds',
+  path: '/refunds',
+  getParentRoute: () => LegalRoute,
+} as any)
+const LegalPrivacyRoute = LegalPrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => LegalRoute,
+} as any)
+const LegalContactRoute = LegalContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => LegalRoute,
 } as any)
 const ChatBotIdRoute = ChatBotIdRouteImport.update({
   id: '/chat/$botId',
@@ -154,6 +184,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/bots': typeof BotsRouteWithChildren
+  '/legal': typeof LegalRouteWithChildren
   '/oauth-debug': typeof OauthDebugRoute
   '/onboarding': typeof OnboardingRoute
   '/splash': typeof SplashRoute
@@ -167,6 +198,10 @@ export interface FileRoutesByFullPath {
   '/bots/$botId': typeof BotsBotIdRoute
   '/bots/new': typeof BotsNewRoute
   '/chat/$botId': typeof ChatBotIdRouteWithChildren
+  '/legal/contact': typeof LegalContactRoute
+  '/legal/privacy': typeof LegalPrivacyRoute
+  '/legal/refunds': typeof LegalRefundsRoute
+  '/legal/terms': typeof LegalTermsRoute
   '/upgrade/success': typeof UpgradeSuccessRoute
   '/auth/': typeof AuthIndexRoute
   '/api/public/analytics': typeof ApiPublicAnalyticsRoute
@@ -178,6 +213,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/bots': typeof BotsRouteWithChildren
+  '/legal': typeof LegalRouteWithChildren
   '/oauth-debug': typeof OauthDebugRoute
   '/onboarding': typeof OnboardingRoute
   '/splash': typeof SplashRoute
@@ -191,6 +227,10 @@ export interface FileRoutesByTo {
   '/bots/$botId': typeof BotsBotIdRoute
   '/bots/new': typeof BotsNewRoute
   '/chat/$botId': typeof ChatBotIdRouteWithChildren
+  '/legal/contact': typeof LegalContactRoute
+  '/legal/privacy': typeof LegalPrivacyRoute
+  '/legal/refunds': typeof LegalRefundsRoute
+  '/legal/terms': typeof LegalTermsRoute
   '/upgrade/success': typeof UpgradeSuccessRoute
   '/auth': typeof AuthIndexRoute
   '/api/public/analytics': typeof ApiPublicAnalyticsRoute
@@ -204,6 +244,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/bots': typeof BotsRouteWithChildren
+  '/legal': typeof LegalRouteWithChildren
   '/oauth-debug': typeof OauthDebugRoute
   '/onboarding': typeof OnboardingRoute
   '/splash': typeof SplashRoute
@@ -217,6 +258,10 @@ export interface FileRoutesById {
   '/bots/$botId': typeof BotsBotIdRoute
   '/bots/new': typeof BotsNewRoute
   '/chat/$botId': typeof ChatBotIdRouteWithChildren
+  '/legal/contact': typeof LegalContactRoute
+  '/legal/privacy': typeof LegalPrivacyRoute
+  '/legal/refunds': typeof LegalRefundsRoute
+  '/legal/terms': typeof LegalTermsRoute
   '/upgrade/success': typeof UpgradeSuccessRoute
   '/auth/': typeof AuthIndexRoute
   '/api/public/analytics': typeof ApiPublicAnalyticsRoute
@@ -231,6 +276,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/bots'
+    | '/legal'
     | '/oauth-debug'
     | '/onboarding'
     | '/splash'
@@ -244,6 +290,10 @@ export interface FileRouteTypes {
     | '/bots/$botId'
     | '/bots/new'
     | '/chat/$botId'
+    | '/legal/contact'
+    | '/legal/privacy'
+    | '/legal/refunds'
+    | '/legal/terms'
     | '/upgrade/success'
     | '/auth/'
     | '/api/public/analytics'
@@ -255,6 +305,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/bots'
+    | '/legal'
     | '/oauth-debug'
     | '/onboarding'
     | '/splash'
@@ -268,6 +319,10 @@ export interface FileRouteTypes {
     | '/bots/$botId'
     | '/bots/new'
     | '/chat/$botId'
+    | '/legal/contact'
+    | '/legal/privacy'
+    | '/legal/refunds'
+    | '/legal/terms'
     | '/upgrade/success'
     | '/auth'
     | '/api/public/analytics'
@@ -280,6 +335,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/bots'
+    | '/legal'
     | '/oauth-debug'
     | '/onboarding'
     | '/splash'
@@ -293,6 +349,10 @@ export interface FileRouteTypes {
     | '/bots/$botId'
     | '/bots/new'
     | '/chat/$botId'
+    | '/legal/contact'
+    | '/legal/privacy'
+    | '/legal/refunds'
+    | '/legal/terms'
     | '/upgrade/success'
     | '/auth/'
     | '/api/public/analytics'
@@ -306,6 +366,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRouteWithChildren
   BotsRoute: typeof BotsRouteWithChildren
+  LegalRoute: typeof LegalRouteWithChildren
   OauthDebugRoute: typeof OauthDebugRoute
   OnboardingRoute: typeof OnboardingRoute
   SplashRoute: typeof SplashRoute
@@ -346,6 +407,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OauthDebugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/legal': {
+      id: '/legal'
+      path: '/legal'
+      fullPath: '/legal'
+      preLoaderRoute: typeof LegalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/bots': {
       id: '/bots'
       path: '/bots'
@@ -380,6 +448,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/upgrade/success'
       preLoaderRoute: typeof UpgradeSuccessRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/legal/terms': {
+      id: '/legal/terms'
+      path: '/terms'
+      fullPath: '/legal/terms'
+      preLoaderRoute: typeof LegalTermsRouteImport
+      parentRoute: typeof LegalRoute
+    }
+    '/legal/refunds': {
+      id: '/legal/refunds'
+      path: '/refunds'
+      fullPath: '/legal/refunds'
+      preLoaderRoute: typeof LegalRefundsRouteImport
+      parentRoute: typeof LegalRoute
+    }
+    '/legal/privacy': {
+      id: '/legal/privacy'
+      path: '/privacy'
+      fullPath: '/legal/privacy'
+      preLoaderRoute: typeof LegalPrivacyRouteImport
+      parentRoute: typeof LegalRoute
+    }
+    '/legal/contact': {
+      id: '/legal/contact'
+      path: '/contact'
+      fullPath: '/legal/contact'
+      preLoaderRoute: typeof LegalContactRouteImport
+      parentRoute: typeof LegalRoute
     }
     '/chat/$botId': {
       id: '/chat/$botId'
@@ -513,6 +609,22 @@ const BotsRouteChildren: BotsRouteChildren = {
 
 const BotsRouteWithChildren = BotsRoute._addFileChildren(BotsRouteChildren)
 
+interface LegalRouteChildren {
+  LegalContactRoute: typeof LegalContactRoute
+  LegalPrivacyRoute: typeof LegalPrivacyRoute
+  LegalRefundsRoute: typeof LegalRefundsRoute
+  LegalTermsRoute: typeof LegalTermsRoute
+}
+
+const LegalRouteChildren: LegalRouteChildren = {
+  LegalContactRoute: LegalContactRoute,
+  LegalPrivacyRoute: LegalPrivacyRoute,
+  LegalRefundsRoute: LegalRefundsRoute,
+  LegalTermsRoute: LegalTermsRoute,
+}
+
+const LegalRouteWithChildren = LegalRoute._addFileChildren(LegalRouteChildren)
+
 interface ChatBotIdRouteChildren {
   ChatBotIdThreadIdRoute: typeof ChatBotIdThreadIdRoute
 }
@@ -529,6 +641,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
   BotsRoute: BotsRouteWithChildren,
+  LegalRoute: LegalRouteWithChildren,
   OauthDebugRoute: OauthDebugRoute,
   OnboardingRoute: OnboardingRoute,
   SplashRoute: SplashRoute,
