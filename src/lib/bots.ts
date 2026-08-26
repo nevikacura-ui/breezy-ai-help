@@ -10,24 +10,40 @@ import buddyVera from "@/assets/bots/buddy-vera.png";
 import buddyArjun from "@/assets/bots/buddy-arjun.png";
 import buddyRio from "@/assets/bots/buddy-rio.png";
 import buddyNeo from "@/assets/bots/buddy-neo.png";
+import kidPip from "@/assets/bots/kid-pip.png";
+import kidBo from "@/assets/bots/kid-bo.png";
+import avatarZane from "@/assets/bots/avatar-zane.png";
+import avatarMira from "@/assets/bots/avatar-mira.png";
+import avatarLia from "@/assets/bots/avatar-lia.png";
 
 export type BotTier = "free" | "trial" | "pro";
-/** Visual character family an agent belongs to. */
-export type AgentFamily = "toons" | "buddies" | "avatars";
+/**
+ * Character family = the age group an agent is designed for.
+ * toons   → Kids (6–12)
+ * avatars → Teens (16–20)
+ * buddies → Grown-ups (21+)
+ */
+export type AgentFamily = "toons" | "avatars" | "buddies";
 
 export const FAMILY_LABELS: Record<AgentFamily, string> = {
-  toons: "Toons",
-  buddies: "Buddies",
-  avatars: "Avatars",
+  toons: "Kids",
+  avatars: "Teens",
+  buddies: "Grown-ups",
+};
+
+export const FAMILY_AGES: Record<AgentFamily, string> = {
+  toons: "Ages 6–12",
+  avatars: "Ages 16–20",
+  buddies: "Ages 21+",
 };
 
 export const FAMILY_TAGLINES: Record<AgentFamily, string> = {
-  toons: "Playful illustrated agents",
-  buddies: "Human-like 3D companions",
-  avatars: "Coming soon",
+  toons: "Ages 6–12 · playful toons",
+  avatars: "Ages 16–20 · 3D avatars",
+  buddies: "Ages 21+ · human buddies",
 };
 
-export const AGENT_FAMILIES: AgentFamily[] = ["toons", "buddies", "avatars"];
+export const AGENT_FAMILIES: AgentFamily[] = ["toons", "avatars", "buddies"];
 
 export type BotCategory =
   | "all"
