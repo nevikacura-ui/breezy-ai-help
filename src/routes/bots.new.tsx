@@ -252,8 +252,8 @@ function NewBot() {
               style={{ background: "color-mix(in oklab, var(--butter) 10%, transparent)", border: "1px solid color-mix(in oklab, var(--butter) 30%, transparent)" }}>
               <div className="flex items-start gap-2">
                 <Sparkles className="mt-0.5 h-4 w-4" style={{ color: "var(--butter)" }} />
-                <div className="text-[13px] opacity-80">
-                  Tell your bot what you want out of it. It'll craft a personal greeting and starter prompts around your goals.
+            <div className="text-[13px] opacity-80">
+                  Tell your agent what you want out of it. It'll craft a personal greeting and starter prompts around your goals.
                 </div>
               </div>
             </div>
