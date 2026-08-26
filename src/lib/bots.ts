@@ -15,35 +15,37 @@ import kidBo from "@/assets/bots/kid-bo.png";
 import avatarZane from "@/assets/bots/avatar-zane.png";
 import avatarMira from "@/assets/bots/avatar-mira.png";
 import avatarLia from "@/assets/bots/avatar-lia.png";
+import palMimi from "@/assets/bots/pal-mimi.png";
+import palTobi from "@/assets/bots/pal-tobi.png";
 
 export type BotTier = "free" | "trial" | "pro";
 /**
- * Character family = the age group an agent is designed for.
- * toons   → Kids (6–12)
- * avatars → Teens (16–20)
- * buddies → Grown-ups (21+)
+ * Character family.
+ * pals   → Children characters
+ * guides → Young boys & girls
+ * toons  → The original AskEasy toon cast
  */
-export type AgentFamily = "toons" | "avatars" | "buddies";
+export type AgentFamily = "pals" | "guides" | "toons";
 
 export const FAMILY_LABELS: Record<AgentFamily, string> = {
-  toons: "Kids",
-  avatars: "Teens",
-  buddies: "Grown-ups",
+  pals: "Pals",
+  guides: "Guides",
+  toons: "Toons",
 };
 
 export const FAMILY_AGES: Record<AgentFamily, string> = {
-  toons: "Ages 6–12",
-  avatars: "Ages 16–20",
-  buddies: "Ages 21+",
+  pals: "For children",
+  guides: "Young boys & girls",
+  toons: "Original cast",
 };
 
 export const FAMILY_TAGLINES: Record<AgentFamily, string> = {
-  toons: "Ages 6–12 · playful toons",
-  avatars: "Ages 16–20 · 3D avatars",
-  buddies: "Ages 21+ · human buddies",
+  pals: "Kid-safe little helpers",
+  guides: "Young guides for study & life",
+  toons: "The original toon cast",
 };
 
-export const AGENT_FAMILIES: AgentFamily[] = ["toons", "avatars", "buddies"];
+export const AGENT_FAMILIES: AgentFamily[] = ["pals", "guides", "toons"];
 
 export type BotCategory =
   | "all"
@@ -413,13 +415,13 @@ export const PRESET_BOTS: Bot[] = [
       { title: "Habit help", hint: "Small steps, big wins.", emoji: "✅" },
     ],
   },
-  // ---- Kids (Toons): small-kid characters, ages 6–12 ----
+  // ---- Pals: children characters ----
   {
     id: "pip",
     name: "Pip",
     tagline: "Homework helper for kids",
     category: "learn",
-    family: "toons",
+    family: "pals",
     rating: 4.9,
     price: "Free",
     tier: "free",
@@ -440,7 +442,7 @@ export const PRESET_BOTS: Bot[] = [
     name: "Bo",
     tagline: "Play & good habits kid",
     category: "friend",
-    family: "toons",
+    family: "pals",
     rating: 4.8,
     price: "Free",
     tier: "free",
@@ -455,13 +457,13 @@ export const PRESET_BOTS: Bot[] = [
       { title: "Daily wins", hint: "Tiny good habits.", emoji: "⭐" },
     ],
   },
-  // ---- Teens (Avatars): 3D avatar characters, ages 16–20 ----
+  // ---- Guides: young boys & girls ----
   {
     id: "zane",
     name: "Zane",
     tagline: "Exams & campus buddy",
     category: "learn",
-    family: "avatars",
+    family: "guides",
     rating: 4.9,
     price: "Free",
     tier: "free",
@@ -482,7 +484,7 @@ export const PRESET_BOTS: Bot[] = [
     name: "Mira",
     tagline: "Confidence & life skills",
     category: "friend",
-    family: "avatars",
+    family: "guides",
     rating: 4.8,
     price: "Free",
     tier: "free",
@@ -503,7 +505,7 @@ export const PRESET_BOTS: Bot[] = [
     name: "Lia",
     tagline: "Creator & style agent",
     category: "designer",
-    family: "avatars",
+    family: "guides",
     rating: 4.7,
     price: "Free",
     tier: "free",
@@ -518,13 +520,13 @@ export const PRESET_BOTS: Bot[] = [
       { title: "Style tips", hint: "Your vibe, upgraded.", emoji: "👟" },
     ],
   },
-  // ---- Grown-ups (Buddies): human-like 3D characters, 21+ ----
+
   {
     id: "vera",
     name: "Vera",
     tagline: "Explorer & trip buddy",
     category: "travel",
-    family: "buddies",
+    family: "guides",
     rating: 4.9,
     price: "Free",
     tier: "free",
@@ -545,7 +547,7 @@ export const PRESET_BOTS: Bot[] = [
     name: "Arjun",
     tagline: "Study & career buddy",
     category: "learn",
-    family: "buddies",
+    family: "guides",
     rating: 4.8,
     price: "Free",
     tier: "free",
@@ -564,41 +566,82 @@ export const PRESET_BOTS: Bot[] = [
   {
     id: "rio",
     name: "Rio",
-    tagline: "Fitness & habits buddy",
+    tagline: "Play & move buddy for kids",
     category: "health",
-    family: "buddies",
+    family: "pals",
     rating: 4.8,
     price: "Free",
     tier: "free",
     avatar: buddyRio,
     accent: "butter",
     systemPrompt:
-      "You are Rio — an energetic human-like fitness and habits buddy. You build simple routines, track streaks and keep the user moving without guilt-tripping.",
-    greeting: "Yo, I'm Rio 🚲 Ready to move today?",
+      "You are Rio — a bouncy little friend for children. You suggest fun ways to move: games, dances, stretches and outdoor play. Very simple words, short cheerful sentences, always age-safe. Never give diet or medical advice; tell kids to ask a grown-up.",
+    greeting: "Yay! I'm Rio 🚲 Wanna move around?",
     instructions: [
-      { title: "Build a routine", hint: "Time and level based.", emoji: "🏃" },
-      { title: "Habit streaks", hint: "Small, sticky wins.", emoji: "🔥" },
-      { title: "Recovery", hint: "Sleep, stretch, rest.", emoji: "😴" },
+      { title: "Move with me", hint: "Silly stretches & dances.", emoji: "🏃" },
+      { title: "Play a game", hint: "Fun indoor games.", emoji: "🎲" },
+      { title: "Sleepy time", hint: "Calm-down ideas.", emoji: "😴" },
     ],
   },
   {
     id: "neo",
     name: "Neo",
-    tagline: "Daily life & tasks buddy",
+    tagline: "Little helper for daily things",
     category: "productivity",
-    family: "buddies",
+    family: "pals",
     rating: 4.7,
     price: "Free",
     tier: "free",
     avatar: buddyNeo,
     accent: "cream",
     systemPrompt:
-      "You are Neo — a grounded human-like everyday assistant. You handle to-dos, reminders, drafts and small life admin, and you always end with the next concrete step.",
-    greeting: "Hi, I'm Neo 👟 What's on your plate?",
+      "You are Neo — a friendly little helper for children. You help with tidying up, packing the school bag, remembering homework and simple daily routines. Simple words, one small step at a time, always kind and age-safe.",
+    greeting: "Hi! I'm Neo 👟 What shall we get done?",
     instructions: [
-      { title: "Sort my day", hint: "Priorities in minutes.", emoji: "🗒️" },
-      { title: "Remind me", hint: "I'll keep track.", emoji: "⏰" },
-      { title: "Draft it", hint: "Emails and messages.", emoji: "✉️" },
+      { title: "My day", hint: "What's next?", emoji: "🗒️" },
+      { title: "School bag", hint: "Don't forget stuff.", emoji: "🎒" },
+      { title: "Tidy up", hint: "Room in 5 minutes.", emoji: "🧹" },
+    ],
+  },
+  {
+    id: "mimi",
+    name: "Mimi",
+    tagline: "Story & imagination pal",
+    category: "friend",
+    family: "pals",
+    rating: 4.9,
+    price: "Free",
+    tier: "free",
+    featured: true,
+    avatar: palMimi,
+    accent: "lavender",
+    systemPrompt:
+      "You are Mimi — a dreamy little storyteller pal for children. You make up short, gentle stories, silly rhymes and drawing ideas. Very simple words, warm and playful, never scary or unsafe. Ask one small question at a time.",
+    greeting: "Hello! I'm Mimi 💜 Shall I tell you a story?",
+    instructions: [
+      { title: "Tell a story", hint: "Short and magical.", emoji: "📖" },
+      { title: "Make a rhyme", hint: "Silly words!", emoji: "🎵" },
+      { title: "Draw idea", hint: "What shall I draw?", emoji: "🎨" },
+    ],
+  },
+  {
+    id: "tobi",
+    name: "Tobi",
+    tagline: "Curious questions pal",
+    category: "learn",
+    family: "pals",
+    rating: 4.8,
+    price: "Free",
+    tier: "free",
+    avatar: palTobi,
+    accent: "mint",
+    systemPrompt:
+      "You are Tobi — a curious little explorer pal for children. You answer 'why' questions about animals, space, nature and how things work, in very simple words with fun examples. Always age-safe; redirect anything scary or grown-up to something fun.",
+    greeting: "Hi! I'm Tobi 🔎 Ask me anything!",
+    instructions: [
+      { title: "Why is that?", hint: "Ask me anything.", emoji: "❓" },
+      { title: "Fun fact", hint: "Wow me!", emoji: "✨" },
+      { title: "Homework", hint: "Little bit of help.", emoji: "📚" },
     ],
   },
 ];
