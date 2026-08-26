@@ -352,14 +352,14 @@ function NewBot() {
             className="flex h-14 w-full items-center justify-center gap-2 rounded-full font-display text-[1.05rem] transition-all active:scale-[0.98] disabled:opacity-40"
             style={{ background: "var(--butter)", color: "var(--ink)" }}>
             {generating ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
-            {generating ? "Generating…" : "Generate persona"}
+            {generating ? "Generating…" : "Generate agent"}
           </button>
         )}
         {step === "preview" && (
           <button onClick={save}
             className="flex h-14 w-full items-center justify-center rounded-full font-display text-[1.05rem] transition-all active:scale-[0.98]"
             style={{ background: "var(--butter)", color: "var(--ink)" }}>
-            Create bot
+            Create agent
           </button>
         )}
       </div>
