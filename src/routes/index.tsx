@@ -10,7 +10,28 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Askeasy — Your cute AI agent" },
       { property: "og:description", content: "AskEasy is your personal AI agent: helpful, cute, and always ready to get things done in your language." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://askeasy.ai/" },
       { name: "twitter:card", content: "summary_large_image" },
+    ],
+    links: [{ rel: "canonical", href: "https://askeasy.ai/" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: "AskEasy",
+          url: "https://askeasy.ai/",
+          applicationCategory: "BusinessApplication",
+          operatingSystem: "Web",
+          description:
+            "AskEasy is a calm, beautifully simple AI assistant. Ask anything by text, voice, camera or documents — in 10 languages.",
+          offers: [
+            { "@type": "Offer", price: "0", priceCurrency: "INR", name: "Free" },
+            { "@type": "Offer", price: "499", priceCurrency: "INR", name: "Pro (monthly)" },
+          ],
+        }),
+      },
     ],
   }),
   component: Index,
