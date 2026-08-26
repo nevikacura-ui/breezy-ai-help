@@ -5,12 +5,12 @@ export const Route = createFileRoute("/legal")({
   component: LegalLayout,
 });
 
-const TABS = [
-  { to: "/legal/privacy", label: "Privacy" },
-  { to: "/legal/terms", label: "Terms" },
-  { to: "/legal/refunds", label: "Refunds" },
-  { to: "/legal/contact", label: "Contact" },
-] as const;
+const TABS: Array<{ to: string; label: string; doc: LegalDocId }> = [
+  { to: "/legal/privacy", label: "Privacy", doc: "privacy" },
+  { to: "/legal/terms", label: "Terms", doc: "terms" },
+  { to: "/legal/refunds", label: "Refunds", doc: "refunds" },
+  { to: "/legal/contact", label: "Contact", doc: "contact" },
+];
 
 function LegalLayout() {
   return (
