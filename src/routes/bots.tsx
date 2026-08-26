@@ -7,7 +7,6 @@ import {
   CATEGORY_CAPABILITY,
   AGENT_FAMILIES,
   FAMILY_LABELS,
-  FAMILY_TAGLINES,
   familyOf,
   useCustomBots,
   useOnboarding,
@@ -78,7 +77,7 @@ function BotsHome() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"top" | "new">("top");
   const [activeCategory, setActiveCategory] = useState<BotCategory>("all");
-  const [activeFamily, setActiveFamily] = useState<AgentFamily | "all">("all");
+  const [activeFamily, setActiveFamily] = useState<AgentFamily>("pals");
   const [welcomeVisible, setWelcomeVisible] = useState(false);
 
   // Show the personalized welcome the first time the user lands post-onboarding,
@@ -115,8 +114,7 @@ function BotsHome() {
   const allBots = useMemo<Bot[]>(() => [...customBots, ...PRESET_BOTS], [customBots]);
   const featured = useMemo(() => PRESET_BOTS.filter((b) => b.featured), []);
   const filtered = useMemo(() => {
-    const byFamily =
-      activeFamily === "all" ? allBots : allBots.filter((b) => familyOf(b) === activeFamily);
+    const byFamily = allBots.filter((b) => familyOf(b) === activeFamily);
     if (activeCategory === "all") return byFamily;
     return byFamily.filter((b) => b.category === activeCategory);
   }, [allBots, activeCategory, activeFamily]);
@@ -306,22 +304,19 @@ function BotsHome() {
 
         {/* Character family tabs */}
         <div className="mt-3 flex gap-1.5">
-          {(["all", ...AGENT_FAMILIES] as (AgentFamily | "all")[]).map((f) => {
+          {AGENT_FAMILIES.map((f) => {
             const on = activeFamily === f;
             return (
               <button
                 key={f}
                 onClick={() => setActiveFamily(f)}
-                className="flex-1 rounded-2xl px-2 py-2 text-[12px] font-semibold transition-all"
+                className="flex-1 rounded-2xl px-2 py-2.5 text-[12px] font-semibold transition-all"
                 style={{
                   background: on ? "var(--ink)" : "color-mix(in oklab, var(--ink) 6%, transparent)",
                   color: on ? "var(--butter)" : "var(--ink)",
                 }}
               >
-                <span className="block">{f === "all" ? "Everyone" : FAMILY_LABELS[f]}</span>
-                <span className="block text-[10px] font-medium opacity-60">
-                  {f === "all" ? "All characters" : FAMILY_TAGLINES[f]}
-                </span>
+                {FAMILY_LABELS[f]}
               </button>
             );
           })}
