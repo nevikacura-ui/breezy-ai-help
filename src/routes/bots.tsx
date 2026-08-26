@@ -4,6 +4,7 @@ import { Bell, Settings2, SlidersHorizontal, Star, Plus, X } from "lucide-react"
 import {
   PRESET_BOTS,
   CATEGORY_LABELS,
+  CATEGORY_CAPABILITY,
   useCustomBots,
   useOnboarding,
   type Bot,
@@ -53,10 +54,10 @@ function personaWelcome(persona: Persona, warmth: number, name: string): { title
 export const Route = createFileRoute("/bots")({
   head: () => ({
     meta: [
-      { title: "Askeasy — Personalized AI bots" },
-      { name: "description", content: "Browse a collection of personalized AI chatbots led by Easy, your cute AI companion. Cook, code, learn, storytell — pick your bot and start a conversation." },
-      { property: "og:title", content: "Askeasy — Personalized AI bots" },
-      { property: "og:description", content: "Browse a collection of personalized AI chatbots led by Easy, your cute AI companion." },
+      { title: "Askeasy — Personalized AI agents" },
+      { name: "description", content: "Browse a collection of personalized AI agents led by Easy, your cute AI companion. Cook, code, learn, plan, and get things done — pick your agent and start a conversation." },
+      { property: "og:title", content: "Askeasy — Personalized AI agents" },
+      { property: "og:description", content: "Browse a collection of personalized AI agents led by Easy, your cute AI companion." },
     ],
   }),
   component: BotsHome,
@@ -212,8 +213,8 @@ function BotsHome() {
           style={{ background: "var(--ink)", color: "var(--cream)" }}
         >
           <div className="max-w-[60%]">
-            <div className="text-[15px] font-semibold leading-tight">Chat with Easy & friends</div>
-            <p className="mt-1 text-[12px] opacity-70">Your cute AI companion, always ready.</p>
+            <div className="text-[15px] font-semibold leading-tight">Your AI agents are ready</div>
+            <p className="mt-1 text-[12px] opacity-70">Cute personal agents that help you get things done.</p>
             <button
               className="mt-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-bold uppercase tracking-wider"
               style={{ background: "var(--lavender)", color: "var(--ink)" }}
@@ -227,7 +228,7 @@ function BotsHome() {
         {/* Feature icons */}
         <div className="mt-4 grid grid-cols-3 gap-2.5">
           {[
-            { label: "Custom\nChat Bots", emoji: "🤖" },
+            { label: "Custom\nAI Agents", emoji: "🤖" },
             { label: "Encrypted\nConversation", emoji: "🔒" },
             { label: "Multi Lingual\nSupport", emoji: "🌐" },
           ].map((f, i) => (
@@ -248,7 +249,7 @@ function BotsHome() {
         {/* Divider label */}
         <div className="mt-6 flex items-center justify-center gap-3">
           <span className="h-px flex-1" style={{ background: "color-mix(in oklab, var(--ink) 14%, transparent)" }} />
-          <span className="text-[12px] font-semibold uppercase tracking-wider opacity-60">Unlock chatbots</span>
+          <span className="text-[12px] font-semibold uppercase tracking-wider opacity-60">Unlock agents</span>
           <span className="h-px flex-1" style={{ background: "color-mix(in oklab, var(--ink) 14%, transparent)" }} />
         </div>
 
@@ -268,7 +269,7 @@ function BotsHome() {
                   color: "var(--ink)",
                 }}
               >
-                {t === "top" ? "Top Chatbots" : "New Chatbots"}
+                {t === "top" ? "Top Agents" : "New Agents"}
               </button>
             ))}
           </div>
@@ -282,10 +283,10 @@ function BotsHome() {
         </div>
       </section>
 
-      {/* All Chatbots list */}
+      {/* All Agents list */}
       <section className="mx-3 mt-4 rounded-[2rem] px-4 pb-6 pt-5" style={{ background: "var(--cream)", color: "var(--ink)" }}>
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-[1.4rem] tracking-tight">All Chatbots</h2>
+          <h2 className="font-display text-[1.4rem] tracking-tight">All Agents</h2>
           <button
             className="flex h-9 w-9 items-center justify-center rounded-full"
             style={{ background: "color-mix(in oklab, var(--ink) 8%, transparent)" }}
@@ -323,7 +324,7 @@ function BotsHome() {
             className="mt-3 flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed py-3.5 text-[13.5px] font-semibold"
             style={{ borderColor: "color-mix(in oklab, var(--ink) 20%, transparent)", color: "var(--ink)" }}
           >
-            <Plus className="h-4 w-4" /> Create your own bot
+            <Plus className="h-4 w-4" /> Create your own agent
           </Link>
         </div>
       </section>
@@ -370,6 +371,12 @@ function BotFeatureCard({ bot }: { bot: Bot }) {
       <div className="mt-2 text-center">
         <div className="text-[13.5px] font-bold">{bot.name}</div>
         <div className="text-[11px] opacity-60">{bot.tagline}</div>
+        <div
+          className="mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold"
+          style={{ background: "color-mix(in oklab, var(--butter) 22%, transparent)", color: "var(--ink)" }}
+        >
+          {CATEGORY_CAPABILITY[bot.category]}
+        </div>
       </div>
       <div
         className="mt-3 flex items-center justify-between rounded-2xl px-3 py-1.5"
@@ -398,6 +405,12 @@ function BotListRow({ bot }: { bot: Bot }) {
       <div className="min-w-0 flex-1">
         <div className="truncate text-[13.5px] font-bold">{bot.name}</div>
         <div className="truncate text-[11.5px] opacity-60">{bot.tagline}</div>
+        <div
+          className="mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold"
+          style={{ background: "color-mix(in oklab, var(--butter) 22%, transparent)", color: "var(--ink)" }}
+        >
+          {CATEGORY_CAPABILITY[bot.category]}
+        </div>
       </div>
       <div className="flex flex-col items-end gap-1">
         {bot.tier === "pro" && bot.price !== "Unlocked" ? (
@@ -414,12 +427,7 @@ function BotListRow({ bot }: { bot: Bot }) {
           >
             {isVoice ? "🔊" : "🔓"} Unlocked
           </span>
-        ) : (
-          <span className="flex items-center gap-0.5 text-[10.5px] font-bold">
-            <Star className="h-2.5 w-2.5 fill-current" style={{ color: "#f5b942" }} />
-            {bot.rating}
-          </span>
-        )}
+        ) : null}
       </div>
     </Link>
   );

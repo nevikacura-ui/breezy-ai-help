@@ -20,6 +20,7 @@ import {
 import { SettingsSheet } from "@/components/askeasy/SettingsSheet";
 import { LANG_ENGLISH_NAME, LANGUAGES, isRTL, t, detectLanguage, type LangCode } from "@/lib/i18n";
 import { extractDocument, buildDocContext, isSupportedDoc, type ParsedDoc } from "@/lib/docs";
+import { AGENT_DIRECTIVE_PROMPT } from "@/lib/headache";
 import { toast } from "sonner";
 import { StreamText } from "@/components/askeasy/StreamText";
 
@@ -132,7 +133,7 @@ function BotChat() {
 
   const systemPrompt = useMemo(() => {
     if (!bot) return "";
-    const bits: string[] = [bot.systemPrompt, personalityPrompt(settings)];
+    const bits: string[] = [bot.systemPrompt, AGENT_DIRECTIVE_PROMPT, personalityPrompt(settings)];
     if (categoryLabels.length) {
       bits.push(`The user is especially interested in: ${categoryLabels.join(", ")}. Weave in when relevant.`);
     }
