@@ -2,7 +2,19 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useOnboarding } from "@/lib/bots";
 
-export const Route = createFileRoute("/")({ component: Index });
+export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Askeasy — Your cute AI agent" },
+      { name: "description", content: "AskEasy is your personal AI agent: helpful, cute, and always ready to get things done in your language." },
+      { property: "og:title", content: "Askeasy — Your cute AI agent" },
+      { property: "og:description", content: "AskEasy is your personal AI agent: helpful, cute, and always ready to get things done in your language." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: Index,
+});
 
 function Index() {
   const nav = useNavigate();
