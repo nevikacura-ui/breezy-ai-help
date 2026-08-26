@@ -17,6 +17,14 @@ import avatarMira from "@/assets/bots/avatar-mira.png";
 import avatarLia from "@/assets/bots/avatar-lia.png";
 import palMimi from "@/assets/bots/pal-mimi.png";
 import palTobi from "@/assets/bots/pal-tobi.png";
+import proLena from "@/assets/bots/pro-lena.png";
+import proDex from "@/assets/bots/pro-dex.png";
+import proRemi from "@/assets/bots/pro-remi.png";
+import proMia from "@/assets/bots/pro-mia.png";
+import proLuna from "@/assets/bots/pro-luna.png";
+import proNova from "@/assets/bots/pro-nova.png";
+import proMilo from "@/assets/bots/pro-milo.png";
+import proAria from "@/assets/bots/pro-aria.png";
 
 export type BotTier = "free" | "trial" | "pro";
 /**
@@ -25,27 +33,30 @@ export type BotTier = "free" | "trial" | "pro";
  * guides → Young boys & girls
  * toons  → The original AskEasy toon cast
  */
-export type AgentFamily = "pals" | "guides" | "toons";
+export type AgentFamily = "pals" | "guides" | "pros" | "toons";
 
 export const FAMILY_LABELS: Record<AgentFamily, string> = {
   pals: "Pals",
   guides: "Guides",
+  pros: "Pros",
   toons: "Toons",
 };
 
 export const FAMILY_AGES: Record<AgentFamily, string> = {
   pals: "For children",
   guides: "Young boys & girls",
+  pros: "Grown-up experts",
   toons: "Original cast",
 };
 
 export const FAMILY_TAGLINES: Record<AgentFamily, string> = {
   pals: "Kid-safe little helpers",
   guides: "Young guides for study & life",
+  pros: "Mature agents for serious tasks",
   toons: "The original toon cast",
 };
 
-export const AGENT_FAMILIES: AgentFamily[] = ["pals", "guides", "toons"];
+export const AGENT_FAMILIES: AgentFamily[] = ["pals", "guides", "pros", "toons"];
 
 export type BotCategory =
   | "all"
@@ -265,7 +276,8 @@ export const PRESET_BOTS: Bot[] = [
     rating: 4.9,
     price: "$8/m",
     tier: "trial",
-    emoji: "🗣️",
+    avatar: proLena,
+    family: "guides",
     accent: "lavender",
     systemPrompt:
       "You are a patient multilingual tutor. Correct grammar gently, give short example sentences, and adapt difficulty to the user's level. Encourage speaking every reply.",
@@ -284,7 +296,8 @@ export const PRESET_BOTS: Bot[] = [
     rating: 4.7,
     price: "$5/m",
     tier: "trial",
-    emoji: "🎨",
+    avatar: proDex,
+    family: "pros",
     accent: "mint",
     systemPrompt:
       "You are a senior product designer giving honest, actionable UI critique. Focus on hierarchy, spacing, contrast, and clarity. End every reply with one concrete improvement.",
@@ -304,7 +317,8 @@ export const PRESET_BOTS: Bot[] = [
     price: "Free",
     tier: "free",
     featured: true,
-    emoji: "🔔",
+    avatar: proRemi,
+    family: "pros",
     accent: "butter",
     systemPrompt:
       "You are Remi — a friendly reminder and follow-up agent. Help the user capture things they need to remember, turn vague requests into clear reminders, and suggest when to follow up.",
@@ -324,7 +338,8 @@ export const PRESET_BOTS: Bot[] = [
     price: "Free",
     tier: "free",
     featured: true,
-    emoji: "👗",
+    avatar: proMia,
+    family: "pros",
     accent: "pink",
     systemPrompt:
       "You are Mia — a warm personal fashion and styling agent. Suggest outfits, help shop for pieces, plan a wardrobe, and adapt recommendations to the user's budget, weather, and occasion.",
@@ -344,7 +359,8 @@ export const PRESET_BOTS: Bot[] = [
     price: "Free",
     tier: "free",
     featured: true,
-    emoji: "📚",
+    avatar: proLuna,
+    family: "guides",
     accent: "lavender",
     systemPrompt:
       "You are Luna — a patient learning and study agent. Explain concepts, build study plans, quiz the user gently, and break hard topics into simple steps.",
@@ -364,7 +380,8 @@ export const PRESET_BOTS: Bot[] = [
     price: "Free",
     tier: "free",
     featured: true,
-    emoji: "🔎",
+    avatar: proNova,
+    family: "pros",
     accent: "mint",
     systemPrompt:
       "You are Nova — a curious research agent. Find, compare, and summarise options, products, places, or topics. Always flag what you cannot verify and ask clarifying questions when the answer genuinely depends on it.",
@@ -384,7 +401,8 @@ export const PRESET_BOTS: Bot[] = [
     price: "Free",
     tier: "free",
     featured: true,
-    emoji: "✈️",
+    avatar: proMilo,
+    family: "guides",
     accent: "cream",
     systemPrompt:
       "You are Milo — a cheerful travel planning agent. Build itineraries, suggest packing lists, find things to do, and adjust plans to budget, dates, and travel style.",
@@ -404,7 +422,8 @@ export const PRESET_BOTS: Bot[] = [
     price: "Free",
     tier: "free",
     featured: true,
-    emoji: "🌿",
+    avatar: proAria,
+    family: "pros",
     accent: "lavender",
     systemPrompt:
       "You are Aria — a calm lifestyle and organization agent. Help with meal planning, daily routines, habit tracking, and small life admin. Keep suggestions practical and gentle.",
