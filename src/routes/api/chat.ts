@@ -43,7 +43,7 @@ const ROUTED_MODEL: Record<string, string> = {
   "long-document": "google/gemini-2.5-pro",
   vision: "google/gemini-2.5-flash",
 };
-type ChatRequestBody = { messages?: ChatMessage[]; model?: string; language?: string; system?: string; webSearch?: boolean };
+type ChatRequestBody = { messages?: ChatMessage[]; model?: string; language?: string; system?: string; webSearch?: boolean; botId?: string; botName?: string };
 
 const LANG_NAMES: Record<string, string> = {
   en: "English", es: "Spanish", fr: "French", de: "German", pt: "Portuguese",
@@ -321,11 +321,20 @@ export const Route = createFileRoute("/api/chat")({
         const { toolsPayload, TOOL_BY_NAME, summarizeProposal } = await import("@/lib/tools/registry");
         const { executeTool, auditProposal } = await import("@/lib/tools/execute.server");
         const { loadPolicy, isAllowed, needsApproval } = await import("@/lib/tools/policy.server");
-        const { loadUserContext, contextBlock } = await import("@/lib/tools/memory.server");
+        const { loadUserContext, contextBlock, loadBotMemory, botContextBlock } =
+          await import("@/lib/tools/memory.server");
 
-        const [policy, userCtx] = await Promise.all([loadPolicy(userId), loadUserContext(userId)]);
+        const botId = typeof body.botId === "string" ? body.botId.slice(0, 80) : "";
+        const botName = typeof body.botName === "string" ? body.botName.slice(0, 60) : "";
+        const [policy, userCtx, botFacts] = await Promise.all([
+          loadPolicy(userId),
+          loadUserContext(userId),
+          botId ? loadBotMemory(userId, botId) : Promise.resolve<string[]>([]),
+        ]);
         const about = contextBlock(userCtx);
         if (about) sys.content = `${sys.content}\n\n${about}`;
+        const botBlock = botContextBlock(botName || "this agent", botFacts);
+        if (botBlock) sys.content = `${sys.content}\n\n${botBlock}`;
 
         const convo: unknown[] = [sys, ...history];
         const proposals: {
@@ -439,7 +448,7 @@ export const Route = createFileRoute("/api/chat")({
               continue;
             }
 
-            const result = await executeTool(name, args, { userId, about });
+            const result = await executeTool(name, args, { userId, about, botId, botName });
             toolsUsed.push(name);
             for (const c of result.citations ?? []) {
               if (!seen.has(c.url)) { seen.add(c.url); citations.push(c); }

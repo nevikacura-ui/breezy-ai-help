@@ -15,6 +15,10 @@ type Ctx = {
   about?: string;
   /** The user's preferred writing tone, if saved. */
   tone?: string;
+  /** The agent this turn belongs to — scopes per-agent memory. */
+  botId?: string;
+  /** Display name of that agent. */
+  botName?: string;
 };
 
 async function ai(
@@ -196,6 +200,69 @@ ${String(input.source_material ?? "(none)").slice(0, 60_000)}`,
       output: added.length ? `Saved: ${added.join("; ")}.` : "Nothing new to save.",
       data: { facts: saved.facts.length },
     };
+  },
+
+  remember_for_this_agent: async (input, ctx) => {
+    if (!ctx.botId) {
+      return { ok: false, tool: "remember_for_this_agent", code: "FAILED", error: "No agent context for this turn." };
+    }
+    const { rememberForBot } = await import("./memory.server");
+    const facts = (input.facts as string[]).slice(0, 10);
+    const saved = await rememberForBot(ctx.userId, ctx.botId, facts);
+    return {
+      ok: true,
+      tool: "remember_for_this_agent",
+      output: `Saved for ${ctx.botName ?? "this agent"}: ${facts.join("; ")}.`,
+      data: { facts: saved.length },
+    };
+  },
+
+  create_reminder: async (input, ctx) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const dueRaw = input.due_at ? String(input.due_at) : null;
+    const due = dueRaw && !Number.isNaN(Date.parse(dueRaw)) ? new Date(dueRaw).toISOString() : null;
+    const { data, error } = await supabaseAdmin
+      .from("reminders")
+      .insert({
+        user_id: ctx.userId,
+        bot_id: ctx.botId ?? null,
+        title: String(input.title).slice(0, 300),
+        notes: input.notes ? String(input.notes).slice(0, 2000) : null,
+        due_at: due,
+      })
+      .select("id")
+      .single();
+    if (error) {
+      return { ok: false, tool: "create_reminder", code: "FAILED", error: error.message };
+    }
+    return {
+      ok: true,
+      tool: "create_reminder",
+      output: `Reminder saved: "${String(input.title)}"${due ? ` for ${new Date(due).toLocaleString()}` : ""}.`,
+      data: { id: (data as { id: string }).id },
+    };
+  },
+
+  list_reminders: async (input, ctx) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const status = String(input.status ?? "open");
+    let q = supabaseAdmin
+      .from("reminders")
+      .select("title, notes, due_at, status")
+      .eq("user_id", ctx.userId)
+      .order("due_at", { ascending: true, nullsFirst: false })
+      .limit(30);
+    if (status !== "all") q = q.eq("status", status);
+    const { data, error } = await q;
+    if (error) return { ok: false, tool: "list_reminders", code: "FAILED", error: error.message };
+    const rows = (data ?? []) as { title: string; notes: string | null; due_at: string | null; status: string }[];
+    if (rows.length === 0) {
+      return { ok: true, tool: "list_reminders", output: "No reminders saved yet.", data: { count: 0 } };
+    }
+    const list = rows
+      .map((r) => `- ${r.title}${r.due_at ? ` (due ${new Date(r.due_at).toLocaleString()})` : ""}${r.notes ? ` — ${r.notes}` : ""} [${r.status}]`)
+      .join("\n");
+    return { ok: true, tool: "list_reminders", output: list, data: { count: rows.length } };
   },
 
   send_email: async () => ({
