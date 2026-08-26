@@ -15,8 +15,10 @@ export const Route = createFileRoute("/auth/")({
       { property: "og:title", content: "Sign in — AskEasy" },
       { property: "og:description", content: "Sign in to AskEasy with Puvio to save your chats, sync across devices and unlock Pro." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://askeasy.ai/auth" },
       { name: "twitter:card", content: "summary" },
     ],
+    links: [{ rel: "canonical", href: "https://askeasy.ai/auth" }],
   }),
   component: AuthPage,
 });

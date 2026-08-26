@@ -7,6 +7,17 @@ import { CheckCircle2, Loader2, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/upgrade/success")({
   validateSearch: z.object({ order: z.string().optional() }),
+  head: () => ({
+    meta: [
+      { title: "Payment confirmed — AskEasy Pro" },
+      { name: "description", content: "Your AskEasy Pro payment is being confirmed. Unlimited messages and the Ultra model unlock as soon as it clears." },
+      { name: "robots", content: "noindex" },
+      { property: "og:title", content: "Payment confirmed — AskEasy Pro" },
+      { property: "og:description", content: "Your AskEasy Pro payment is being confirmed." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: SuccessPage,
 });
 

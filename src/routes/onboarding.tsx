@@ -12,8 +12,10 @@ export const Route = createFileRoute("/onboarding")({
       { property: "og:title", content: "Pick your categories — AskEasy" },
       { property: "og:description", content: "Choose 2-3 categories and AskEasy personalizes your agents instantly." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://askeasy.ai/onboarding" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "https://askeasy.ai/onboarding" }],
   }),
   component: Onboarding,
 });

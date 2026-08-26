@@ -8,6 +8,11 @@ export const Route = createFileRoute("/splash")({
     meta: [
       { title: "Askeasy — Meet Easy" },
       { name: "description", content: "Meet Easy, your cute AI companion. Ask anything, learn, create, and chat — the easy way." },
+      { property: "og:title", content: "Askeasy — Meet Easy" },
+      { property: "og:description", content: "Meet Easy, your cute AI companion. Ask anything, learn, create, and chat — the easy way." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://askeasy.ai/splash" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       // Preconnect + high-priority preload so the logo is decoded before first paint

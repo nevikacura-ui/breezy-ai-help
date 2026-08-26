@@ -17,10 +17,11 @@ export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: () => {
-        const lastmod = new Date().toISOString().slice(0, 10);
+        // No <lastmod>: we have no authoritative per-page change timestamp,
+        // and a generation-time date would be misleading to crawlers.
         const urls = PAGES.map(
           (p) =>
-            `  <url><loc>${ORIGIN}${p.path}</loc><lastmod>${lastmod}</lastmod><changefreq>${p.changefreq}</changefreq><priority>${p.priority}</priority></url>`,
+            `  <url><loc>${ORIGIN}${p.path}</loc><changefreq>${p.changefreq}</changefreq><priority>${p.priority}</priority></url>`,
         ).join("\n");
         const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
         return new Response(xml, {
