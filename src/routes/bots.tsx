@@ -78,6 +78,7 @@ function BotsHome() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"top" | "new">("top");
   const [activeCategory, setActiveCategory] = useState<BotCategory>("all");
+  const [activeFamily, setActiveFamily] = useState<AgentFamily | "all">("all");
   const [welcomeVisible, setWelcomeVisible] = useState(false);
 
   // Show the personalized welcome the first time the user lands post-onboarding,
@@ -114,9 +115,11 @@ function BotsHome() {
   const allBots = useMemo<Bot[]>(() => [...customBots, ...PRESET_BOTS], [customBots]);
   const featured = useMemo(() => PRESET_BOTS.filter((b) => b.featured), []);
   const filtered = useMemo(() => {
-    if (activeCategory === "all") return allBots;
-    return allBots.filter((b) => b.category === activeCategory);
-  }, [allBots, activeCategory]);
+    const byFamily =
+      activeFamily === "all" ? allBots : allBots.filter((b) => familyOf(b) === activeFamily);
+    if (activeCategory === "all") return byFamily;
+    return byFamily.filter((b) => b.category === activeCategory);
+  }, [allBots, activeCategory, activeFamily]);
 
   // Warm avatar decode cache once so the hub + chat feel instant.
   useEffect(() => {
