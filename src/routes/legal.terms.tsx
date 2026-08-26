@@ -22,7 +22,7 @@ export const Route = createFileRoute("/legal/terms")({
 
 function Terms() {
   return (
-    <LegalDoc title="Terms of Service" updated="26 August 2026">
+    <LegalDoc title="Terms of Service" updated="2026-08-26">
       <p>By using AskEasy at askeasy.ai you agree to these terms. If you do not agree, please don't use the service.</p>
 
       <h2>Your account</h2>
