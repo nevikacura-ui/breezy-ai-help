@@ -3,12 +3,13 @@ import { ChevronLeft, Sparkles, Loader2, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useCustomBots, type Bot } from "@/lib/bots";
+import { AGENT_DIRECTIVE_PROMPT } from "@/lib/headache";
 
 export const Route = createFileRoute("/bots/new")({
   head: () => ({
     meta: [
-      { title: "Create your own bot — Askeasy" },
-      { name: "description", content: "Create a custom AI chatbot with its own personality, goals, and tone." },
+      { title: "Create your own agent — Askeasy" },
+      { name: "description", content: "Create a custom AI agent with its own personality, goals, and agentic capabilities." },
     ],
   }),
   component: NewBot,
@@ -24,6 +25,17 @@ const TONE_PRESETS = [
   "Direct and no-fluff",
   "Encouraging coach",
   "Professional expert",
+];
+
+const AGENT_ROLES = [
+  "Helper",
+  "Reminder",
+  "Planner",
+  "Researcher",
+  "Tutor",
+  "Stylist",
+  "Coach",
+  "Writer",
 ];
 
 type Starter = { title: string; hint: string; emoji: string };
@@ -58,6 +70,7 @@ function NewBot() {
   // Personalize
   const [goals, setGoals] = useState("");
   const [tone, setTone] = useState("Warm and casual");
+  const [roles, setRoles] = useState<string[]>([]);
 
   // Generated
   const [tagline, setTagline] = useState("");
@@ -65,8 +78,10 @@ function NewBot() {
   const [starters, setStarters] = useState<Starter[]>(DEFAULT_STARTERS);
   const [generating, setGenerating] = useState(false);
 
-  const canBasics = name.trim().length >= 2 && role.trim().length >= 5;
+  const canBasics = name.trim().length >= 2 && (role.trim().length >= 5 || roles.length > 0);
   const canPersonalize = goals.trim().length >= 5 && tone.trim().length >= 2;
+
+  const roleSummary = [role.trim(), ...roles].filter(Boolean).join(", ");
 
   const generate = async () => {
     if (!canPersonalize) return;
@@ -75,7 +90,7 @@ function NewBot() {
       const res = await fetch("/api/bot-generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim(), role: role.trim(), goals: goals.trim(), tone: tone.trim() }),
+        body: JSON.stringify({ name: name.trim(), role: roleSummary, goals: goals.trim(), tone: tone.trim() }),
       });
       const data = await res.json() as { tagline?: string; greeting?: string; starters?: Starter[] };
       if (data.tagline) setTagline(data.tagline);
@@ -95,14 +110,14 @@ function NewBot() {
     const bot: Bot = {
       id: `custom-${Date.now()}`,
       name: name.trim(),
-      tagline: tagline.trim() || "Custom bot",
-      category: "friend",
+      tagline: tagline.trim() || "Custom agent",
+      category: roles[0] ? "friend" : "friend",
       rating: 5.0,
       price: "Free",
       tier: "free",
       emoji,
       accent,
-      systemPrompt: `You are ${name.trim()}. ${role.trim()} User goals: ${goals.trim() || "(none)"}. Voice: ${tone}. Keep responses concise and helpful, in line with these goals and voice.`,
+      systemPrompt: `${AGENT_DIRECTIVE_PROMPT}\n\nYou are ${name.trim()}. ${roleSummary}. User goals: ${goals.trim() || "(none)"}. Voice: ${tone}. Keep responses concise and helpful, in line with these goals and voice.`,
       greeting: greeting.trim() || `Hi! I'm ${name.trim()}. How can I help?`,
       instructions: starters.map((s) => ({
         title: s.title.trim() || "Ask me anything",
@@ -135,7 +150,7 @@ function NewBot() {
           <ChevronLeft className="h-5 w-5" />
         </button>
         <span className="font-display text-[1.05rem]">
-          {step === "basics" ? "Create a bot" : step === "personalize" ? "Personalize" : "Preview"}
+          {step === "basics" ? "Create an agent" : step === "personalize" ? "Personalize" : "Preview"}
         </span>
         <span className="w-10" />
       </header>
@@ -161,8 +176,8 @@ function NewBot() {
             {emoji}
           </div>
           <div className="min-w-0">
-            <div className="truncate font-display text-[1.15rem]">{name || "Your bot"}</div>
-            <div className="truncate text-[12px] opacity-60">{tagline || "Custom bot"}</div>
+            <div className="truncate font-display text-[1.15rem]">{name || "Your agent"}</div>
+            <div className="truncate text-[12px] opacity-60">{tagline || "Custom agent"}</div>
           </div>
         </div>
 
@@ -205,6 +220,27 @@ function NewBot() {
                     }}
                     aria-label={a} />
                 ))}
+              </div>
+            </div>
+
+            <div className="mt-5">
+              <div className="mb-2 text-[11px] font-bold uppercase tracking-wider opacity-60">Agent roles (pick one or more)</div>
+              <div className="flex flex-wrap gap-2">
+                {AGENT_ROLES.map((r) => {
+                  const active = roles.includes(r);
+                  return (
+                    <button key={r} onClick={() => setRoles((prev) =>
+                      active ? prev.filter((x) => x !== r) : [...prev, r]
+                    )}
+                      className="rounded-full px-3 py-1.5 text-[12px] font-semibold transition-all"
+                      style={{
+                        background: active ? "var(--butter)" : "color-mix(in oklab, var(--cream) 8%, transparent)",
+                        color: active ? "var(--ink)" : "var(--cream)",
+                      }}>
+                      {r}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </>
