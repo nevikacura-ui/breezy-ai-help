@@ -436,46 +436,6 @@ function BotFeatureCard({ bot }: { bot: Bot }) {
   );
 }
 
-function BotListRow({ bot }: { bot: Bot }) {
-  const isVoice = bot.id === "news-ani";
-  return (
-    <Link
-      to="/chat/$botId"
-      params={{ botId: bot.id }}
-      className="flex items-center gap-3 rounded-2xl border p-2.5 transition-all active:scale-[0.99]"
-      style={{ background: "#fff", borderColor: "color-mix(in oklab, var(--ink) 10%, transparent)" }}
-    >
-      <BotAvatar bot={bot} size={44} />
-      <div className="min-w-0 flex-1">
-        <div className="truncate text-[13.5px] font-bold">{bot.name}</div>
-        <div className="truncate text-[11.5px] opacity-60">{bot.tagline}</div>
-        <div
-          className="mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold"
-          style={{ background: "color-mix(in oklab, var(--butter) 22%, transparent)", color: "var(--ink)" }}
-        >
-          {CATEGORY_CAPABILITY[bot.category]}
-        </div>
-      </div>
-      <div className="flex flex-col items-end gap-1">
-        {bot.tier === "pro" && bot.price !== "Unlocked" ? (
-          <span
-            className="rounded-full px-2 py-0.5 text-[10.5px] font-bold"
-            style={{ background: "var(--lavender)", color: "var(--ink)" }}
-          >
-            {bot.price}
-          </span>
-        ) : bot.price === "Unlocked" ? (
-          <span
-            className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10.5px] font-bold"
-            style={{ background: "color-mix(in oklab, var(--ink) 8%, transparent)" }}
-          >
-            {isVoice ? "🔊" : "🔓"} Unlocked
-          </span>
-        ) : null}
-      </div>
-    </Link>
-  );
-}
 
 /** Clean square character card — image + name only. */
 function BotGridCard({ bot, onOpen }: { bot: Bot; onOpen: () => void }) {
