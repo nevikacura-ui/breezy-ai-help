@@ -95,6 +95,12 @@ export function UpgradeDialog({ open, onOpenChange, reason, labels }: Props) {
         <p className="mt-3 text-center text-[11px] text-muted-foreground">
           Secure payments by Cashfree · UPI, cards, netbanking, wallets
         </p>
+        <p className="mt-1.5 text-center text-[11px] text-muted-foreground">
+          ₹499/month, auto-renews. Cancel anytime ·{" "}
+          <a className="underline underline-offset-2" href="/legal/terms">Terms</a> ·{" "}
+          <a className="underline underline-offset-2" href="/legal/refunds">Refunds</a> ·{" "}
+          <a className="underline underline-offset-2" href="/legal/privacy">Privacy</a>
+        </p>
       </DialogContent>
     </Dialog>
   );
