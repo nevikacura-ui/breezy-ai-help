@@ -18,32 +18,32 @@ import avatarLia from "@/assets/bots/avatar-lia.png";
 
 export type BotTier = "free" | "trial" | "pro";
 /**
- * Character family = the age group an agent is designed for.
- * toons   → Kids (6–12)
- * avatars → Teens (16–20)
- * buddies → Grown-ups (21+)
+ * Character family.
+ * pals   → Children characters
+ * guides → Young boys & girls
+ * toons  → The original AskEasy toon cast
  */
-export type AgentFamily = "toons" | "avatars" | "buddies";
+export type AgentFamily = "pals" | "guides" | "toons";
 
 export const FAMILY_LABELS: Record<AgentFamily, string> = {
-  toons: "Kids",
-  avatars: "Teens",
-  buddies: "Grown-ups",
+  pals: "Pals",
+  guides: "Guides",
+  toons: "Toons",
 };
 
 export const FAMILY_AGES: Record<AgentFamily, string> = {
-  toons: "Ages 6–12",
-  avatars: "Ages 16–20",
-  buddies: "Ages 21+",
+  pals: "For children",
+  guides: "Young boys & girls",
+  toons: "Original cast",
 };
 
 export const FAMILY_TAGLINES: Record<AgentFamily, string> = {
-  toons: "Ages 6–12 · playful toons",
-  avatars: "Ages 16–20 · 3D avatars",
-  buddies: "Ages 21+ · human buddies",
+  pals: "Kid-safe little helpers",
+  guides: "Young guides for study & life",
+  toons: "The original toon cast",
 };
 
-export const AGENT_FAMILIES: AgentFamily[] = ["toons", "avatars", "buddies"];
+export const AGENT_FAMILIES: AgentFamily[] = ["pals", "guides", "toons"];
 
 export type BotCategory =
   | "all"
