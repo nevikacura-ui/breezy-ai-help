@@ -5,10 +5,15 @@ import {
   PRESET_BOTS,
   CATEGORY_LABELS,
   CATEGORY_CAPABILITY,
+  AGENT_FAMILIES,
+  FAMILY_LABELS,
+  FAMILY_TAGLINES,
+  familyOf,
   useCustomBots,
   useOnboarding,
   type Bot,
   type BotCategory,
+  type AgentFamily,
 } from "@/lib/bots";
 import { SettingsSheet } from "@/components/askeasy/SettingsSheet";
 import { BotAvatar, preloadBotAvatars } from "@/components/askeasy/BotAvatar";
@@ -73,6 +78,7 @@ function BotsHome() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"top" | "new">("top");
   const [activeCategory, setActiveCategory] = useState<BotCategory>("all");
+  const [activeFamily, setActiveFamily] = useState<AgentFamily | "all">("all");
   const [welcomeVisible, setWelcomeVisible] = useState(false);
 
   // Show the personalized welcome the first time the user lands post-onboarding,
@@ -109,9 +115,11 @@ function BotsHome() {
   const allBots = useMemo<Bot[]>(() => [...customBots, ...PRESET_BOTS], [customBots]);
   const featured = useMemo(() => PRESET_BOTS.filter((b) => b.featured), []);
   const filtered = useMemo(() => {
-    if (activeCategory === "all") return allBots;
-    return allBots.filter((b) => b.category === activeCategory);
-  }, [allBots, activeCategory]);
+    const byFamily =
+      activeFamily === "all" ? allBots : allBots.filter((b) => familyOf(b) === activeFamily);
+    if (activeCategory === "all") return byFamily;
+    return byFamily.filter((b) => b.category === activeCategory);
+  }, [allBots, activeCategory, activeFamily]);
 
   // Warm avatar decode cache once so the hub + chat feel instant.
   useEffect(() => {
@@ -296,6 +304,29 @@ function BotsHome() {
           </button>
         </div>
 
+        {/* Character family tabs */}
+        <div className="mt-3 flex gap-1.5">
+          {(["all", ...AGENT_FAMILIES] as (AgentFamily | "all")[]).map((f) => {
+            const on = activeFamily === f;
+            return (
+              <button
+                key={f}
+                onClick={() => setActiveFamily(f)}
+                className="flex-1 rounded-2xl px-2 py-2 text-[12px] font-semibold transition-all"
+                style={{
+                  background: on ? "var(--ink)" : "color-mix(in oklab, var(--ink) 6%, transparent)",
+                  color: on ? "var(--butter)" : "var(--ink)",
+                }}
+              >
+                <span className="block">{f === "all" ? "Everyone" : FAMILY_LABELS[f]}</span>
+                <span className="block text-[10px] font-medium opacity-60">
+                  {f === "all" ? "All characters" : FAMILY_TAGLINES[f]}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
         {/* Category chips */}
         <div className="-mx-1 mt-3 flex gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {(Object.keys(CATEGORY_LABELS) as BotCategory[]).map((c) => (
@@ -315,6 +346,14 @@ function BotsHome() {
 
         {/* List */}
         <div className="mt-4 space-y-2.5">
+          {filtered.length === 0 && (
+            <p className="rounded-2xl px-4 py-6 text-center text-[13px] font-medium opacity-60"
+               style={{ background: "color-mix(in oklab, var(--ink) 5%, transparent)" }}>
+              {activeFamily === "avatars"
+                ? "Avatars are landing soon — your own look-alike agents."
+                : "No agents here yet."}
+            </p>
+          )}
           {filtered.map((b) => (
             <BotListRow key={b.id} bot={b} />
           ))}

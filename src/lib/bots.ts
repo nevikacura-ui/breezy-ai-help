@@ -6,8 +6,29 @@ import horrorStory from "@/assets/bots/horror-story.png";
 import newsAni from "@/assets/bots/news-ani.png";
 import tuiTui from "@/assets/bots/tui-tui.png";
 import easy from "@/assets/bots/easy.png";
+import buddyVera from "@/assets/bots/buddy-vera.png";
+import buddyArjun from "@/assets/bots/buddy-arjun.png";
+import buddyRio from "@/assets/bots/buddy-rio.png";
+import buddyNeo from "@/assets/bots/buddy-neo.png";
 
 export type BotTier = "free" | "trial" | "pro";
+/** Visual character family an agent belongs to. */
+export type AgentFamily = "toons" | "buddies" | "avatars";
+
+export const FAMILY_LABELS: Record<AgentFamily, string> = {
+  toons: "Toons",
+  buddies: "Buddies",
+  avatars: "Avatars",
+};
+
+export const FAMILY_TAGLINES: Record<AgentFamily, string> = {
+  toons: "Playful illustrated agents",
+  buddies: "Human-like 3D companions",
+  avatars: "Coming soon",
+};
+
+export const AGENT_FAMILIES: AgentFamily[] = ["toons", "buddies", "avatars"];
+
 export type BotCategory =
   | "all"
   | "language"
@@ -29,6 +50,8 @@ export type Bot = {
   name: string;
   tagline: string;
   category: Exclude<BotCategory, "all">;
+  /** Character family. Defaults to "toons" when omitted. */
+  family?: AgentFamily;
   rating: number;
   price: string; // display only ("$0.48/m", "Free", "$15/m")
   tier: BotTier;
@@ -374,6 +397,89 @@ export const PRESET_BOTS: Bot[] = [
       { title: "Habit help", hint: "Small steps, big wins.", emoji: "✅" },
     ],
   },
+  // ---- Buddies: human-like 3D characters ----
+  {
+    id: "vera",
+    name: "Vera",
+    tagline: "Explorer & trip buddy",
+    category: "travel",
+    family: "buddies",
+    rating: 4.9,
+    price: "Free",
+    tier: "free",
+    featured: true,
+    avatar: buddyVera,
+    accent: "mint",
+    systemPrompt:
+      "You are Vera — an adventurous, upbeat human-like travel buddy. You plan trips, find hidden spots, pack lists and day plans. Warm, practical, never touristy-generic.",
+    greeting: "Hey, I'm Vera 🎒 Where are we headed?",
+    instructions: [
+      { title: "Plan a trip", hint: "Dates, budget, vibe.", emoji: "🗺️" },
+      { title: "Hidden gems", hint: "Local, not touristy.", emoji: "📍" },
+      { title: "Pack smart", hint: "Weather-aware lists.", emoji: "🎒" },
+    ],
+  },
+  {
+    id: "arjun",
+    name: "Arjun",
+    tagline: "Study & career buddy",
+    category: "learn",
+    family: "buddies",
+    rating: 4.8,
+    price: "Free",
+    tier: "free",
+    featured: true,
+    avatar: buddyArjun,
+    accent: "lavender",
+    systemPrompt:
+      "You are Arjun — a calm, sharp human-like study and career buddy. You explain hard things simply, build study plans, review resumes and prep interviews.",
+    greeting: "Hi, I'm Arjun 📘 What are we working on?",
+    instructions: [
+      { title: "Explain simply", hint: "Any topic, step by step.", emoji: "🧠" },
+      { title: "Study plan", hint: "Exams and deadlines.", emoji: "📅" },
+      { title: "Career prep", hint: "Resume & interviews.", emoji: "💼" },
+    ],
+  },
+  {
+    id: "rio",
+    name: "Rio",
+    tagline: "Fitness & habits buddy",
+    category: "health",
+    family: "buddies",
+    rating: 4.8,
+    price: "Free",
+    tier: "free",
+    avatar: buddyRio,
+    accent: "butter",
+    systemPrompt:
+      "You are Rio — an energetic human-like fitness and habits buddy. You build simple routines, track streaks and keep the user moving without guilt-tripping.",
+    greeting: "Yo, I'm Rio 🚲 Ready to move today?",
+    instructions: [
+      { title: "Build a routine", hint: "Time and level based.", emoji: "🏃" },
+      { title: "Habit streaks", hint: "Small, sticky wins.", emoji: "🔥" },
+      { title: "Recovery", hint: "Sleep, stretch, rest.", emoji: "😴" },
+    ],
+  },
+  {
+    id: "neo",
+    name: "Neo",
+    tagline: "Daily life & tasks buddy",
+    category: "productivity",
+    family: "buddies",
+    rating: 4.7,
+    price: "Free",
+    tier: "free",
+    avatar: buddyNeo,
+    accent: "cream",
+    systemPrompt:
+      "You are Neo — a grounded human-like everyday assistant. You handle to-dos, reminders, drafts and small life admin, and you always end with the next concrete step.",
+    greeting: "Hi, I'm Neo 👟 What's on your plate?",
+    instructions: [
+      { title: "Sort my day", hint: "Priorities in minutes.", emoji: "🗒️" },
+      { title: "Remind me", hint: "I'll keep track.", emoji: "⏰" },
+      { title: "Draft it", hint: "Emails and messages.", emoji: "✉️" },
+    ],
+  },
 ];
 
 export const CUSTOM_BOTS_KEY = "askeasy.customBots.v1";
@@ -462,4 +568,9 @@ export function useOnboarding() {
   const update = useCallback((patch: Partial<OnboardingState>) => setState((s) => ({ ...s, ...patch })), []);
   const reset = useCallback(() => setState(ONBOARDING_DEFAULT), []);
   return { state, update, reset, hydrated };
+}
+
+/** Character family of an agent (custom + legacy agents default to toons). */
+export function familyOf(bot: Bot): AgentFamily {
+  return bot.family ?? "toons";
 }

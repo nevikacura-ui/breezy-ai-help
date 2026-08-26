@@ -101,3 +101,53 @@ export async function rememberAboutUser(
   if (error) throw error;
   return merged;
 }
+
+// -------- Per-agent memory --------
+// Each agent (bot) keeps its own durable facts, separate from the global
+// user context: what Vera knows about your travel style shouldn't leak into
+// Arjun's study coaching.
+
+export async function loadBotMemory(userId: string, botId: string): Promise<string[]> {
+  if (!botId) return [];
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("bot_memory")
+      .select("facts")
+      .eq("user_id", userId)
+      .eq("bot_id", botId)
+      .maybeSingle();
+    return asStringArray((data as { facts?: unknown } | null)?.facts);
+  } catch (e) {
+    console.error("[memory] bot load failed", e);
+    return [];
+  }
+}
+
+export function botContextBlock(botName: string, facts: string[]): string {
+  if (facts.length === 0) return "";
+  return `WHAT YOU (${botName}) REMEMBER FROM PAST CHATS WITH THIS USER (use it naturally, never re-ask):\n${facts
+    .slice(-20)
+    .map((f) => `- ${f}`)
+    .join("\n")}`;
+}
+
+export async function rememberForBot(
+  userId: string,
+  botId: string,
+  facts: string[],
+): Promise<string[]> {
+  const current = await loadBotMemory(userId, botId);
+  const merged = Array.from(
+    new Set([...current, ...facts.map((f) => f.trim()).filter(Boolean)]),
+  ).slice(-40);
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { error } = await supabaseAdmin
+    .from("bot_memory")
+    .upsert(
+      { user_id: userId, bot_id: botId, facts: merged, updated_at: new Date().toISOString() },
+      { onConflict: "user_id,bot_id" },
+    );
+  if (error) throw error;
+  return merged;
+}

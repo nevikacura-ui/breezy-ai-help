@@ -335,6 +335,8 @@ function BotChat() {
         settings,
         system: systemPrompt,
         signal: controller.signal,
+        botId: bot?.id,
+        botName: bot?.name,
       });
       setAutomation(autoLine ?? null);
       const { body, followUps } = splitFollowUps(reply);

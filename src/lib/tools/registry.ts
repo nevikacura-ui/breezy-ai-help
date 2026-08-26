@@ -212,6 +212,60 @@ export const TOOLS: ToolDef[] = [
     },
   },
   {
+    name: "remember_for_this_agent",
+    label: "Agent memory",
+    description:
+      "Save a fact that only THIS agent should remember about the user (preferences, goals, ongoing projects relevant to this agent's role). Use for agent-specific context; use remember_about_me for facts every agent should know.",
+    permission: "none",
+    requiresApproval: false,
+    auditEvent: "tool.remember_for_this_agent",
+    input: z.object({ facts: z.array(z.string()).min(1) }),
+    parameters: {
+      type: "object",
+      properties: {
+        facts: { type: "array", items: { type: "string" }, description: "Short durable facts for this agent only" },
+      },
+      required: ["facts"],
+    },
+  },
+  {
+    name: "create_reminder",
+    label: "Create a reminder",
+    description:
+      "Save a reminder or follow-up for the user with an optional due date. Use whenever the user says to remind them, follow up, or not let them forget something.",
+    permission: "none",
+    requiresApproval: false,
+    auditEvent: "tool.create_reminder",
+    input: z.object({
+      title: z.string().min(2),
+      notes: z.string().optional(),
+      due_at: z.string().optional(),
+    }),
+    parameters: {
+      type: "object",
+      properties: {
+        title: str("What to remind the user about, short and concrete"),
+        notes: str("Optional extra detail"),
+        due_at: str("Optional ISO-8601 date-time for when it is due"),
+      },
+      required: ["title"],
+    },
+  },
+  {
+    name: "list_reminders",
+    label: "List reminders",
+    description:
+      "List the user's saved reminders and follow-ups. Use before answering questions about what they have coming up or what they asked to be reminded of.",
+    permission: "none",
+    requiresApproval: false,
+    auditEvent: "tool.list_reminders",
+    input: z.object({ status: z.enum(["open", "done", "all"]).optional() }),
+    parameters: {
+      type: "object",
+      properties: { status: str("Filter: open, done or all. Defaults to open.") },
+    },
+  },
+  {
     name: "send_email",
     label: "Send an email",
     description:

@@ -463,6 +463,8 @@ export async function sendToAIDetailed(args: {
   settings: Settings;
   signal?: AbortSignal;
   system?: string;
+  botId?: string;
+  botName?: string;
 }): Promise<{ reply: string; automation?: string; proposals: PendingApproval[]; toolsUsed: string[] }> {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   try {
@@ -481,6 +483,8 @@ export async function sendToAIDetailed(args: {
       model: args.settings.openRouterModel,
       language: args.settings.language,
       system: args.system,
+      botId: args.botId,
+      botName: args.botName,
       webSearch: !!args.settings.webSearch && !!args.settings.focusMode,
       messages: args.messages.map((m) => {
         const images = (m.attachments ?? []).filter((a) => a.type === "image");
