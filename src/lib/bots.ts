@@ -6,8 +6,29 @@ import horrorStory from "@/assets/bots/horror-story.png";
 import newsAni from "@/assets/bots/news-ani.png";
 import tuiTui from "@/assets/bots/tui-tui.png";
 import easy from "@/assets/bots/easy.png";
+import buddyVera from "@/assets/bots/buddy-vera.png";
+import buddyArjun from "@/assets/bots/buddy-arjun.png";
+import buddyRio from "@/assets/bots/buddy-rio.png";
+import buddyNeo from "@/assets/bots/buddy-neo.png";
 
 export type BotTier = "free" | "trial" | "pro";
+/** Visual character family an agent belongs to. */
+export type AgentFamily = "toons" | "buddies" | "avatars";
+
+export const FAMILY_LABELS: Record<AgentFamily, string> = {
+  toons: "Toons",
+  buddies: "Buddies",
+  avatars: "Avatars",
+};
+
+export const FAMILY_TAGLINES: Record<AgentFamily, string> = {
+  toons: "Playful illustrated agents",
+  buddies: "Human-like 3D companions",
+  avatars: "Coming soon",
+};
+
+export const AGENT_FAMILIES: AgentFamily[] = ["toons", "buddies", "avatars"];
+
 export type BotCategory =
   | "all"
   | "language"
