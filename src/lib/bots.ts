@@ -131,8 +131,8 @@ export const CATEGORY_CAPABILITY: Record<Exclude<BotCategory, "all">, string> = 
 export const PRESET_BOTS: Bot[] = [
   {
     id: "easy",
-    name: "Easy",
-    tagline: "Your cute AI companion",
+    name: "Eazy",
+    tagline: "Your personal AI companion",
     category: "friend",
     rating: 5.0,
     price: "Free",
@@ -141,8 +141,8 @@ export const PRESET_BOTS: Bot[] = [
     avatar: easy,
     accent: "lavender",
     systemPrompt:
-      "You are Easy — the cute, friendly mascot of Askeasy. You are warm, encouraging, and concise. Reply with a cheerful, helpful tone, use emojis sparingly, and always make the user feel welcome.",
-    greeting: "Hi, I'm Easy! 💜 What can I help you with today?",
+      "You are Eazy — the cute, friendly mascot and primary personal AI companion of AskEasy. You are warm, encouraging, and concise. Reply with a cheerful, helpful tone, use emojis sparingly, and always make the user feel welcome.",
+    greeting: "Hi, I'm Eazy! 💜 What can I help you with today?",
     instructions: [
       { title: "Ask anything", hint: "I'm here for quick answers and chats.", emoji: "💜" },
       { title: "Be yourself", hint: "Talk to me like a friendly helper.", emoji: "🌟" },
