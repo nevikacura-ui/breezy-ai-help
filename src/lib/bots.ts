@@ -50,6 +50,8 @@ export type Bot = {
   name: string;
   tagline: string;
   category: Exclude<BotCategory, "all">;
+  /** Character family. Defaults to "toons" when omitted. */
+  family?: AgentFamily;
   rating: number;
   price: string; // display only ("$0.48/m", "Free", "$15/m")
   tier: BotTier;
