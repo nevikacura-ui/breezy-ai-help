@@ -89,6 +89,27 @@ export type Database = {
         }
         Relationships: []
       }
+      bot_memory: {
+        Row: {
+          bot_id: string
+          facts: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bot_id: string
+          facts?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bot_id?: string
+          facts?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           attachments: Json
@@ -277,6 +298,39 @@ export type Database = {
           pro_until?: string | null
           trial_started_at?: string | null
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      reminders: {
+        Row: {
+          bot_id: string | null
+          created_at: string
+          due_at: string | null
+          id: string
+          notes: string | null
+          status: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          bot_id?: string | null
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          notes?: string | null
+          status?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          bot_id?: string | null
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          notes?: string | null
+          status?: string
+          title?: string
           user_id?: string
         }
         Relationships: []
