@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { ONBOARDING_CATEGORIES, useOnboarding } from "@/lib/bots";
+import { trackEvent } from "@/lib/analytics";
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({

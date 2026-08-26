@@ -26,12 +26,10 @@ export const Route = createFileRoute("/api/public/analytics")({
         const { event, properties, session_id, path } = parsed.data;
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-          const { error } = await supabaseAdmin.from("analytics_events").insert({
-            event,
-            properties,
-            session_id,
-            path,
-          });
+          // Table is new; generated types may lag one build, so cast the row.
+          const { error } = await supabaseAdmin
+            .from("analytics_events" as never)
+            .insert({ event, properties, session_id, path } as never);
           if (error) {
             console.error("analytics insert failed:", error.message);
             return new Response("store failed", { status: 500 });
