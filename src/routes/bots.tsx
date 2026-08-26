@@ -7,7 +7,6 @@ import {
   CATEGORY_CAPABILITY,
   AGENT_FAMILIES,
   FAMILY_LABELS,
-  FAMILY_TAGLINES,
   familyOf,
   useCustomBots,
   useOnboarding,
@@ -114,10 +113,11 @@ function BotsHome() {
 
   const allBots = useMemo<Bot[]>(() => [...customBots, ...PRESET_BOTS], [customBots]);
   const featured = useMemo(() => PRESET_BOTS.filter((b) => b.featured), []);
-  const filtered = useMemo(
-    () => allBots.filter((b) => familyOf(b) === activeFamily),
-    [allBots, activeFamily]
-  );
+  const filtered = useMemo(() => {
+    const byFamily = allBots.filter((b) => familyOf(b) === activeFamily);
+    if (activeCategory === "all") return byFamily;
+    return byFamily.filter((b) => b.category === activeCategory);
+  }, [allBots, activeCategory, activeFamily]);
 
   // Warm avatar decode cache once so the hub + chat feel instant.
   useEffect(() => {
