@@ -560,7 +560,7 @@ function BotChat() {
           if (!text) { toast.message("Couldn't hear you clearly."); return; }
           setInput(text);
           // Auto-send so hold-to-talk is truly hands-free.
-          setTimeout(() => sendMessage(text), 40);
+          sendMessage(text);
         } catch (err: any) {
           toast.error(err?.message ?? "Voice transcription failed");
         } finally {
