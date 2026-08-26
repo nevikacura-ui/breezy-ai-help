@@ -339,26 +339,22 @@ function BotsHome() {
           ))}
         </div>
 
-        {/* List */}
-        <div className="mt-4 space-y-2.5">
-          {filtered.length === 0 && (
-            <p className="rounded-2xl px-4 py-6 text-center text-[13px] font-medium opacity-60"
-               style={{ background: "color-mix(in oklab, var(--ink) 5%, transparent)" }}>
-              No agents here yet.
-            </p>
-          )}
+        {/* Clean card grid */}
+        <div className="mt-4 grid grid-cols-3 gap-2.5">
           {filtered.map((b) => (
-            <BotListRow key={b.id} bot={b} />
+            <BotGridCard key={b.id} bot={b} onOpen={() => setPreview(b)} />
           ))}
 
-          <Link
-            to="/bots/new"
-            className="mt-3 flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed py-3.5 text-[13.5px] font-semibold"
-            style={{ borderColor: "color-mix(in oklab, var(--ink) 20%, transparent)", color: "var(--ink)" }}
+          <button
+            onClick={() => setUploadOpen(true)}
+            className="flex flex-col items-center justify-center gap-1.5 rounded-3xl border-2 border-dashed p-3 text-center transition-all active:scale-[0.97]"
+            style={{ borderColor: "color-mix(in oklab, var(--ink) 20%, transparent)", color: "var(--ink)", minHeight: 124 }}
           >
-            <Plus className="h-4 w-4" /> Create your own agent
-          </Link>
+            <Plus className="h-5 w-5" />
+            <span className="text-[11.5px] font-semibold leading-tight">Add character</span>
+          </button>
         </div>
+
       </section>
 
       <SettingsSheet
