@@ -47,6 +47,33 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_events: {
+        Row: {
+          created_at: string
+          event: string
+          id: string
+          path: string
+          properties: Json
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          event: string
+          id?: string
+          path?: string
+          properties?: Json
+          session_id?: string
+        }
+        Update: {
+          created_at?: string
+          event?: string
+          id?: string
+          path?: string
+          properties?: Json
+          session_id?: string
+        }
+        Relationships: []
+      }
       automation_specs: {
         Row: {
           created_at: string

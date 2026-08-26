@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { ONBOARDING_CATEGORIES, useOnboarding } from "@/lib/bots";
+import { trackEvent } from "@/lib/analytics";
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({
@@ -40,13 +41,22 @@ function Onboarding() {
   const toggle = (id: string) =>
     setSelected((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      if (next.has(id)) {
+        next.delete(id);
+        trackEvent({ event: "category_deselect", properties: { category: id, selected_count: next.size } });
+      } else {
+        next.add(id);
+        trackEvent({ event: "category_select", properties: { category: id, selected_count: next.size } });
+      }
       return next;
     });
 
   const handleContinue = () => {
     if (!canContinue) return;
+    trackEvent({
+      event: "onboarding_complete",
+      properties: { categories: Array.from(selected).join(","), count: selected.size },
+    });
     update({ categories: Array.from(selected), completed: true, step: 0, draftCategories: [] });
     nav({ to: "/bots" });
   };
@@ -151,10 +161,13 @@ function Onboarding() {
         <button
           onClick={handleContinue}
           disabled={!canContinue}
-          className="flex h-14 w-full items-center justify-center rounded-full font-display text-[1.05rem] transition-all active:scale-[0.98] disabled:opacity-40"
+          aria-disabled={!canContinue}
+          className={`flex h-14 w-full items-center justify-center rounded-full font-display text-[1.05rem] transition-all duration-300 ${
+            canContinue ? "active:scale-[0.98] shadow-[0_14px_36px_-12px_rgba(255,216,107,0.55)]" : "opacity-40 saturate-0"
+          }`}
           style={{ background: "var(--butter)", color: "var(--ink)" }}
         >
-          Get started
+          {canContinue ? "Get started" : `Pick ${2 - selected.size} more to start`}
         </button>
       </div>
     </main>

@@ -29,6 +29,7 @@ import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiBotGenerateRouteImport } from './routes/api/bot-generate'
 import { Route as ChatBotIdThreadIdRouteImport } from './routes/chat.$botId.$threadId'
 import { Route as ApiPublicCashfreeWebhookRouteImport } from './routes/api/public/cashfree-webhook'
+import { Route as ApiPublicAnalyticsRouteImport } from './routes/api/public/analytics'
 import { Route as ApiPublicOtpVerifyRouteImport } from './routes/api/public/otp/verify'
 import { Route as ApiPublicOtpSendRouteImport } from './routes/api/public/otp/send'
 
@@ -133,6 +134,11 @@ const ApiPublicCashfreeWebhookRoute =
     path: '/api/public/cashfree-webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicAnalyticsRoute = ApiPublicAnalyticsRouteImport.update({
+  id: '/api/public/analytics',
+  path: '/api/public/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicOtpVerifyRoute = ApiPublicOtpVerifyRouteImport.update({
   id: '/api/public/otp/verify',
   path: '/api/public/otp/verify',
@@ -163,6 +169,7 @@ export interface FileRoutesByFullPath {
   '/chat/$botId': typeof ChatBotIdRouteWithChildren
   '/upgrade/success': typeof UpgradeSuccessRoute
   '/auth/': typeof AuthIndexRoute
+  '/api/public/analytics': typeof ApiPublicAnalyticsRoute
   '/api/public/cashfree-webhook': typeof ApiPublicCashfreeWebhookRoute
   '/chat/$botId/$threadId': typeof ChatBotIdThreadIdRoute
   '/api/public/otp/send': typeof ApiPublicOtpSendRoute
@@ -186,6 +193,7 @@ export interface FileRoutesByTo {
   '/chat/$botId': typeof ChatBotIdRouteWithChildren
   '/upgrade/success': typeof UpgradeSuccessRoute
   '/auth': typeof AuthIndexRoute
+  '/api/public/analytics': typeof ApiPublicAnalyticsRoute
   '/api/public/cashfree-webhook': typeof ApiPublicCashfreeWebhookRoute
   '/chat/$botId/$threadId': typeof ChatBotIdThreadIdRoute
   '/api/public/otp/send': typeof ApiPublicOtpSendRoute
@@ -211,6 +219,7 @@ export interface FileRoutesById {
   '/chat/$botId': typeof ChatBotIdRouteWithChildren
   '/upgrade/success': typeof UpgradeSuccessRoute
   '/auth/': typeof AuthIndexRoute
+  '/api/public/analytics': typeof ApiPublicAnalyticsRoute
   '/api/public/cashfree-webhook': typeof ApiPublicCashfreeWebhookRoute
   '/chat/$botId/$threadId': typeof ChatBotIdThreadIdRoute
   '/api/public/otp/send': typeof ApiPublicOtpSendRoute
@@ -237,6 +246,7 @@ export interface FileRouteTypes {
     | '/chat/$botId'
     | '/upgrade/success'
     | '/auth/'
+    | '/api/public/analytics'
     | '/api/public/cashfree-webhook'
     | '/chat/$botId/$threadId'
     | '/api/public/otp/send'
@@ -260,6 +270,7 @@ export interface FileRouteTypes {
     | '/chat/$botId'
     | '/upgrade/success'
     | '/auth'
+    | '/api/public/analytics'
     | '/api/public/cashfree-webhook'
     | '/chat/$botId/$threadId'
     | '/api/public/otp/send'
@@ -284,6 +295,7 @@ export interface FileRouteTypes {
     | '/chat/$botId'
     | '/upgrade/success'
     | '/auth/'
+    | '/api/public/analytics'
     | '/api/public/cashfree-webhook'
     | '/chat/$botId/$threadId'
     | '/api/public/otp/send'
@@ -305,6 +317,7 @@ export interface RootRouteChildren {
   ApiTtsRoute: typeof ApiTtsRoute
   ChatBotIdRoute: typeof ChatBotIdRouteWithChildren
   UpgradeSuccessRoute: typeof UpgradeSuccessRoute
+  ApiPublicAnalyticsRoute: typeof ApiPublicAnalyticsRoute
   ApiPublicCashfreeWebhookRoute: typeof ApiPublicCashfreeWebhookRoute
   ApiPublicOtpSendRoute: typeof ApiPublicOtpSendRoute
   ApiPublicOtpVerifyRoute: typeof ApiPublicOtpVerifyRoute
@@ -452,6 +465,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicCashfreeWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/analytics': {
+      id: '/api/public/analytics'
+      path: '/api/public/analytics'
+      fullPath: '/api/public/analytics'
+      preLoaderRoute: typeof ApiPublicAnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/otp/verify': {
       id: '/api/public/otp/verify'
       path: '/api/public/otp/verify'
@@ -520,6 +540,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiTtsRoute: ApiTtsRoute,
   ChatBotIdRoute: ChatBotIdRouteWithChildren,
   UpgradeSuccessRoute: UpgradeSuccessRoute,
+  ApiPublicAnalyticsRoute: ApiPublicAnalyticsRoute,
   ApiPublicCashfreeWebhookRoute: ApiPublicCashfreeWebhookRoute,
   ApiPublicOtpSendRoute: ApiPublicOtpSendRoute,
   ApiPublicOtpVerifyRoute: ApiPublicOtpVerifyRoute,
