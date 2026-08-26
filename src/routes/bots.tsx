@@ -79,6 +79,9 @@ function BotsHome() {
   const [activeCategory, setActiveCategory] = useState<BotCategory>("all");
   const [activeFamily, setActiveFamily] = useState<AgentFamily>("pals");
   const [welcomeVisible, setWelcomeVisible] = useState(false);
+  const [preview, setPreview] = useState<Bot | null>(null);
+  const [uploadOpen, setUploadOpen] = useState(false);
+
 
   // Show the personalized welcome the first time the user lands post-onboarding,
   // and again if their persona changes.
