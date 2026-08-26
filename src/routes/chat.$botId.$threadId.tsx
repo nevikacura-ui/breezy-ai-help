@@ -615,13 +615,12 @@ function BotChat() {
     return () => window.removeEventListener("keydown", onKey);
   }, [thinking, exportChat, newThread]);
 
-  // sendMessage is defined below (uses the value directly, bypassing the input state race).
+  // Sends the given text directly — never via `send()`, whose memoized closure
+  // holds the pre-update `input` and would send stale text (or nothing).
   const sendMessage = (text: string) => {
     const value = text.trim();
     if (!value) return;
-    setInput(value);
-    // Defer to next tick so state settles, then reuse the existing send path.
-    setTimeout(() => send(), 0);
+    void sendText(value);
   };
 
   const forgetMessage = (id: string) => {
