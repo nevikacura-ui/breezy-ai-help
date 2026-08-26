@@ -1,3 +1,4 @@
+import { trackLegalLinkClick } from "@/lib/analytics";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";

@@ -1,3 +1,4 @@
+import { trackLegalLinkClick } from "@/lib/analytics";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useServerFn } from "@tanstack/react-start";
