@@ -123,7 +123,9 @@ function BotsHome() {
   const filtered = useMemo(() => {
     const byFamily = allBots.filter((b) => familyOf(b) === activeFamily);
     if (activeCategory === "all") return byFamily;
-    return byFamily.filter((b) => b.category === activeCategory);
+    const inFamily = byFamily.filter((b) => b.category === activeCategory);
+    // Fall back across families so a valid category never shows an empty grid.
+    return inFamily.length ? inFamily : allBots.filter((b) => b.category === activeCategory);
   }, [allBots, activeCategory, activeFamily]);
 
   // Warm avatar decode cache once so the hub + chat feel instant.
