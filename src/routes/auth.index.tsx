@@ -161,9 +161,22 @@ function AuthPage() {
           </div>
         )}
 
-        <p className="mt-6 text-[11px] text-muted-foreground">
-          By continuing you agree to our terms & privacy.
+        <a
+          href="https://puvio.ai"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-6 inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-[11px] text-muted-foreground transition hover:text-foreground"
+        >
+          <ShieldCheck className="h-3.5 w-3.5" />
+          Secured by Puvio
+        </a>
+
+        <p className="mt-3 text-[11px] text-muted-foreground">
+          By continuing you agree to our{" "}
+          <a className="underline underline-offset-2" href="/legal/terms">terms</a> &{" "}
+          <a className="underline underline-offset-2" href="/legal/privacy">privacy</a>.
         </p>
+
 
       </div>
     </main>
