@@ -13,6 +13,8 @@ import {
 } from "@/lib/askeasy";
 import { LANGUAGES, type LangCode } from "@/lib/i18n";
 import { ConnectionsPanel } from "@/components/askeasy/ConnectionsPanel";
+import { PushToggle } from "@/components/askeasy/PushToggle";
+
 
 
 type Props = {
@@ -381,6 +383,10 @@ export function SettingsSheet({
               onChange={(v) => update({ voiceEnabled: v })}
             />
           </section>
+
+          <PushToggle />
+
+
 
           {/* Connections, permissions, activity */}
           <ConnectionsPanel />
