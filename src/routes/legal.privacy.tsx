@@ -77,7 +77,7 @@ function Privacy() {
       <h2>Your rights</h2>
       <p>
         You can access, correct, export or delete your data, withdraw consent, and clear per-agent memory from
-        Settings. Write to <a href="mailto:support@askeasy.ai">support@askeasy.ai</a> and we will respond within 30
+        Settings. Write to <a href="mailto:askeasy@nevika.ai">askeasy@nevika.ai</a> and we will respond within 30
         days.
       </p>
 
@@ -98,7 +98,7 @@ function Privacy() {
 
       <h2>Contact</h2>
       <p>
-        AskEasy · <a href="mailto:support@askeasy.ai">support@askeasy.ai</a>
+        AskEasy · <a href="mailto:askeasy@nevika.ai">askeasy@nevika.ai</a>
       </p>
     </LegalDoc>
   );

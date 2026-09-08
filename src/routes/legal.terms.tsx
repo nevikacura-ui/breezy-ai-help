@@ -78,7 +78,7 @@ function Terms() {
 
       <h2>Contact</h2>
       <p>
-        Questions: <a href="mailto:support@askeasy.ai">support@askeasy.ai</a>
+        Questions: <a href="mailto:askeasy@nevika.ai">askeasy@nevika.ai</a>
       </p>
     </LegalDoc>
   );
