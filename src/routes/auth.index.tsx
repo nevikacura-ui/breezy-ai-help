@@ -4,7 +4,7 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { puvioAuth } from "@/lib/puvio-auth";
 import { toast } from "sonner";
-import { Sparkles } from "lucide-react";
+import { Sparkles, ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/auth/")({
   validateSearch: z.object({ next: z.string().optional() }),
