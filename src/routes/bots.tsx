@@ -123,7 +123,9 @@ function BotsHome() {
   const filtered = useMemo(() => {
     const byFamily = allBots.filter((b) => familyOf(b) === activeFamily);
     if (activeCategory === "all") return byFamily;
-    return byFamily.filter((b) => b.category === activeCategory);
+    const inFamily = byFamily.filter((b) => b.category === activeCategory);
+    // Fall back across families so a valid category never shows an empty grid.
+    return inFamily.length ? inFamily : allBots.filter((b) => b.category === activeCategory);
   }, [allBots, activeCategory, activeFamily]);
 
   // Warm avatar decode cache once so the hub + chat feel instant.
@@ -352,6 +354,17 @@ function BotsHome() {
           {filtered.map((b) => (
             <BotGridCard key={b.id} bot={b} onOpen={() => setPreview(b)} />
           ))}
+
+          {filtered.length === 0 && (
+            <button
+              onClick={() => setActiveCategory("all")}
+              className="col-span-2 flex flex-col items-center justify-center gap-1.5 rounded-3xl border p-3 text-center"
+              style={{ borderColor: "color-mix(in oklab, var(--ink) 14%, transparent)", color: "var(--ink)", minHeight: 124 }}
+            >
+              <span className="text-[13px] font-bold">No {CATEGORY_LABELS[activeCategory]} characters yet</span>
+              <span className="text-[11.5px] opacity-60">Tap to show all agents</span>
+            </button>
+          )}
 
           <button
             onClick={() => setUploadOpen(true)}
