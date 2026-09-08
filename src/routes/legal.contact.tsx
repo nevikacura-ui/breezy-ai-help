@@ -25,12 +25,12 @@ function Contact() {
       <p>We're a small team and read every message.</p>
       <h2>Support</h2>
       <p>
-        <a href="mailto:support@askeasy.ai">support@askeasy.ai</a> — product help, bugs, billing, refunds. We reply
+        <a href="mailto:askeasy@nevika.ai">askeasy@nevika.ai</a> — product help, bugs, billing, refunds. We reply
         within 3 business days.
       </p>
       <h2>Privacy requests</h2>
       <p>
-        <a href="mailto:support@askeasy.ai">support@askeasy.ai</a> — data access, export or account deletion. Handled
+        <a href="mailto:askeasy@nevika.ai">askeasy@nevika.ai</a> — data access, export or account deletion. Handled
         within 30 days.
       </p>
       <h2>Service</h2>

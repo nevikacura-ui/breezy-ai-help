@@ -44,7 +44,7 @@ function Refunds() {
 
       <h2>How to request</h2>
       <p>
-        Email <a href="mailto:support@askeasy.ai">support@askeasy.ai</a> with the registered account and the payment
+        Email <a href="mailto:askeasy@nevika.ai">askeasy@nevika.ai</a> with the registered account and the payment
         reference. We respond within 3 business days.
       </p>
 
