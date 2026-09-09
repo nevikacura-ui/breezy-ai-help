@@ -97,6 +97,11 @@ export function PushToggle() {
           {busy ? "…" : on ? "Turn off" : "Turn on"}
         </Button>
       </div>
+      {on ? (
+        <Button size="sm" variant="ghost" className="h-7 px-2 text-[12px]" disabled={busy} onClick={test}>
+          Send test notification
+        </Button>
+      ) : null}
     </section>
   );
 }
