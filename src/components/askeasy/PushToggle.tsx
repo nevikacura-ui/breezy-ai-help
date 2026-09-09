@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { disablePush, enablePush, PUSH_MESSAGES } from "@/lib/push";
-import { registerPushToken, unregisterPushToken } from "@/lib/push.functions";
+import { registerPushToken, sendPushToMe, unregisterPushToken } from "@/lib/push.functions";
 
 const TOKEN_KEY = "askeasy.pushToken";
 
@@ -12,6 +12,7 @@ const TOKEN_KEY = "askeasy.pushToken";
 export function PushToggle() {
   const register = useServerFn(registerPushToken);
   const unregister = useServerFn(unregisterPushToken);
+  const sendTest = useServerFn(sendPushToMe);
   const [busy, setBusy] = useState(false);
   const [on, setOn] = useState(false);
 
@@ -61,6 +62,22 @@ export function PushToggle() {
     }
   };
 
+  const test = async () => {
+    setBusy(true);
+    try {
+      const res = await sendTest({
+        data: { title: "AskEasy", body: "Notifications are working on this device.", path: "/bots" },
+      });
+      toast[res.sent > 0 ? "success" : "message"](
+        res.sent > 0 ? "Test notification sent." : "No devices registered yet.",
+      );
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't send a test notification.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <section className="space-y-2">
       <div className="text-xs uppercase tracking-wider text-muted-foreground">Notifications</div>
@@ -80,6 +97,11 @@ export function PushToggle() {
           {busy ? "…" : on ? "Turn off" : "Turn on"}
         </Button>
       </div>
+      {on ? (
+        <Button size="sm" variant="ghost" className="h-7 px-2 text-[12px]" disabled={busy} onClick={test}>
+          Send test notification
+        </Button>
+      ) : null}
     </section>
   );
 }

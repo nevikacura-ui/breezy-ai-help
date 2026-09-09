@@ -52,48 +52,6 @@ export const sendPushToMe = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
-    const lovableKey = process.env["LOVABLE_API_KEY"];
-    const connKey = process.env["FIREBASE_MESSAGING_API_KEY"];
-    if (!lovableKey || !connKey) throw new Error("Push notifications are not configured.");
-
-    const { data: rows, error } = await context.supabase
-      .from("push_tokens")
-      .select("token")
-      .eq("user_id", context.userId);
-    if (error) throw new Error(error.message);
-    const tokens = (rows ?? []).map((r) => r.token as string);
-    if (tokens.length === 0) return { sent: 0, removed: 0 };
-
-    let sent = 0;
-    const stale: string[] = [];
-
-    for (const token of tokens) {
-      const res = await fetch(`${GATEWAY_URL}/v1/projects/_/messages:send`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${lovableKey}`,
-          "X-Connection-Api-Key": connKey,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: {
-            token,
-            notification: { title: data.title, body: data.body },
-            ...(data.path ? { data: { path: data.path } } : {}),
-          },
-        }),
-      });
-      if (res.ok) {
-        sent += 1;
-        continue;
-      }
-      const text = await res.text();
-      if (res.status === 404 || res.status === 400) stale.push(token);
-      else console.error(`FCM send failed [${res.status}]: ${text}`);
-    }
-
-    if (stale.length) {
-      await context.supabase.from("push_tokens").delete().in("token", stale).eq("user_id", context.userId);
-    }
-    return { sent, removed: stale.length };
+    const { sendPushToUser } = await import("@/lib/push-send.server");
+    return sendPushToUser(context.supabase, context.userId, data);
   });
