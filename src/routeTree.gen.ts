@@ -38,6 +38,7 @@ import { Route as ApiPublicCashfreeWebhookRouteImport } from './routes/api/publi
 import { Route as ApiPublicAnalyticsRouteImport } from './routes/api/public/analytics'
 import { Route as ApiPublicOtpVerifyRouteImport } from './routes/api/public/otp/verify'
 import { Route as ApiPublicOtpSendRouteImport } from './routes/api/public/otp/send'
+import { Route as ApiPublicCronRemindersRouteImport } from './routes/api/public/cron/reminders'
 
 const SplashRoute = SplashRouteImport.update({
   id: '/splash',
@@ -185,6 +186,11 @@ const ApiPublicOtpSendRoute = ApiPublicOtpSendRouteImport.update({
   path: '/api/public/otp/send',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicCronRemindersRoute = ApiPublicCronRemindersRouteImport.update({
+  id: '/api/public/cron/reminders',
+  path: '/api/public/cron/reminders',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -214,6 +220,7 @@ export interface FileRoutesByFullPath {
   '/api/public/analytics': typeof ApiPublicAnalyticsRoute
   '/api/public/cashfree-webhook': typeof ApiPublicCashfreeWebhookRoute
   '/chat/$botId/$threadId': typeof ChatBotIdThreadIdRoute
+  '/api/public/cron/reminders': typeof ApiPublicCronRemindersRoute
   '/api/public/otp/send': typeof ApiPublicOtpSendRoute
   '/api/public/otp/verify': typeof ApiPublicOtpVerifyRoute
 }
@@ -244,6 +251,7 @@ export interface FileRoutesByTo {
   '/api/public/analytics': typeof ApiPublicAnalyticsRoute
   '/api/public/cashfree-webhook': typeof ApiPublicCashfreeWebhookRoute
   '/chat/$botId/$threadId': typeof ChatBotIdThreadIdRoute
+  '/api/public/cron/reminders': typeof ApiPublicCronRemindersRoute
   '/api/public/otp/send': typeof ApiPublicOtpSendRoute
   '/api/public/otp/verify': typeof ApiPublicOtpVerifyRoute
 }
@@ -276,6 +284,7 @@ export interface FileRoutesById {
   '/api/public/analytics': typeof ApiPublicAnalyticsRoute
   '/api/public/cashfree-webhook': typeof ApiPublicCashfreeWebhookRoute
   '/chat/$botId/$threadId': typeof ChatBotIdThreadIdRoute
+  '/api/public/cron/reminders': typeof ApiPublicCronRemindersRoute
   '/api/public/otp/send': typeof ApiPublicOtpSendRoute
   '/api/public/otp/verify': typeof ApiPublicOtpVerifyRoute
 }
@@ -309,6 +318,7 @@ export interface FileRouteTypes {
     | '/api/public/analytics'
     | '/api/public/cashfree-webhook'
     | '/chat/$botId/$threadId'
+    | '/api/public/cron/reminders'
     | '/api/public/otp/send'
     | '/api/public/otp/verify'
   fileRoutesByTo: FileRoutesByTo
@@ -339,6 +349,7 @@ export interface FileRouteTypes {
     | '/api/public/analytics'
     | '/api/public/cashfree-webhook'
     | '/chat/$botId/$threadId'
+    | '/api/public/cron/reminders'
     | '/api/public/otp/send'
     | '/api/public/otp/verify'
   id:
@@ -370,6 +381,7 @@ export interface FileRouteTypes {
     | '/api/public/analytics'
     | '/api/public/cashfree-webhook'
     | '/chat/$botId/$threadId'
+    | '/api/public/cron/reminders'
     | '/api/public/otp/send'
     | '/api/public/otp/verify'
   fileRoutesById: FileRoutesById
@@ -393,6 +405,7 @@ export interface RootRouteChildren {
   UpgradeSuccessRoute: typeof UpgradeSuccessRoute
   ApiPublicAnalyticsRoute: typeof ApiPublicAnalyticsRoute
   ApiPublicCashfreeWebhookRoute: typeof ApiPublicCashfreeWebhookRoute
+  ApiPublicCronRemindersRoute: typeof ApiPublicCronRemindersRoute
   ApiPublicOtpSendRoute: typeof ApiPublicOtpSendRoute
   ApiPublicOtpVerifyRoute: typeof ApiPublicOtpVerifyRoute
 }
@@ -602,6 +615,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicOtpSendRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/cron/reminders': {
+      id: '/api/public/cron/reminders'
+      path: '/api/public/cron/reminders'
+      fullPath: '/api/public/cron/reminders'
+      preLoaderRoute: typeof ApiPublicCronRemindersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -676,6 +696,7 @@ const rootRouteChildren: RootRouteChildren = {
   UpgradeSuccessRoute: UpgradeSuccessRoute,
   ApiPublicAnalyticsRoute: ApiPublicAnalyticsRoute,
   ApiPublicCashfreeWebhookRoute: ApiPublicCashfreeWebhookRoute,
+  ApiPublicCronRemindersRoute: ApiPublicCronRemindersRoute,
   ApiPublicOtpSendRoute: ApiPublicOtpSendRoute,
   ApiPublicOtpVerifyRoute: ApiPublicOtpVerifyRoute,
 }

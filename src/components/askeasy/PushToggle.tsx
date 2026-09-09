@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { disablePush, enablePush, PUSH_MESSAGES } from "@/lib/push";
-import { registerPushToken, unregisterPushToken } from "@/lib/push.functions";
+import { registerPushToken, sendPushToMe, unregisterPushToken } from "@/lib/push.functions";
 
 const TOKEN_KEY = "askeasy.pushToken";
 
