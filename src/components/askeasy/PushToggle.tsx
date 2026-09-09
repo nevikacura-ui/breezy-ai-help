@@ -12,6 +12,7 @@ const TOKEN_KEY = "askeasy.pushToken";
 export function PushToggle() {
   const register = useServerFn(registerPushToken);
   const unregister = useServerFn(unregisterPushToken);
+  const sendTest = useServerFn(sendPushToMe);
   const [busy, setBusy] = useState(false);
   const [on, setOn] = useState(false);
 
@@ -56,6 +57,22 @@ export function PushToggle() {
       toast.success("Notifications are off for this device.");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Couldn't turn off notifications.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const test = async () => {
+    setBusy(true);
+    try {
+      const res = await sendTest({
+        data: { title: "AskEasy", body: "Notifications are working on this device.", path: "/bots" },
+      });
+      toast[res.sent > 0 ? "success" : "message"](
+        res.sent > 0 ? "Test notification sent." : "No devices registered yet.",
+      );
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't send a test notification.");
     } finally {
       setBusy(false);
     }
