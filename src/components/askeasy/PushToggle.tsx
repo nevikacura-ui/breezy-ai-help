@@ -1,16 +1,28 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Bell } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
-import { enablePush, PUSH_MESSAGES } from "@/lib/push";
-import { registerPushToken } from "@/lib/push.functions";
+import { disablePush, enablePush, PUSH_MESSAGES } from "@/lib/push";
+import { registerPushToken, unregisterPushToken } from "@/lib/push.functions";
 
-/** Lets the signed-in user turn on browser notifications for reminders and replies. */
+const TOKEN_KEY = "askeasy.pushToken";
+
+/** Lets the signed-in user turn browser notifications for reminders and replies on or off. */
 export function PushToggle() {
   const register = useServerFn(registerPushToken);
+  const unregister = useServerFn(unregisterPushToken);
   const [busy, setBusy] = useState(false);
   const [on, setOn] = useState(false);
+
+  // Restore the saved state after a reload: only "on" when the browser still allows it.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const saved = window.localStorage.getItem(TOKEN_KEY);
+    const granted = "Notification" in window && Notification.permission === "granted";
+    if (saved && granted) setOn(true);
+    else if (saved) window.localStorage.removeItem(TOKEN_KEY);
+  }, []);
 
   const turnOn = async () => {
     setBusy(true);
@@ -23,10 +35,27 @@ export function PushToggle() {
       await register({
         data: { token: result.token, platform: "web", userAgent: navigator.userAgent.slice(0, 500) },
       });
+      window.localStorage.setItem(TOKEN_KEY, result.token);
       setOn(true);
       toast.success("Notifications are on for this device.");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Couldn't turn on notifications.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const turnOff = async () => {
+    setBusy(true);
+    try {
+      const token = window.localStorage.getItem(TOKEN_KEY);
+      if (token) await unregister({ data: { token } });
+      await disablePush();
+      window.localStorage.removeItem(TOKEN_KEY);
+      setOn(false);
+      toast.success("Notifications are off for this device.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't turn off notifications.");
     } finally {
       setBusy(false);
     }
@@ -42,8 +71,13 @@ export function PushToggle() {
           </div>
           <p className="text-[12px] text-muted-foreground">Reminders and replies, even when AskEasy is closed.</p>
         </div>
-        <Button size="sm" variant={on ? "secondary" : "outline"} disabled={busy || on} onClick={turnOn}>
-          {on ? "On" : busy ? "…" : "Turn on"}
+        <Button
+          size="sm"
+          variant={on ? "secondary" : "outline"}
+          disabled={busy}
+          onClick={on ? turnOff : turnOn}
+        >
+          {busy ? "…" : on ? "Turn off" : "Turn on"}
         </Button>
       </div>
     </section>
