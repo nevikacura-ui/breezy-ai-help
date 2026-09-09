@@ -179,11 +179,11 @@ export const Features: React.FC = () => (
       <Beat index={1} kicker="Ten languages" title={"Answers in\nyour language."}>
         <Panel style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
           <Chip label="English" delay={2} accent />
-          <Chip label="हिन्दी" delay={6} />
-          <Chip label="मैथिली" delay={10} />
-          <Chip label="বাংলা" delay={14} />
-          <Chip label="தமிழ்" delay={18} />
-          <Chip label="मराठी" delay={22} />
+          <Chip label="Hindi" delay={6} />
+          <Chip label="Maithili" delay={10} />
+          <Chip label="Bangla" delay={14} />
+          <Chip label="Tamil" delay={18} />
+          <Chip label="Marathi" delay={22} />
         </Panel>
       </Beat>
     </Sequence>
