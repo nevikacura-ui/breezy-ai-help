@@ -4,7 +4,8 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { puvioAuth } from "@/lib/puvio-auth";
 import { toast } from "sonner";
-import { Sparkles, ShieldCheck } from "lucide-react";
+import { Sparkles } from "lucide-react";
+import puvioBadge from "@/assets/puvio-badge.png.asset.json";
 
 export const Route = createFileRoute("/auth/")({
   validateSearch: z.object({ next: z.string().optional() }),
@@ -165,10 +166,15 @@ function AuthPage() {
           href="https://puvio.ai"
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-6 inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-[11px] text-muted-foreground transition hover:text-foreground"
+          className="mt-6 inline-block transition-opacity hover:opacity-90"
+          aria-label="Secured by Puvio - Your AI AppBox"
         >
-          <ShieldCheck className="h-3.5 w-3.5" />
-          Secured by Puvio
+          <img
+            src={puvioBadge.url}
+            alt="Puvio - Your AI AppBox"
+            className="h-12 w-auto rounded-2xl"
+            loading="lazy"
+          />
         </a>
 
         <p className="mt-3 text-[11px] text-muted-foreground">
