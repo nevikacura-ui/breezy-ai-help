@@ -44,6 +44,20 @@ export async function enablePush(): Promise<PushResult> {
   return token ? { status: "registered", token } : { status: "denied" };
 }
 
+/** Deletes this device's FCM token so Firebase stops delivering to it. */
+export async function disablePush(): Promise<void> {
+  if (!firebaseConfig.apiKey || !appId || !firebaseConfig.messagingSenderId) return;
+  try {
+    const { getMessaging, deleteToken, isSupported } = await import("firebase/messaging");
+    if (!(await isSupported())) return;
+    const { initializeApp, getApps } = await import("firebase/app");
+    const app = getApps()[0] ?? initializeApp(firebaseConfig as Record<string, string>);
+    await deleteToken(getMessaging(app));
+  } catch {
+    // Token may already be gone; nothing else to clean up here.
+  }
+}
+
 export const PUSH_MESSAGES: Record<Exclude<PushResult["status"], "registered">, string> = {
   "not-configured": "Notifications aren't set up yet.",
   unsupported: "This browser can't show notifications.",
