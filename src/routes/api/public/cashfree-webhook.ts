@@ -57,7 +57,7 @@ export const Route = createFileRoute("/api/public/cashfree-webhook")({
           // Only promote if not already promoted for this order
           const { data: existing } = await supabaseAdmin
             .from("payments")
-            .select("user_id, status")
+            .select("user_id, status, amount, currency")
             .eq("cashfree_order_id", orderId)
             .maybeSingle();
 
@@ -75,6 +75,24 @@ export const Route = createFileRoute("/api/public/cashfree-webhook")({
               .from("profiles")
               .update({ is_pro: true, pro_until: proUntil.toISOString(), updated_at: new Date().toISOString() })
               .eq("user_id", existing.user_id);
+
+            // Receipt email — never let a mail failure break the webhook ack.
+            try {
+              const { data: u } = await supabaseAdmin.auth.admin.getUserById(existing.user_id);
+              const email = u?.user?.email as string | undefined;
+              if (email) {
+                const { sendReceiptEmail } = await import("@/lib/mailer.server");
+                await sendReceiptEmail({
+                  email,
+                  orderId,
+                  amount: existing.amount ?? null,
+                  currency: existing.currency ?? "INR",
+                  proUntil: proUntil.toISOString(),
+                });
+              }
+            } catch (e) {
+              console.error("Receipt email failed:", e);
+            }
           }
         }
 

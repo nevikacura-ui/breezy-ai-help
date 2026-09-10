@@ -248,21 +248,35 @@ ${String(input.source_material ?? "(none)").slice(0, 60_000)}`,
     const status = String(input.status ?? "open");
     let q = supabaseAdmin
       .from("reminders")
-      .select("title, notes, due_at, status")
+      .select("title, notes, due_at, status, last_error")
       .eq("user_id", ctx.userId)
       .order("due_at", { ascending: true, nullsFirst: false })
       .limit(30);
-    if (status !== "all") q = q.eq("status", status);
+    // "open" also surfaces reminders we could not deliver, so the user hears about them.
+    if (status === "open") q = q.in("status", ["open", "failed"]);
+    else if (status !== "all") q = q.eq("status", status);
     const { data, error } = await q;
     if (error) return { ok: false, tool: "list_reminders", code: "FAILED", error: error.message };
-    const rows = (data ?? []) as { title: string; notes: string | null; due_at: string | null; status: string }[];
+    const rows = (data ?? []) as {
+      title: string;
+      notes: string | null;
+      due_at: string | null;
+      status: string;
+      last_error: string | null;
+    }[];
     if (rows.length === 0) {
       return { ok: true, tool: "list_reminders", output: "No reminders saved yet.", data: { count: 0 } };
     }
+    const failedCount = rows.filter((r) => r.status === "failed").length;
     const list = rows
-      .map((r) => `- ${r.title}${r.due_at ? ` (due ${new Date(r.due_at).toLocaleString()})` : ""}${r.notes ? ` — ${r.notes}` : ""} [${r.status}]`)
+      .map(
+        (r) =>
+          `- ${r.title}${r.due_at ? ` (due ${new Date(r.due_at).toLocaleString()})` : ""}${r.notes ? ` — ${r.notes}` : ""} [${r.status}]${
+            r.status === "failed" ? ` (not delivered: ${r.last_error ?? "unknown reason"} — ask the user to turn on notifications in Settings)` : ""
+          }`,
+      )
       .join("\n");
-    return { ok: true, tool: "list_reminders", output: list, data: { count: rows.length } };
+    return { ok: true, tool: "list_reminders", output: list, data: { count: rows.length, failed: failedCount } };
   },
 
   send_email: async () => ({
