@@ -363,8 +363,11 @@ export type Database = {
         Row: {
           bot_id: string | null
           created_at: string
+          delivery_attempts: number
           due_at: string | null
           id: string
+          last_attempt_at: string | null
+          last_error: string | null
           notes: string | null
           status: string
           title: string
@@ -373,8 +376,11 @@ export type Database = {
         Insert: {
           bot_id?: string | null
           created_at?: string
+          delivery_attempts?: number
           due_at?: string | null
           id?: string
+          last_attempt_at?: string | null
+          last_error?: string | null
           notes?: string | null
           status?: string
           title: string
@@ -383,8 +389,11 @@ export type Database = {
         Update: {
           bot_id?: string | null
           created_at?: string
+          delivery_attempts?: number
           due_at?: string | null
           id?: string
+          last_attempt_at?: string | null
+          last_error?: string | null
           notes?: string | null
           status?: string
           title?: string
