@@ -81,5 +81,10 @@ export const exchangePuvioCode = createServerFn({ method: "POST" })
     const hashed = link.data.properties?.hashed_token;
     if (!hashed) throw new Error("Could not mint a session for this account");
 
+    if (isNewUser) {
+      const { sendWelcomeEmail } = await import("@/lib/mailer.server");
+      await sendWelcomeEmail(info.email, info.name ?? null);
+    }
+
     return { email: info.email, tokenHash: hashed };
   });

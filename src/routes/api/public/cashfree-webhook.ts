@@ -57,7 +57,7 @@ export const Route = createFileRoute("/api/public/cashfree-webhook")({
           // Only promote if not already promoted for this order
           const { data: existing } = await supabaseAdmin
             .from("payments")
-            .select("user_id, status")
+            .select("user_id, status, amount, currency")
             .eq("cashfree_order_id", orderId)
             .maybeSingle();
 
