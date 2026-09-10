@@ -62,6 +62,7 @@ export const exchangePuvioCode = createServerFn({ method: "POST" })
       provider: "puvio",
     };
 
+    let isNewUser = false;
     let link = await supabaseAdmin.auth.admin.generateLink({ type: "magiclink", email: info.email });
     if (link.error) {
       const created = await supabaseAdmin.auth.admin.createUser({
@@ -70,6 +71,7 @@ export const exchangePuvioCode = createServerFn({ method: "POST" })
         user_metadata: metadata,
       });
       if (created.error && !/already/i.test(created.error.message)) throw new Error(created.error.message);
+      isNewUser = !created.error;
       link = await supabaseAdmin.auth.admin.generateLink({ type: "magiclink", email: info.email });
     } else if (link.data.user?.id) {
       await supabaseAdmin.auth.admin.updateUserById(link.data.user.id, { user_metadata: metadata });
