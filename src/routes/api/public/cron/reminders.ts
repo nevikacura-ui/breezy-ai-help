@@ -49,8 +49,11 @@ export const Route = createFileRoute("/api/public/cron/reminders")({
         let pushed = 0;
         let emailed = 0;
 
+        let undelivered = 0;
+
         for (const row of rows) {
           const body = row.notes?.slice(0, 300) || "Your reminder is due.";
+          let delivered = false;
           try {
             const result = await sendPushToUser(supabaseAdmin as never, row.user_id, {
               title: row.title.slice(0, 120),
@@ -59,18 +62,27 @@ export const Route = createFileRoute("/api/public/cron/reminders")({
             });
             if (result.sent > 0) {
               pushed += 1;
+              delivered = true;
             } else {
               const sentByEmail = await emailFallback(supabaseAdmin, row.user_id, row.title, body);
-              if (sentByEmail) emailed += 1;
+              if (sentByEmail) {
+                emailed += 1;
+                delivered = true;
+              }
             }
           } catch (e) {
             console.error(`Reminder ${row.id} delivery failed:`, e);
-            continue;
           }
-          await supabaseAdmin.from("reminders").update({ status: "sent" }).eq("id", row.id);
+          // Only close a reminder once it actually reached the user; otherwise leave it
+          // open so the next sweep retries it and it stays visible in their list.
+          if (delivered) {
+            await supabaseAdmin.from("reminders").update({ status: "sent" }).eq("id", row.id);
+          } else {
+            undelivered += 1;
+          }
         }
 
-        return Response.json({ ok: true, due: rows.length, pushed, emailed });
+        return Response.json({ ok: true, due: rows.length, pushed, emailed, undelivered });
       },
     },
   },
