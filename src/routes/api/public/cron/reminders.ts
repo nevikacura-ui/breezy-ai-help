@@ -82,7 +82,7 @@ export const Route = createFileRoute("/api/public/cron/reminders")({
           }
         }
 
-        return Response.json({ ok: true, due: rows.length, pushed, emailed });
+        return Response.json({ ok: true, due: rows.length, pushed, emailed, undelivered });
       },
     },
   },
