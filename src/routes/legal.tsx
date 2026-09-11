@@ -39,7 +39,9 @@ function LegalLayout() {
         <Outlet />
       </main>
       <footer className="border-t border-border/60 py-8 text-center text-[12px] text-muted-foreground">
-        © {new Date().getFullYear()} AskEasy · askeasy.ai
+        <p>© {new Date().getFullYear()} AskEasy · askeasy.ai</p>
+        <p className="mt-1">Product of SevenVertex</p>
+        <p>Powered by Xceln AI</p>
       </footer>
     </div>
   );
