@@ -410,6 +410,10 @@ export function SettingsSheet({
                 </a>
               ))}
             </nav>
+            <p className="text-[11px] leading-relaxed text-muted-foreground">
+              Product of SevenVertex<br />
+              Powered by Xceln AI
+            </p>
           </section>
         </div>
       </SheetContent>
