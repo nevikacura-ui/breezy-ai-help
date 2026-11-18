@@ -182,7 +182,7 @@ export const Route = createFileRoute("/api/chat")({
         const { data: profile } = await supa
           .from("profiles")
           .select("is_pro, pro_until, trial_started_at")
-          .eq("user_id", userId)
+          .eq("id", userId)
           .maybeSingle();
 
         const proUntil = profile?.pro_until ? new Date(profile.pro_until as string).getTime() : 0;

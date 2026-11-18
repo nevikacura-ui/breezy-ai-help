@@ -21,10 +21,12 @@ export const registerPushToken = createServerFn({ method: "POST" })
       {
         user_id: context.userId,
         token: data.token,
-        platform: data.platform,
-        user_agent: data.userAgent ?? null,
-        last_seen_at: new Date().toISOString(),
-      },
+        device_info: {
+          platform: data.platform,
+          userAgent: data.userAgent ?? null,
+          lastSeenAt: new Date().toISOString(),
+        },
+      } as never,
       { onConflict: "token" },
     );
     if (error) throw new Error(error.message);

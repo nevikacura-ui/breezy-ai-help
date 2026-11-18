@@ -12,15 +12,23 @@ export const getMe = createServerFn({ method: "GET" })
     const today = new Date().toISOString().slice(0, 10);
 
     const [profileRes, usageRes] = await Promise.all([
-      supabase.from("profiles").select("user_id, display_name, is_pro, pro_until").eq("user_id", userId).maybeSingle(),
+      supabase.from("profiles").select("id, display_name, is_pro, pro_until").eq("id" as never, userId).maybeSingle(),
       supabase.from("usage_daily").select("text_count, media_count, voice_count").eq("user_id", userId).eq("day", today).maybeSingle(),
     ]);
 
     if (profileRes.error) throw new Error(profileRes.error.message);
     const usage = usageRes.data ?? { text_count: 0, media_count: 0, voice_count: 0 };
+    const profile = profileRes.data as unknown as {
+      id: string;
+      display_name: string | null;
+      is_pro: boolean;
+      pro_until: string | null;
+    } | null;
 
     return {
-      profile: profileRes.data ?? { user_id: userId, display_name: null, is_pro: false, pro_until: null },
+      profile: profile
+        ? { user_id: profile.id, display_name: profile.display_name, is_pro: profile.is_pro, pro_until: profile.pro_until }
+        : { user_id: userId, display_name: null, is_pro: false, pro_until: null },
       usage: { text: usage.text_count, media: usage.media_count, voice: usage.voice_count },
     };
   });

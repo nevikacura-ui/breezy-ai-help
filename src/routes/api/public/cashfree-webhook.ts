@@ -33,11 +33,13 @@ export const Route = createFileRoute("/api/public/cashfree-webhook")({
 
         const insertRes = await supabaseAdmin.from("webhook_events").insert({
           source: "cashfree",
-          event_id: eventId,
+          event_key: eventId ? `cashfree:${eventId}` : null,
+          reference_id: orderIdEarly ?? null,
           event_type: (parsed?.type as string | undefined) ?? null,
           status: verified ? "verified" : "signature_failed",
+          signature_ok: verified,
           payload: parsed as never,
-        });
+        } as never);
 
         // Duplicate delivery → ack without re-processing
         if (insertRes.error && (insertRes.error as { code?: string }).code === "23505") {
@@ -74,7 +76,7 @@ export const Route = createFileRoute("/api/public/cashfree-webhook")({
             await supabaseAdmin
               .from("profiles")
               .update({ is_pro: true, pro_until: proUntil.toISOString(), updated_at: new Date().toISOString() })
-              .eq("user_id", existing.user_id);
+              .eq("id" as never, existing.user_id);
 
             // Receipt email — never let a mail failure break the webhook ack.
             try {

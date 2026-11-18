@@ -9,65 +9,40 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SplashRouteImport } from './routes/splash'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as OnboardingRouteImport } from './routes/onboarding'
-import { Route as OauthDebugRouteImport } from './routes/oauth-debug'
-import { Route as LegalRouteImport } from './routes/legal'
-import { Route as BotsRouteImport } from './routes/bots'
-import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthIndexRouteImport } from './routes/auth.index'
-import { Route as UpgradeSuccessRouteImport } from './routes/upgrade.success'
-import { Route as LegalTermsRouteImport } from './routes/legal.terms'
-import { Route as LegalRefundsRouteImport } from './routes/legal.refunds'
-import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
-import { Route as LegalContactRouteImport } from './routes/legal.contact'
-import { Route as ChatBotIdRouteImport } from './routes/chat.$botId'
-import { Route as BotsNewRouteImport } from './routes/bots.new'
-import { Route as BotsBotIdRouteImport } from './routes/bots.$botId'
-import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
-import { Route as ApiTtsRouteImport } from './routes/api/tts'
-import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
-import { Route as ApiToolsRouteImport } from './routes/api/tools'
-import { Route as ApiCubixRouteImport } from './routes/api/cubix'
-import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as BotsRouteImport } from './routes/bots'
+import { Route as LegalRouteImport } from './routes/legal'
+import { Route as OauthDebugRouteImport } from './routes/oauth-debug'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SplashRouteImport } from './routes/splash'
 import { Route as ApiBotGenerateRouteImport } from './routes/api/bot-generate'
-import { Route as ChatBotIdThreadIdRouteImport } from './routes/chat.$botId.$threadId'
-import { Route as ApiPublicCashfreeWebhookRouteImport } from './routes/api/public/cashfree-webhook'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as ApiCubixRouteImport } from './routes/api/cubix'
+import { Route as ApiToolsRouteImport } from './routes/api/tools'
+import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
+import { Route as ApiTtsRouteImport } from './routes/api/tts'
+import { Route as AuthIndexRouteImport } from './routes/auth.index'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
+import { Route as BotsBotIdRouteImport } from './routes/bots.$botId'
+import { Route as BotsNewRouteImport } from './routes/bots.new'
+import { Route as ChatBotIdRouteImport } from './routes/chat.$botId'
+import { Route as LegalContactRouteImport } from './routes/legal.contact'
+import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
+import { Route as LegalRefundsRouteImport } from './routes/legal.refunds'
+import { Route as LegalTermsRouteImport } from './routes/legal.terms'
+import { Route as UpgradeSuccessRouteImport } from './routes/upgrade.success'
 import { Route as ApiPublicAnalyticsRouteImport } from './routes/api/public/analytics'
-import { Route as ApiPublicOtpVerifyRouteImport } from './routes/api/public/otp/verify'
-import { Route as ApiPublicOtpSendRouteImport } from './routes/api/public/otp/send'
+import { Route as ApiPublicCashfreeWebhookRouteImport } from './routes/api/public/cashfree-webhook'
+import { Route as ChatBotIdThreadIdRouteImport } from './routes/chat.$botId.$threadId'
 import { Route as ApiPublicCronRemindersRouteImport } from './routes/api/public/cron/reminders'
+import { Route as ApiPublicOtpSendRouteImport } from './routes/api/public/otp/send'
+import { Route as ApiPublicOtpVerifyRouteImport } from './routes/api/public/otp/verify'
 
-const SplashRoute = SplashRouteImport.update({
-  id: '/splash',
-  path: '/splash',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OnboardingRoute = OnboardingRouteImport.update({
-  id: '/onboarding',
-  path: '/onboarding',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OauthDebugRoute = OauthDebugRouteImport.update({
-  id: '/oauth-debug',
-  path: '/oauth-debug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LegalRoute = LegalRouteImport.update({
-  id: '/legal',
-  path: '/legal',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BotsRoute = BotsRouteImport.update({
-  id: '/bots',
-  path: '/bots',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -75,84 +50,34 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const BotsRoute = BotsRouteImport.update({
+  id: '/bots',
+  path: '/bots',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthIndexRoute = AuthIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AuthRoute,
-} as any)
-const UpgradeSuccessRoute = UpgradeSuccessRouteImport.update({
-  id: '/upgrade/success',
-  path: '/upgrade/success',
+const LegalRoute = LegalRouteImport.update({
+  id: '/legal',
+  path: '/legal',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LegalTermsRoute = LegalTermsRouteImport.update({
-  id: '/terms',
-  path: '/terms',
-  getParentRoute: () => LegalRoute,
-} as any)
-const LegalRefundsRoute = LegalRefundsRouteImport.update({
-  id: '/refunds',
-  path: '/refunds',
-  getParentRoute: () => LegalRoute,
-} as any)
-const LegalPrivacyRoute = LegalPrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
-  getParentRoute: () => LegalRoute,
-} as any)
-const LegalContactRoute = LegalContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
-  getParentRoute: () => LegalRoute,
-} as any)
-const ChatBotIdRoute = ChatBotIdRouteImport.update({
-  id: '/chat/$botId',
-  path: '/chat/$botId',
+const OauthDebugRoute = OauthDebugRouteImport.update({
+  id: '/oauth-debug',
+  path: '/oauth-debug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const BotsNewRoute = BotsNewRouteImport.update({
-  id: '/new',
-  path: '/new',
-  getParentRoute: () => BotsRoute,
-} as any)
-const BotsBotIdRoute = BotsBotIdRouteImport.update({
-  id: '/$botId',
-  path: '/$botId',
-  getParentRoute: () => BotsRoute,
-} as any)
-const AuthCallbackRoute = AuthCallbackRouteImport.update({
-  id: '/callback',
-  path: '/callback',
-  getParentRoute: () => AuthRoute,
-} as any)
-const ApiTtsRoute = ApiTtsRouteImport.update({
-  id: '/api/tts',
-  path: '/api/tts',
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiTranscribeRoute = ApiTranscribeRouteImport.update({
-  id: '/api/transcribe',
-  path: '/api/transcribe',
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiToolsRoute = ApiToolsRouteImport.update({
-  id: '/api/tools',
-  path: '/api/tools',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiCubixRoute = ApiCubixRouteImport.update({
-  id: '/api/cubix',
-  path: '/api/cubix',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiChatRoute = ApiChatRouteImport.update({
-  id: '/api/chat',
-  path: '/api/chat',
+const SplashRoute = SplashRouteImport.update({
+  id: '/splash',
+  path: '/splash',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiBotGenerateRoute = ApiBotGenerateRouteImport.update({
@@ -160,10 +85,85 @@ const ApiBotGenerateRoute = ApiBotGenerateRouteImport.update({
   path: '/api/bot-generate',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ChatBotIdThreadIdRoute = ChatBotIdThreadIdRouteImport.update({
-  id: '/$threadId',
-  path: '/$threadId',
-  getParentRoute: () => ChatBotIdRoute,
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCubixRoute = ApiCubixRouteImport.update({
+  id: '/api/cubix',
+  path: '/api/cubix',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiToolsRoute = ApiToolsRouteImport.update({
+  id: '/api/tools',
+  path: '/api/tools',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTranscribeRoute = ApiTranscribeRouteImport.update({
+  id: '/api/transcribe',
+  path: '/api/transcribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTtsRoute = ApiTtsRouteImport.update({
+  id: '/api/tts',
+  path: '/api/tts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthIndexRoute = AuthIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/callback',
+  path: '/callback',
+  getParentRoute: () => AuthRoute,
+} as any)
+const BotsBotIdRoute = BotsBotIdRouteImport.update({
+  id: '/$botId',
+  path: '/$botId',
+  getParentRoute: () => BotsRoute,
+} as any)
+const BotsNewRoute = BotsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => BotsRoute,
+} as any)
+const ChatBotIdRoute = ChatBotIdRouteImport.update({
+  id: '/chat/$botId',
+  path: '/chat/$botId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalContactRoute = LegalContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => LegalRoute,
+} as any)
+const LegalPrivacyRoute = LegalPrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => LegalRoute,
+} as any)
+const LegalRefundsRoute = LegalRefundsRouteImport.update({
+  id: '/refunds',
+  path: '/refunds',
+  getParentRoute: () => LegalRoute,
+} as any)
+const LegalTermsRoute = LegalTermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => LegalRoute,
+} as any)
+const UpgradeSuccessRoute = UpgradeSuccessRouteImport.update({
+  id: '/upgrade/success',
+  path: '/upgrade/success',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicAnalyticsRoute = ApiPublicAnalyticsRouteImport.update({
+  id: '/api/public/analytics',
+  path: '/api/public/analytics',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicCashfreeWebhookRoute =
   ApiPublicCashfreeWebhookRouteImport.update({
@@ -171,14 +171,14 @@ const ApiPublicCashfreeWebhookRoute =
     path: '/api/public/cashfree-webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicAnalyticsRoute = ApiPublicAnalyticsRouteImport.update({
-  id: '/api/public/analytics',
-  path: '/api/public/analytics',
-  getParentRoute: () => rootRouteImport,
+const ChatBotIdThreadIdRoute = ChatBotIdThreadIdRouteImport.update({
+  id: '/$threadId',
+  path: '/$threadId',
+  getParentRoute: () => ChatBotIdRoute,
 } as any)
-const ApiPublicOtpVerifyRoute = ApiPublicOtpVerifyRouteImport.update({
-  id: '/api/public/otp/verify',
-  path: '/api/public/otp/verify',
+const ApiPublicCronRemindersRoute = ApiPublicCronRemindersRouteImport.update({
+  id: '/api/public/cron/reminders',
+  path: '/api/public/cron/reminders',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicOtpSendRoute = ApiPublicOtpSendRouteImport.update({
@@ -186,9 +186,9 @@ const ApiPublicOtpSendRoute = ApiPublicOtpSendRouteImport.update({
   path: '/api/public/otp/send',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicCronRemindersRoute = ApiPublicCronRemindersRouteImport.update({
-  id: '/api/public/cron/reminders',
-  path: '/api/public/cron/reminders',
+const ApiPublicOtpVerifyRoute = ApiPublicOtpVerifyRouteImport.update({
+  id: '/api/public/otp/verify',
+  path: '/api/public/otp/verify',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -412,46 +412,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/splash': {
-      id: '/splash'
-      path: '/splash'
-      fullPath: '/splash'
-      preLoaderRoute: typeof SplashRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/onboarding': {
-      id: '/onboarding'
-      path: '/onboarding'
-      fullPath: '/onboarding'
-      preLoaderRoute: typeof OnboardingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/oauth-debug': {
-      id: '/oauth-debug'
-      path: '/oauth-debug'
-      fullPath: '/oauth-debug'
-      preLoaderRoute: typeof OauthDebugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/legal': {
-      id: '/legal'
-      path: '/legal'
-      fullPath: '/legal'
-      preLoaderRoute: typeof LegalRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/bots': {
-      id: '/bots'
-      path: '/bots'
-      fullPath: '/bots'
-      preLoaderRoute: typeof BotsRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -461,116 +426,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/bots': {
+      id: '/bots'
+      path: '/bots'
+      fullPath: '/bots'
+      preLoaderRoute: typeof BotsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth/': {
-      id: '/auth/'
-      path: '/'
-      fullPath: '/auth/'
-      preLoaderRoute: typeof AuthIndexRouteImport
-      parentRoute: typeof AuthRoute
-    }
-    '/upgrade/success': {
-      id: '/upgrade/success'
-      path: '/upgrade/success'
-      fullPath: '/upgrade/success'
-      preLoaderRoute: typeof UpgradeSuccessRouteImport
+    '/legal': {
+      id: '/legal'
+      path: '/legal'
+      fullPath: '/legal'
+      preLoaderRoute: typeof LegalRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/legal/terms': {
-      id: '/legal/terms'
-      path: '/terms'
-      fullPath: '/legal/terms'
-      preLoaderRoute: typeof LegalTermsRouteImport
-      parentRoute: typeof LegalRoute
-    }
-    '/legal/refunds': {
-      id: '/legal/refunds'
-      path: '/refunds'
-      fullPath: '/legal/refunds'
-      preLoaderRoute: typeof LegalRefundsRouteImport
-      parentRoute: typeof LegalRoute
-    }
-    '/legal/privacy': {
-      id: '/legal/privacy'
-      path: '/privacy'
-      fullPath: '/legal/privacy'
-      preLoaderRoute: typeof LegalPrivacyRouteImport
-      parentRoute: typeof LegalRoute
-    }
-    '/legal/contact': {
-      id: '/legal/contact'
-      path: '/contact'
-      fullPath: '/legal/contact'
-      preLoaderRoute: typeof LegalContactRouteImport
-      parentRoute: typeof LegalRoute
-    }
-    '/chat/$botId': {
-      id: '/chat/$botId'
-      path: '/chat/$botId'
-      fullPath: '/chat/$botId'
-      preLoaderRoute: typeof ChatBotIdRouteImport
+    '/oauth-debug': {
+      id: '/oauth-debug'
+      path: '/oauth-debug'
+      fullPath: '/oauth-debug'
+      preLoaderRoute: typeof OauthDebugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/bots/new': {
-      id: '/bots/new'
-      path: '/new'
-      fullPath: '/bots/new'
-      preLoaderRoute: typeof BotsNewRouteImport
-      parentRoute: typeof BotsRoute
-    }
-    '/bots/$botId': {
-      id: '/bots/$botId'
-      path: '/$botId'
-      fullPath: '/bots/$botId'
-      preLoaderRoute: typeof BotsBotIdRouteImport
-      parentRoute: typeof BotsRoute
-    }
-    '/auth/callback': {
-      id: '/auth/callback'
-      path: '/callback'
-      fullPath: '/auth/callback'
-      preLoaderRoute: typeof AuthCallbackRouteImport
-      parentRoute: typeof AuthRoute
-    }
-    '/api/tts': {
-      id: '/api/tts'
-      path: '/api/tts'
-      fullPath: '/api/tts'
-      preLoaderRoute: typeof ApiTtsRouteImport
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/transcribe': {
-      id: '/api/transcribe'
-      path: '/api/transcribe'
-      fullPath: '/api/transcribe'
-      preLoaderRoute: typeof ApiTranscribeRouteImport
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/tools': {
-      id: '/api/tools'
-      path: '/api/tools'
-      fullPath: '/api/tools'
-      preLoaderRoute: typeof ApiToolsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/cubix': {
-      id: '/api/cubix'
-      path: '/api/cubix'
-      fullPath: '/api/cubix'
-      preLoaderRoute: typeof ApiCubixRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/chat': {
-      id: '/api/chat'
-      path: '/api/chat'
-      fullPath: '/api/chat'
-      preLoaderRoute: typeof ApiChatRouteImport
+    '/splash': {
+      id: '/splash'
+      path: '/splash'
+      fullPath: '/splash'
+      preLoaderRoute: typeof SplashRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/bot-generate': {
@@ -580,18 +475,109 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiBotGenerateRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/chat/$botId/$threadId': {
-      id: '/chat/$botId/$threadId'
-      path: '/$threadId'
-      fullPath: '/chat/$botId/$threadId'
-      preLoaderRoute: typeof ChatBotIdThreadIdRouteImport
-      parentRoute: typeof ChatBotIdRoute
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/api/public/cashfree-webhook': {
-      id: '/api/public/cashfree-webhook'
-      path: '/api/public/cashfree-webhook'
-      fullPath: '/api/public/cashfree-webhook'
-      preLoaderRoute: typeof ApiPublicCashfreeWebhookRouteImport
+    '/api/cubix': {
+      id: '/api/cubix'
+      path: '/api/cubix'
+      fullPath: '/api/cubix'
+      preLoaderRoute: typeof ApiCubixRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/tools': {
+      id: '/api/tools'
+      path: '/api/tools'
+      fullPath: '/api/tools'
+      preLoaderRoute: typeof ApiToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/transcribe': {
+      id: '/api/transcribe'
+      path: '/api/transcribe'
+      fullPath: '/api/transcribe'
+      preLoaderRoute: typeof ApiTranscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/tts': {
+      id: '/api/tts'
+      path: '/api/tts'
+      fullPath: '/api/tts'
+      preLoaderRoute: typeof ApiTtsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/': {
+      id: '/auth/'
+      path: '/'
+      fullPath: '/auth/'
+      preLoaderRoute: typeof AuthIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/bots/$botId': {
+      id: '/bots/$botId'
+      path: '/$botId'
+      fullPath: '/bots/$botId'
+      preLoaderRoute: typeof BotsBotIdRouteImport
+      parentRoute: typeof BotsRoute
+    }
+    '/bots/new': {
+      id: '/bots/new'
+      path: '/new'
+      fullPath: '/bots/new'
+      preLoaderRoute: typeof BotsNewRouteImport
+      parentRoute: typeof BotsRoute
+    }
+    '/chat/$botId': {
+      id: '/chat/$botId'
+      path: '/chat/$botId'
+      fullPath: '/chat/$botId'
+      preLoaderRoute: typeof ChatBotIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal/contact': {
+      id: '/legal/contact'
+      path: '/contact'
+      fullPath: '/legal/contact'
+      preLoaderRoute: typeof LegalContactRouteImport
+      parentRoute: typeof LegalRoute
+    }
+    '/legal/privacy': {
+      id: '/legal/privacy'
+      path: '/privacy'
+      fullPath: '/legal/privacy'
+      preLoaderRoute: typeof LegalPrivacyRouteImport
+      parentRoute: typeof LegalRoute
+    }
+    '/legal/refunds': {
+      id: '/legal/refunds'
+      path: '/refunds'
+      fullPath: '/legal/refunds'
+      preLoaderRoute: typeof LegalRefundsRouteImport
+      parentRoute: typeof LegalRoute
+    }
+    '/legal/terms': {
+      id: '/legal/terms'
+      path: '/terms'
+      fullPath: '/legal/terms'
+      preLoaderRoute: typeof LegalTermsRouteImport
+      parentRoute: typeof LegalRoute
+    }
+    '/upgrade/success': {
+      id: '/upgrade/success'
+      path: '/upgrade/success'
+      fullPath: '/upgrade/success'
+      preLoaderRoute: typeof UpgradeSuccessRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/analytics': {
@@ -601,11 +587,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAnalyticsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/otp/verify': {
-      id: '/api/public/otp/verify'
-      path: '/api/public/otp/verify'
-      fullPath: '/api/public/otp/verify'
-      preLoaderRoute: typeof ApiPublicOtpVerifyRouteImport
+    '/api/public/cashfree-webhook': {
+      id: '/api/public/cashfree-webhook'
+      path: '/api/public/cashfree-webhook'
+      fullPath: '/api/public/cashfree-webhook'
+      preLoaderRoute: typeof ApiPublicCashfreeWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat/$botId/$threadId': {
+      id: '/chat/$botId/$threadId'
+      path: '/$threadId'
+      fullPath: '/chat/$botId/$threadId'
+      preLoaderRoute: typeof ChatBotIdThreadIdRouteImport
+      parentRoute: typeof ChatBotIdRoute
+    }
+    '/api/public/cron/reminders': {
+      id: '/api/public/cron/reminders'
+      path: '/api/public/cron/reminders'
+      fullPath: '/api/public/cron/reminders'
+      preLoaderRoute: typeof ApiPublicCronRemindersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/otp/send': {
@@ -615,11 +615,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicOtpSendRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/cron/reminders': {
-      id: '/api/public/cron/reminders'
-      path: '/api/public/cron/reminders'
-      fullPath: '/api/public/cron/reminders'
-      preLoaderRoute: typeof ApiPublicCronRemindersRouteImport
+    '/api/public/otp/verify': {
+      id: '/api/public/otp/verify'
+      path: '/api/public/otp/verify'
+      fullPath: '/api/public/otp/verify'
+      preLoaderRoute: typeof ApiPublicOtpVerifyRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
