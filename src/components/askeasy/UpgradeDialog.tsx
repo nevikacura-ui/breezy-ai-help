@@ -1,8 +1,8 @@
 import { trackLegalLinkClick } from "@/lib/analytics";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useServerFn } from "@tanstack/react-start";
-import { createCashfreeOrder } from "@/lib/pro.functions";
+import { createPuvioCheckout } from "@/lib/puvio.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
@@ -15,26 +15,10 @@ type Props = {
   labels?: { title?: string; cta?: string; opening?: string };
 };
 
-const CASHFREE_SDK = "https://sdk.cashfree.com/js/v3/cashfree.js";
-
-function loadCashfree(): Promise<((opts: { mode: "sandbox" | "production" }) => { checkout: (o: { paymentSessionId: string; redirectTarget?: string }) => Promise<unknown> })> {
-  return new Promise((resolve, reject) => {
-    const w = window as unknown as { Cashfree?: unknown };
-    if (w.Cashfree) return resolve(w.Cashfree as never);
-    const s = document.createElement("script");
-    s.src = CASHFREE_SDK;
-    s.onload = () => {
-      const cf = (window as unknown as { Cashfree?: unknown }).Cashfree;
-      cf ? resolve(cf as never) : reject(new Error("Cashfree SDK not available"));
-    };
-    s.onerror = () => reject(new Error("Cashfree SDK failed to load"));
-    document.head.appendChild(s);
-  });
-}
-
 export function UpgradeDialog({ open, onOpenChange, reason, labels }: Props) {
   const [busy, setBusy] = useState(false);
-  const create = useServerFn(createCashfreeOrder);
+  const requestId = useRef<string | null>(null);
+  const create = useServerFn(createPuvioCheckout);
   const navigate = useNavigate();
 
   const startCheckout = async () => {
@@ -46,12 +30,12 @@ export function UpgradeDialog({ open, onOpenChange, reason, labels }: Props) {
         navigate({ to: "/auth", search: { next: "/" } });
         return;
       }
-      const order = await create();
-      const Cashfree = await loadCashfree();
-      const cf = Cashfree({ mode: order.env === "production" ? "production" : "sandbox" });
-      await cf.checkout({ paymentSessionId: order.paymentSessionId, redirectTarget: "_self" });
+      requestId.current ??= crypto.randomUUID();
+      const checkout = await create({ data: { requestId: requestId.current } });
+      window.location.assign(checkout.checkoutUrl);
     } catch (e) {
-      toast.error("Couldn't start checkout", { description: String((e as Error).message ?? e) });
+      requestId.current = null;
+      toast.error("Couldn't start Puvio checkout", { description: String((e as Error).message ?? e) });
       setBusy(false);
     }
   };
@@ -60,10 +44,7 @@ export function UpgradeDialog({ open, onOpenChange, reason, labels }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <div
-            className="mx-auto flex h-12 w-12 items-center justify-center rounded-full text-white"
-            style={{ background: "var(--send-gradient)" }}
-          >
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full text-white" style={{ background: "var(--send-gradient)" }}>
             <Zap className="h-5 w-5" />
           </div>
           <DialogTitle className="font-display text-center text-2xl">{labels?.title ?? "Upgrade to Pro"}</DialogTitle>
@@ -91,10 +72,10 @@ export function UpgradeDialog({ open, onOpenChange, reason, labels }: Props) {
           style={{ background: "var(--send-gradient)" }}
         >
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
-          {busy ? (labels?.opening ?? "Opening secure checkout…") : (labels?.cta ?? "Continue to Cashfree")}
+          {busy ? (labels?.opening ?? "Opening secure checkout…") : (labels?.cta ?? "Continue with Puvio")}
         </button>
         <p className="mt-3 text-center text-[11px] text-muted-foreground">
-          Secure payments by Cashfree · UPI, cards, netbanking, wallets
+          Secure Puvio checkout · Razorpay for INR · UPI, cards, netbanking, wallets
         </p>
         <p className="mt-1.5 text-center text-[11px] text-muted-foreground">
           ₹499 for 30 days · one-time payment · no automatic renewal ·{" "}
@@ -110,10 +91,7 @@ export function UpgradeDialog({ open, onOpenChange, reason, labels }: Props) {
 function Row({ children }: { children: React.ReactNode }) {
   return (
     <li className="flex items-start gap-2.5">
-      <span
-        className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-white"
-        style={{ background: "var(--send-gradient)" }}
-      >
+      <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-white" style={{ background: "var(--send-gradient)" }}>
         <Check className="h-2.5 w-2.5" />
       </span>
       <span>{children}</span>

@@ -35,7 +35,7 @@ function Terms() {
       <h2>Free tier and Pro</h2>
       <ul>
         <li>The free tier includes a daily allowance of text, media and voice messages, and access to standard models.</li>
-        <li>Pro is ₹499 for 30 days, paid through Cashfree, and unlocks unlimited messages and the Ultra model.</li>
+        <li>Pro is ₹499 for 30 days, paid through Puvio centralized billing with Razorpay for INR, and unlocks unlimited messages and the Ultra model.</li>
         <li>Pro does not renew automatically. Each successful payment adds 30 days; your plan and access end date appear in Settings.</li>
         <li>We may adjust prices or limits with notice on this page.</li>
       </ul>

@@ -1,41 +1,42 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+import { PUVIO_APP_ID, PUVIO_ISSUER, PUVIO_TOKEN_URL } from "@/lib/puvio-config";
 
 export const getOAuthConfigStatus = createServerFn({ method: "GET" }).handler(async () => {
-  const issuer = process.env["PUVIO_ISSUER"] ?? null;
-  const secret = process.env["PUVIO_CLIENT_SECRET"] ?? null;
+  const secret = process.env.PUVIO_CLIENT_SECRET ?? null;
   return {
-    issuer,
-    issuerConfigured: Boolean(issuer),
+    issuer: PUVIO_ISSUER,
+    issuerConfigured: true,
+    clientId: process.env.PUVIO_CLIENT_ID ?? PUVIO_APP_ID,
     clientSecretConfigured: Boolean(secret),
-    clientSecretLength: secret ? secret.length : 0,
-    supabaseUrlConfigured: Boolean(process.env["SUPABASE_URL"]),
+    supabaseUrlConfigured: Boolean(process.env.EXTERNAL_SUPABASE_URL ?? process.env.SUPABASE_URL),
   };
 });
 
 export const runTokenExchange = createServerFn({ method: "POST" })
-  .inputValidator((input: { tokenEndpoint: string; code: string; redirectUri: string; codeVerifier?: string }) => {
-    if (!/^https:\/\//.test(input.tokenEndpoint)) throw new Error("tokenEndpoint must be an https URL");
-    if (!input.code) throw new Error("code is required");
-    return input;
-  })
+  .inputValidator((input) => z.object({
+    tokenEndpoint: z.string().url().refine((value) => value === PUVIO_TOKEN_URL, "Only Puvio's production token endpoint is allowed."),
+    code: z.string().min(1).max(4096),
+    redirectUri: z.string().url().max(2048),
+    codeVerifier: z.string().min(43).max(128).optional(),
+  }).parse(input))
   .handler(async ({ data }) => {
-    const clientId = process.env["VITE_PUVIO_CLIENT_ID"] ?? "";
-    const clientSecret = process.env["PUVIO_CLIENT_SECRET"] ?? "";
-    const body = new URLSearchParams({
-      grant_type: "authorization_code",
-      code: data.code,
-      redirect_uri: data.redirectUri,
-      client_id: clientId,
-      client_secret: clientSecret,
-    });
-    if (data.codeVerifier) body.set("code_verifier", data.codeVerifier);
-
+    const clientId = process.env.PUVIO_CLIENT_ID ?? PUVIO_APP_ID;
+    const clientSecret = process.env.PUVIO_CLIENT_SECRET ?? "";
     const startedAt = Date.now();
     try {
-      const res = await fetch(data.tokenEndpoint, {
+      const res = await fetch(PUVIO_TOKEN_URL, {
         method: "POST",
-        headers: { "content-type": "application/x-www-form-urlencoded", accept: "application/json" },
-        body: body.toString(),
+        headers: { "content-type": "application/json", accept: "application/json" },
+        redirect: "manual",
+        body: JSON.stringify({
+          grant_type: "authorization_code",
+          code: data.code,
+          redirect_uri: data.redirectUri,
+          client_id: clientId,
+          client_secret: clientSecret,
+          ...(data.codeVerifier ? { code_verifier: data.codeVerifier } : {}),
+        }),
       });
       const text = await res.text();
       return {
@@ -44,8 +45,7 @@ export const runTokenExchange = createServerFn({ method: "POST" })
         statusText: res.statusText,
         durationMs: Date.now() - startedAt,
         contentType: res.headers.get("content-type") ?? "",
-        // Verbatim provider response, truncated so a full HTML error page stays readable.
-        body: text.slice(0, 4000),
+        body: res.ok ? "Token exchange succeeded. Sensitive token fields are not displayed." : text.slice(0, 4000),
         networkError: null as string | null,
       };
     } catch (e) {

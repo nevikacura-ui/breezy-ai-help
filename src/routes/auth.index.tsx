@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router"
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { puvioAuth } from "@/lib/puvio-auth";
+import { puvioAuth, safePostAuthPath } from "@/lib/puvio-auth";
 import { toast } from "sonner";
 import { Sparkles } from "lucide-react";
 import puvioBadge from "@/assets/puvio-badge.png.asset.json";
@@ -36,14 +36,14 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: (next ?? "/") as "/" });
+      if (data.session) navigate({ to: safePostAuthPath(next) as "/" });
     });
   }, [navigate, next]);
 
   const signIn = async () => {
     setBusy(true);
     try {
-      await puvioAuth.signIn(next && next.startsWith("/") ? next : "/");
+      await puvioAuth.signIn(safePostAuthPath(next));
     } catch (e) {
       toast.error("Sign-in failed", { description: e instanceof Error ? e.message : String(e) });
       setBusy(false);
@@ -81,7 +81,7 @@ function AuthPage() {
       if (!res.ok || !data.token_hash) throw new Error(data.error ?? "Verification failed");
       const { error } = await supabase.auth.verifyOtp({ token_hash: data.token_hash, type: "magiclink" });
       if (error) throw error;
-      navigate({ to: (next && next.startsWith("/") ? next : "/") as "/" });
+      navigate({ to: safePostAuthPath(next) as "/" });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : String(e));
     } finally {

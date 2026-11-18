@@ -1,6 +1,6 @@
-// Puvio OAuth (PKCE) client helper.
-// Contract: https://puvio.ai/.well-known/openid-configuration
-const ISSUER = "https://puvio.ai";
+// Puvio OAuth/OIDC Authorization Code + PKCE client helper.
+import { PUVIO_APP_ID, PUVIO_AUTHORIZE_URL } from "@/lib/puvio-config";
+
 const VERIFIER_KEY = "puvio.pkce.verifier";
 const STATE_KEY = "puvio.oauth.state";
 const NEXT_KEY = "puvio.postAuth";
@@ -21,49 +21,50 @@ async function challenge(verifier: string): Promise<string> {
   return base64url(digest);
 }
 
+export function safePostAuthPath(value: string | null | undefined): string {
+  return value && value.startsWith("/") && !value.startsWith("//") ? value : "/";
+}
+
 export const puvioAuth = {
   redirectUri(): string {
     return `${window.location.origin}/auth/callback`;
   },
 
   async signIn(next = "/"): Promise<void> {
-    const clientId = import.meta.env["VITE_PUVIO_CLIENT_ID"] as string | undefined;
-    if (!clientId) throw new Error("VITE_PUVIO_CLIENT_ID is not configured");
-
     const verifier = randomString();
     const state = randomString(16);
     sessionStorage.setItem(VERIFIER_KEY, verifier);
     sessionStorage.setItem(STATE_KEY, state);
-    sessionStorage.setItem(NEXT_KEY, next.startsWith("/") ? next : "/");
+    sessionStorage.setItem(NEXT_KEY, safePostAuthPath(next));
 
     const params = new URLSearchParams({
-      client_id: clientId,
+      client_id: PUVIO_APP_ID,
       redirect_uri: this.redirectUri(),
       response_type: "code",
-      scope: "profile email",
+      scope: "openid profile email",
       state,
       code_challenge: await challenge(verifier),
       code_challenge_method: "S256",
     });
-    window.location.assign(`${ISSUER}/oauth/authorize?${params.toString()}`);
+    window.location.assign(`${PUVIO_AUTHORIZE_URL}?${params.toString()}`);
   },
 
   takeVerifier(): string | null {
-    const v = sessionStorage.getItem(VERIFIER_KEY);
+    const value = sessionStorage.getItem(VERIFIER_KEY);
     sessionStorage.removeItem(VERIFIER_KEY);
-    return v;
+    return value;
   },
 
   takeState(): string | null {
-    const s = sessionStorage.getItem(STATE_KEY);
+    const value = sessionStorage.getItem(STATE_KEY);
     sessionStorage.removeItem(STATE_KEY);
-    return s;
+    return value;
   },
 
   takeNext(): string {
-    const n = sessionStorage.getItem(NEXT_KEY);
+    const value = sessionStorage.getItem(NEXT_KEY);
     sessionStorage.removeItem(NEXT_KEY);
-    return n && n.startsWith("/") ? n : "/";
+    return safePostAuthPath(value);
   },
 
   async signOut(): Promise<void> {
@@ -71,5 +72,6 @@ export const puvioAuth = {
     await supabase.auth.signOut();
     sessionStorage.removeItem(VERIFIER_KEY);
     sessionStorage.removeItem(STATE_KEY);
+    sessionStorage.removeItem(NEXT_KEY);
   },
 };

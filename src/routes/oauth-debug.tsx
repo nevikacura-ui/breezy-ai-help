@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { getOAuthConfigStatus, runTokenExchange } from "@/lib/puvio-diagnostics.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { PUVIO_APP_ID, PUVIO_AUTHORIZE_URL, PUVIO_ISSUER, PUVIO_TOKEN_URL } from "@/lib/puvio-config";
 
 export const Route = createFileRoute("/oauth-debug")({
   head: () => ({
@@ -43,7 +44,7 @@ function readLog(): CallbackLogEntry[] {
 type ExchangeResult = Awaited<ReturnType<typeof runTokenExchange>>;
 
 function OAuthDebugPage() {
-  const clientId = import.meta.env['VITE_PUVIO_CLIENT_ID'] ?? "";
+  const clientId = PUVIO_APP_ID;
   const [origin, setOrigin] = useState("");
   const [config, setConfig] = useState<Awaited<ReturnType<typeof getOAuthConfigStatus>> | null>(null);
   const [configError, setConfigError] = useState<string | null>(null);
@@ -53,7 +54,7 @@ function OAuthDebugPage() {
   const fetchConfig = useServerFn(getOAuthConfigStatus);
   const exchange = useServerFn(runTokenExchange);
 
-  const [tokenEndpoint, setTokenEndpoint] = useState("https://puvio.ai/api/oauth/token");
+  const [tokenEndpoint, setTokenEndpoint] = useState(PUVIO_TOKEN_URL);
   const [code, setCode] = useState("");
   const [codeVerifier, setCodeVerifier] = useState("");
   const [busy, setBusy] = useState(false);
@@ -77,7 +78,7 @@ function OAuthDebugPage() {
 
   const authParams = useMemo<Array<[string, string]>>(
     () => [
-      ["client_id", clientId || "(missing VITE_PUVIO_CLIENT_ID)"],
+      ["client_id", clientId || "(missing PUVIO_CLIENT_ID)"],
       ["redirect_uri", redirectUri || "(unknown — client not mounted)"],
       ["response_type", "code"],
       ["scope", "openid profile email"],
@@ -88,7 +89,7 @@ function OAuthDebugPage() {
   );
 
   const authorizeUrl = useMemo(() => {
-    const base = `${config?.issuer ?? "https://puvio.ai"}/auth`;
+    const base = config?.issuer ? PUVIO_AUTHORIZE_URL : `${PUVIO_ISSUER}/oauth/authorize`;
     const qs = new URLSearchParams({
       client_id: clientId,
       redirect_uri: redirectUri,
@@ -120,19 +121,19 @@ function OAuthDebugPage() {
       <header>
         <h1 className="font-display text-2xl font-semibold tracking-tight">OAuth diagnostics</h1>
         <p className="mt-1.5 text-sm text-muted-foreground">
-          Internal debug view. Shows the redirect URL, the authorization parameters the app would send, and the verbatim
-          result of a callback token exchange.
+          Internal debug view. Shows the redirect URL, the authorization parameters the app would send, and a safe
+          callback token-exchange result with successful token fields redacted.
         </p>
       </header>
 
       <Section title="Environment">
         <Row label="Origin" value={origin || "…"} />
         <Row label="Redirect URI" value={redirectUri || "…"} mono />
-        <Row label="VITE_PUVIO_CLIENT_ID" value={clientId || "NOT SET"} mono ok={Boolean(clientId)} />
+        <Row label="PUVIO_CLIENT_ID" value={clientId} mono ok={Boolean(clientId)} />
         <Row label="PUVIO_ISSUER (server)" value={config?.issuer ?? (configError ? "error" : "…")} mono ok={config?.issuerConfigured} />
         <Row
           label="PUVIO_CLIENT_SECRET (server)"
-          value={config ? (config.clientSecretConfigured ? `configured (${config.clientSecretLength} chars)` : "NOT SET") : "…"}
+          value={config ? (config.clientSecretConfigured ? "configured" : "NOT SET") : "…"}
           ok={config?.clientSecretConfigured}
         />
         {configError && <p className="mt-2 text-[13px] text-destructive">Config check failed: {configError}</p>}
@@ -165,6 +166,7 @@ function OAuthDebugPage() {
       <Section title="Callback token exchange">
         <label className="block text-[12px] font-medium text-muted-foreground">Token endpoint</label>
         <input
+          readOnly
           value={tokenEndpoint}
           onChange={(e) => setTokenEndpoint(e.target.value)}
           className="mt-1 w-full rounded-xl border border-border/60 bg-background px-3 py-2 font-mono text-[12px]"
@@ -190,7 +192,7 @@ function OAuthDebugPage() {
           {busy ? "Exchanging…" : "Run token exchange"}
         </button>
         <p className="mt-2 text-[11px] text-muted-foreground">
-          Runs server-side so the client secret never reaches the browser. The response below is verbatim.
+          Runs server-side so the client secret and successful access-token fields never reach the browser.
         </p>
 
         {resultError && <pre className="mt-3 overflow-x-auto rounded-xl bg-destructive/10 p-3 text-[12px] text-destructive">{resultError}</pre>}

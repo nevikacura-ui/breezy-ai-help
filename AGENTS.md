@@ -12,3 +12,4 @@
 ## Architecture
 
 - Database access uses the manually configured external Supabase runtime in `src/lib/external-supabase-config.ts` and `src/lib/external-supabase-admin.server.ts`; never silently fall back to Lovable Cloud or edit generated integration files.
+- Puvio identity, Protocol 1.1 execution, and centralized billing stay server-side with shared HMAC secrets; reuse the external AskEasy profile/session/payment tables and persistent webhook events for replay protection.

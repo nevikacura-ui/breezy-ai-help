@@ -30,7 +30,7 @@ function Privacy() {
         <li><strong>Account and profile</strong> — your Puvio account identifier, verified email where available, mobile number when you use SMS OTP or add it for checkout, display name, profile photo, and securely managed account roles.</li>
         <li><strong>Preferences and memory</strong> — language, tone, accessibility settings, onboarding categories, and facts or agent memories you choose to save.</li>
         <li><strong>Conversations and uploads</strong> — messages, assistant replies, images, documents, and audio needed to fulfil your requests.</li>
-        <li><strong>Plans and payments</strong> — plan, subscription period, payment status, amount, and transaction references. Cashfree processes card and UPI credentials; we do not receive or store those credentials.</li>
+        <li><strong>Plans and payments</strong> — plan, subscription period, payment status, amount, and transaction references. Puvio and Razorpay process card and UPI credentials; we do not receive or store those credentials.</li>
         <li><strong>Support</strong> — feedback, bug reports, feature requests, optional ratings, and your reply email.</li>
         <li><strong>Notifications</strong> — browser push tokens and reminder delivery status when you enable notifications.</li>
         <li><strong>Product and diagnostic events</strong> — onboarding choices, legal-link opens, errors, and the technical measurements described below.</li>
@@ -49,9 +49,9 @@ function Privacy() {
       <h2>Service providers and recipients</h2>
       <ul>
         <li>External Supabase infrastructure for authentication, application data, and profile-photo storage.</li>
-        <li>Puvio for Puvio ID sign-in; MSG91 for SMS one-time passcodes.</li>
+        <li>Puvio for Puvio ID sign-in and centralized billing; MSG91 for SMS one-time passcodes.</li>
         <li>OpenRouter and its underlying model providers for AI responses, transcription, and speech.</li>
-        <li>Cashfree for payment checkout and transaction confirmation.</li>
+        <li>Razorpay for INR payment processing and transaction confirmation through Puvio.</li>
         <li>Resend for transactional and support email; Firebase Cloud Messaging for browser push notifications.</li>
         <li>Lovable for hosting, error reporting, and the visitor analytics described below.</li>
       </ul>

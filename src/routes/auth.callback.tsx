@@ -45,14 +45,14 @@ function CallbackPage() {
       const next = puvioAuth.takeNext();
 
       if (!code) return setError("No authorization code was returned.");
-      if (expectedState && returnedState !== expectedState) return setError("State mismatch — please try signing in again.");
+      if (!expectedState || !returnedState || returnedState !== expectedState) return setError("State mismatch — please try signing in again.");
       if (!verifier) return setError("Sign-in session expired — please try again.");
 
       try {
         const { tokenHash, email } = await exchange({
           data: { code, codeVerifier: verifier, redirectUri: `${window.location.origin}/auth/callback` },
         });
-        const { error: otpError } = await supabase.auth.verifyOtp({ type: "email", token_hash: tokenHash });
+        const { error: otpError } = await supabase.auth.verifyOtp({ type: "magiclink", token_hash: tokenHash });
         if (otpError) throw new Error(otpError.message);
         if (typeof window !== "undefined") window.localStorage.setItem("askeasy.lastEmail", email);
         navigate({ to: next as "/", replace: true });

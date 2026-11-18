@@ -8,6 +8,16 @@
 - [x] Verify REST connectivity, external admin authentication, public learning access, child-session privacy, and preservation of existing data.
 - [x] Remove the protected temporary inspection endpoint and report the active project ref, found/created tables, data preservation, and connection evidence.
 
+# Step 3 — Puvio ecosystem integration
+
+- [x] Finish Puvio ID OAuth/OIDC PKCE with the production callback and profile mapping.
+- [x] Add the signed Protocol 1.1 receiver, persistent replay/idempotency protection, real capabilities, and discovery reporting.
+- [x] Use Puvio centralized INR-only checkout and verify paid billing returns before activating Pro.
+- [x] Add Puvio Box and Truverify AI trust badges.
+- [x] Test signature failures, replay-window rules, paid-return activation and retry safety, routes, types, and preview build.
+- [x] International Stripe pricing is deferred by the user; build INR checkout only.
+- [ ] Live signed probe, discovery submission, and real INR checkout remain unverified until Puvio supplies PUVIO_EXEC_SIGNING_KEY and PUVIO_SUBMISSION_TOKEN; no interactive secret request was opened.
+
 # Step 2 — Core customer infrastructure
 
 - [x] Reuse phone OTP login and add persistent profiles for display name, avatar, preferences, and secure read-only roles.

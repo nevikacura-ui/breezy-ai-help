@@ -25,6 +25,7 @@ import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as ApiTtsRouteImport } from './routes/api/tts'
 import { Route as AuthIndexRouteImport } from './routes/auth.index'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
+import { Route as BillingReturnRouteImport } from './routes/billing/return'
 import { Route as BotsBotIdRouteImport } from './routes/bots.$botId'
 import { Route as BotsNewRouteImport } from './routes/bots.new'
 import { Route as ChatBotIdRouteImport } from './routes/chat.$botId'
@@ -41,6 +42,7 @@ import { Route as ChatBotIdThreadIdRouteImport } from './routes/chat.$botId.$thr
 import { Route as ApiPublicCronRemindersRouteImport } from './routes/api/public/cron/reminders'
 import { Route as ApiPublicOtpSendRouteImport } from './routes/api/public/otp/send'
 import { Route as ApiPublicOtpVerifyRouteImport } from './routes/api/public/otp/verify'
+import { Route as ApiPublicPuvioExecuteRouteImport } from './routes/api/public/puvio/execute'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -121,6 +123,11 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   id: '/callback',
   path: '/callback',
   getParentRoute: () => AuthRoute,
+} as any)
+const BillingReturnRoute = BillingReturnRouteImport.update({
+  id: '/billing/return',
+  path: '/billing/return',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const BotsBotIdRoute = BotsBotIdRouteImport.update({
   id: '/$botId',
@@ -203,6 +210,11 @@ const ApiPublicOtpVerifyRoute = ApiPublicOtpVerifyRouteImport.update({
   path: '/api/public/otp/verify',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicPuvioExecuteRoute = ApiPublicPuvioExecuteRouteImport.update({
+  id: '/api/public/puvio/execute',
+  path: '/api/public/puvio/execute',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -220,6 +232,7 @@ export interface FileRoutesByFullPath {
   '/api/transcribe': typeof ApiTranscribeRoute
   '/api/tts': typeof ApiTtsRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/billing/return': typeof BillingReturnRoute
   '/bots/$botId': typeof BotsBotIdRoute
   '/bots/new': typeof BotsNewRoute
   '/chat/$botId': typeof ChatBotIdRouteWithChildren
@@ -237,6 +250,7 @@ export interface FileRoutesByFullPath {
   '/api/public/cron/reminders': typeof ApiPublicCronRemindersRoute
   '/api/public/otp/send': typeof ApiPublicOtpSendRoute
   '/api/public/otp/verify': typeof ApiPublicOtpVerifyRoute
+  '/api/public/puvio/execute': typeof ApiPublicPuvioExecuteRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -253,6 +267,7 @@ export interface FileRoutesByTo {
   '/api/transcribe': typeof ApiTranscribeRoute
   '/api/tts': typeof ApiTtsRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/billing/return': typeof BillingReturnRoute
   '/bots/$botId': typeof BotsBotIdRoute
   '/bots/new': typeof BotsNewRoute
   '/chat/$botId': typeof ChatBotIdRouteWithChildren
@@ -270,6 +285,7 @@ export interface FileRoutesByTo {
   '/api/public/cron/reminders': typeof ApiPublicCronRemindersRoute
   '/api/public/otp/send': typeof ApiPublicOtpSendRoute
   '/api/public/otp/verify': typeof ApiPublicOtpVerifyRoute
+  '/api/public/puvio/execute': typeof ApiPublicPuvioExecuteRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -288,6 +304,7 @@ export interface FileRoutesById {
   '/api/transcribe': typeof ApiTranscribeRoute
   '/api/tts': typeof ApiTtsRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/billing/return': typeof BillingReturnRoute
   '/bots/$botId': typeof BotsBotIdRoute
   '/bots/new': typeof BotsNewRoute
   '/chat/$botId': typeof ChatBotIdRouteWithChildren
@@ -305,6 +322,7 @@ export interface FileRoutesById {
   '/api/public/cron/reminders': typeof ApiPublicCronRemindersRoute
   '/api/public/otp/send': typeof ApiPublicOtpSendRoute
   '/api/public/otp/verify': typeof ApiPublicOtpVerifyRoute
+  '/api/public/puvio/execute': typeof ApiPublicPuvioExecuteRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -324,6 +342,7 @@ export interface FileRouteTypes {
     | '/api/transcribe'
     | '/api/tts'
     | '/auth/callback'
+    | '/billing/return'
     | '/bots/$botId'
     | '/bots/new'
     | '/chat/$botId'
@@ -341,6 +360,7 @@ export interface FileRouteTypes {
     | '/api/public/cron/reminders'
     | '/api/public/otp/send'
     | '/api/public/otp/verify'
+    | '/api/public/puvio/execute'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -357,6 +377,7 @@ export interface FileRouteTypes {
     | '/api/transcribe'
     | '/api/tts'
     | '/auth/callback'
+    | '/billing/return'
     | '/bots/$botId'
     | '/bots/new'
     | '/chat/$botId'
@@ -374,6 +395,7 @@ export interface FileRouteTypes {
     | '/api/public/cron/reminders'
     | '/api/public/otp/send'
     | '/api/public/otp/verify'
+    | '/api/public/puvio/execute'
   id:
     | '__root__'
     | '/'
@@ -391,6 +413,7 @@ export interface FileRouteTypes {
     | '/api/transcribe'
     | '/api/tts'
     | '/auth/callback'
+    | '/billing/return'
     | '/bots/$botId'
     | '/bots/new'
     | '/chat/$botId'
@@ -408,6 +431,7 @@ export interface FileRouteTypes {
     | '/api/public/cron/reminders'
     | '/api/public/otp/send'
     | '/api/public/otp/verify'
+    | '/api/public/puvio/execute'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -425,6 +449,7 @@ export interface RootRouteChildren {
   ApiToolsRoute: typeof ApiToolsRoute
   ApiTranscribeRoute: typeof ApiTranscribeRoute
   ApiTtsRoute: typeof ApiTtsRoute
+  BillingReturnRoute: typeof BillingReturnRoute
   ChatBotIdRoute: typeof ChatBotIdRouteWithChildren
   UpgradeSuccessRoute: typeof UpgradeSuccessRoute
   ApiPublicAnalyticsRoute: typeof ApiPublicAnalyticsRoute
@@ -432,6 +457,7 @@ export interface RootRouteChildren {
   ApiPublicCronRemindersRoute: typeof ApiPublicCronRemindersRoute
   ApiPublicOtpSendRoute: typeof ApiPublicOtpSendRoute
   ApiPublicOtpVerifyRoute: typeof ApiPublicOtpVerifyRoute
+  ApiPublicPuvioExecuteRoute: typeof ApiPublicPuvioExecuteRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -548,6 +574,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/billing/return': {
+      id: '/billing/return'
+      path: '/billing/return'
+      fullPath: '/billing/return'
+      preLoaderRoute: typeof BillingReturnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/bots/$botId': {
       id: '/bots/$botId'
       path: '/$botId'
@@ -660,6 +693,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicOtpVerifyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/puvio/execute': {
+      id: '/api/public/puvio/execute'
+      path: '/api/public/puvio/execute'
+      fullPath: '/api/public/puvio/execute'
+      preLoaderRoute: typeof ApiPublicPuvioExecuteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -734,6 +774,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiToolsRoute: ApiToolsRoute,
   ApiTranscribeRoute: ApiTranscribeRoute,
   ApiTtsRoute: ApiTtsRoute,
+  BillingReturnRoute: BillingReturnRoute,
   ChatBotIdRoute: ChatBotIdRouteWithChildren,
   UpgradeSuccessRoute: UpgradeSuccessRoute,
   ApiPublicAnalyticsRoute: ApiPublicAnalyticsRoute,
@@ -741,6 +782,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicCronRemindersRoute: ApiPublicCronRemindersRoute,
   ApiPublicOtpSendRoute: ApiPublicOtpSendRoute,
   ApiPublicOtpVerifyRoute: ApiPublicOtpVerifyRoute,
+  ApiPublicPuvioExecuteRoute: ApiPublicPuvioExecuteRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

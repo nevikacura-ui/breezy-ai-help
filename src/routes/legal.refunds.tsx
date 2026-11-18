@@ -41,7 +41,7 @@ function Refunds() {
       <p>Email <a href="mailto:info@nevika.ai">info@nevika.ai</a> with the registered account and payment reference. We aim to respond within 3 business days.</p>
 
       <h2>Timeline</h2>
-      <p>Approved refunds are issued to the original payment method through Cashfree and typically reach you within 5–10 business days, depending on your bank.</p>
+      <p>Approved refunds are issued to the original payment method through Puvio and Razorpay and typically reach you within 5–10 business days, depending on your bank.</p>
     </LegalDoc>
   );
 }
