@@ -6,6 +6,7 @@ import { puvioAuth } from "@/lib/puvio-auth";
 import { toast } from "sonner";
 import { Sparkles } from "lucide-react";
 import puvioBadge from "@/assets/puvio-badge.png.asset.json";
+import { DivisionFooter } from "@/components/askeasy/DivisionFooter";
 
 export const Route = createFileRoute("/auth/")({
   validateSearch: z.object({ next: z.string().optional() }),
@@ -185,6 +186,7 @@ function AuthPage() {
 
 
       </div>
+      <DivisionFooter className="w-full max-w-lg" />
     </main>
   );
 }

@@ -79,9 +79,9 @@ export type ModelInfo = {
 };
 
 export const MODELS: ModelInfo[] = [
-  { id: "askeasy/smart", label: "Smart", hint: "Balanced everyday answers · Free trial", tier: "free" },
-  { id: "askeasy/eco",   label: "Eco",   hint: "Fast & lightweight · Free trial",       tier: "free" },
-  { id: "askeasy/ultra", label: "Ultra", hint: "Deep reasoning · Free during launch",    tier: "free" },
+  { id: "askeasy/smart", label: "Smart", hint: "Balanced everyday answers · Free", tier: "free" },
+  { id: "askeasy/eco",   label: "Eco",   hint: "Fast & lightweight · Free",       tier: "free" },
+  { id: "askeasy/ultra", label: "Ultra", hint: "Deep reasoning · Pro",             tier: "pro" },
 ];
 
 export const PERSONAS: { id: Persona; label: string; emoji: string; hint: string }[] = [

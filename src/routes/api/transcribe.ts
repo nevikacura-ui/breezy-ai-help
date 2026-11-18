@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
+import { isProfileProActive } from "@/lib/account";
 
 const FREE_VOICE_LIMIT = 2;
 
@@ -68,18 +69,21 @@ export const Route = createFileRoute("/api/transcribe")({
             status: 401, headers: { "Content-Type": "application/json" },
           });
         }
-        const { data: allowed, error: qErr } = await supa.rpc("check_and_bump_usage", {
-          _kind: "voice", _n: 1, _limit: FREE_VOICE_LIMIT,
-        });
-        if (qErr) {
-          return new Response(JSON.stringify({ error: "Quota check failed" }), {
-            status: 500, headers: { "Content-Type": "application/json" },
+        const { data: profile } = await supa.from("profiles").select("is_pro, pro_until").eq("id", userData.user.id).maybeSingle();
+        if (!isProfileProActive(profile)) {
+          const { data: allowed, error: qErr } = await supa.rpc("check_and_bump_usage", {
+            _kind: "voice", _n: 1, _limit: FREE_VOICE_LIMIT,
           });
-        }
-        if (allowed === false) {
-          return new Response(JSON.stringify({ error: "Daily voice limit reached. Upgrade to Pro.", code: "QUOTA_EXCEEDED" }), {
-            status: 429, headers: { "Content-Type": "application/json" },
-          });
+          if (qErr) {
+            return new Response(JSON.stringify({ error: "Quota check failed" }), {
+              status: 500, headers: { "Content-Type": "application/json" },
+            });
+          }
+          if (allowed === false) {
+            return new Response(JSON.stringify({ error: "Daily voice limit reached. Upgrade to Pro.", code: "QUOTA_EXCEEDED" }), {
+              status: 429, headers: { "Content-Type": "application/json" },
+            });
+          }
         }
 
         const form = await request.formData().catch(() => null);

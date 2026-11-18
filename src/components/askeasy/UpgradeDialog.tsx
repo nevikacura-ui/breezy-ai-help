@@ -76,12 +76,12 @@ export function UpgradeDialog({ open, onOpenChange, reason, labels }: Props) {
           <Row>Unlimited text, image/file, and voice messages</Row>
           <Row>Ultra model — deepest reasoning</Row>
           <Row>Priority speed &amp; longer memory</Row>
-          <Row>Cancel anytime</Row>
+          <Row>30 days of Pro; renew when you choose</Row>
         </ul>
 
         <div className="mt-5 flex items-baseline justify-center gap-1">
           <span className="text-3xl font-semibold tracking-tight">₹499</span>
-          <span className="text-sm text-muted-foreground">/ month</span>
+          <span className="text-sm text-muted-foreground">/ 30 days</span>
         </div>
 
         <button
@@ -97,7 +97,7 @@ export function UpgradeDialog({ open, onOpenChange, reason, labels }: Props) {
           Secure payments by Cashfree · UPI, cards, netbanking, wallets
         </p>
         <p className="mt-1.5 text-center text-[11px] text-muted-foreground">
-          ₹499/month, auto-renews. Cancel anytime ·{" "}
+          ₹499 for 30 days · one-time payment · no automatic renewal ·{" "}
           <a className="underline underline-offset-2" href="/legal/terms" onClick={() => trackLegalLinkClick("terms", "checkout")}>Terms</a> ·{" "}
           <a className="underline underline-offset-2" href="/legal/refunds" onClick={() => trackLegalLinkClick("refunds", "checkout")}>Refunds</a> ·{" "}
           <a className="underline underline-offset-2" href="/legal/privacy" onClick={() => trackLegalLinkClick("privacy", "checkout")}>Privacy</a>

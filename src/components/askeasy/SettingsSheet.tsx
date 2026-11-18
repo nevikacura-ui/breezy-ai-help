@@ -5,8 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Sun, Moon, Monitor, Zap, Check, Lock, Sparkles, Leaf, MessageSquare, ImageIcon, Mic, Clock, Flame, X, Plus, Type, EyeOff, Briefcase } from "lucide-react";
-import { useState } from "react";
+import { Sun, Moon, Monitor, Zap, Check, Lock, Sparkles, Leaf, MessageSquare, ImageIcon, Mic, Clock, Flame, X, Plus, Type, EyeOff, Briefcase, Camera, LifeBuoy, Loader2, LogOut, RefreshCw } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 import {
   MODELS, FREE_LIMITS, PERSONAS, type ModelId, type Settings, type Theme, type Usage, type Persona,
   trialDaysLeft, trialActive,
@@ -14,6 +18,13 @@ import {
 import { LANGUAGES, type LangCode } from "@/lib/i18n";
 import { ConnectionsPanel } from "@/components/askeasy/ConnectionsPanel";
 import { PushToggle } from "@/components/askeasy/PushToggle";
+import { UpgradeDialog } from "@/components/askeasy/UpgradeDialog";
+import { SupportModal } from "@/components/askeasy/SupportModal";
+import { DivisionFooter } from "@/components/askeasy/DivisionFooter";
+import { COOKIE_SETTINGS_EVENT } from "@/components/askeasy/CookieConsent";
+import { useAccount } from "@/lib/useAccount";
+import { syncAccountPreferences, updateAccountProfile, uploadAccountAvatar } from "@/lib/account.functions";
+import type { LegalDocId } from "@/lib/analytics";
 
 
 
@@ -23,11 +34,9 @@ type Props = {
   settings: Settings;
   update: (patch: Partial<Settings>) => void;
   onClearConversation: () => void;
-  onUpgrade: () => void;
   onSelectLanguage: (code: LangCode) => void;
   /** Optional override for which language is shown as active (per-bot). */
   activeLanguage?: LangCode;
-  isProEffective: boolean;
   usage: Usage;
 };
 
@@ -44,14 +53,109 @@ const MODEL_ICON: Record<ModelId, React.ReactNode> = {
 };
 
 export function SettingsSheet({
-  open, onOpenChange, settings, update, onClearConversation, onUpgrade, onSelectLanguage, activeLanguage, isProEffective, usage,
+  open, onOpenChange, settings, update, onClearConversation, onSelectLanguage, activeLanguage, usage,
 }: Props) {
   const currentModel = settings.openRouterModel as ModelId;
   const currentLang: LangCode = activeLanguage ?? settings.language;
   const daysLeft = trialDaysLeft(settings);
   const inTrial = trialActive(settings);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const account = useAccount(open, settings, update);
+  const saveProfile = useServerFn(updateAccountProfile);
+  const savePreferences = useServerFn(syncAccountPreferences);
+  const uploadAvatar = useServerFn(uploadAccountAvatar);
+  const [phone, setPhone] = useState("");
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const phoneDirtyRef = useRef(false);
+  const [saving, setSaving] = useState(false);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [supportOpen, setSupportOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+  const isProEffective = account.isPro;
+  const effectiveUsage = account.snapshot?.usage ?? usage;
+
+  useEffect(() => {
+    if (account.snapshot) setPhone(account.snapshot.profile.phone ?? "");
+  }, [account.snapshot]);
+
+  const requireAccount = () => {
+    if (account.user) return true;
+    onOpenChange(false);
+    void navigate({ to: "/auth", search: { next: "/bots" } });
+    return false;
+  };
+
+  const openUpgrade = () => {
+    if (!requireAccount()) return;
+    onOpenChange(false);
+    setUpgradeOpen(true);
+  };
+
+  const signOut = async () => {
+    setSigningOut(true);
+    try {
+      await queryClient.cancelQueries();
+      queryClient.clear();
+      const { puvioAuth } = await import("@/lib/puvio-auth");
+      await puvioAuth.signOut();
+      update({ isPro: false });
+      onOpenChange(false);
+      await navigate({ to: "/auth", replace: true });
+    } catch (error) {
+      toast.error("Couldn't sign out", { description: error instanceof Error ? error.message : String(error) });
+    } finally {
+      setSigningOut(false);
+    }
+  };
+
+  const saveAccount = async () => {
+    if (!requireAccount()) return;
+    setSaving(true);
+    const displayName = (nameInputRef.current?.value ?? settings.name).trim();
+    const phoneToSave = phoneDirtyRef.current ? phone : (account.snapshot?.profile.phone ?? phone);
+    try {
+      await Promise.all([
+        saveProfile({ data: { displayName, phone: phoneToSave } }),
+        savePreferences({ data: { persona: settings.persona, warmth: settings.warmth, language: currentLang, facts: settings.aboutMe } }),
+      ]);
+      update({ name: displayName });
+      phoneDirtyRef.current = false;
+      await account.refresh();
+      toast.success("Profile and preferences saved");
+    } catch (error) {
+      toast.error("Couldn't save your profile", { description: error instanceof Error ? error.message : String(error) });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const changeAvatar = async (file: File | undefined) => {
+    if (!file || !requireAccount()) return;
+    if (!["image/png", "image/jpeg", "image/webp"].includes(file.type) || file.size > 2 * 1024 * 1024) {
+      toast.error("Choose a PNG, JPG, or WebP image smaller than 2 MB.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(new Error("Could not read that image."));
+        reader.readAsDataURL(file);
+      });
+      await uploadAvatar({ data: { dataUrl } });
+      await account.refresh();
+      toast.success("Profile photo updated");
+    } catch (error) {
+      toast.error("Couldn't update your photo", { description: error instanceof Error ? error.message : String(error) });
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
+    <>
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md">
         <SheetHeader>
@@ -74,15 +178,33 @@ export function SettingsSheet({
           )}
 
           {/* Identity */}
-          <section className="space-y-2">
-            <Label htmlFor="name" className="text-xs uppercase tracking-wider text-muted-foreground">Your name</Label>
-            <Input
-              id="name"
-              placeholder="Friend"
-              value={settings.name}
-              onChange={(e) => update({ name: e.target.value })}
-            />
-            <p className="text-xs text-muted-foreground">Used in your greeting.</p>
+          <section className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="name" className="text-xs uppercase tracking-wider text-muted-foreground">Your profile</Label>
+              {account.user && <span className="text-[11px] text-muted-foreground">{account.planCode === "pro" ? "Pro member" : "Free member"}</span>}
+            </div>
+            <div className="flex items-center gap-3">
+              <label className="group relative flex h-14 w-14 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-border/60 bg-accent text-lg font-semibold" aria-label="Change profile photo">
+                {account.snapshot?.profile.avatar_url ? (
+                  <img src={account.snapshot.profile.avatar_url} alt="Your profile" className="h-full w-full object-cover" />
+                ) : (
+                  (settings.name || account.user?.email || "E").slice(0, 1).toUpperCase()
+                )}
+                <span className="absolute inset-0 flex items-center justify-center bg-foreground/50 text-background opacity-0 transition-opacity group-hover:opacity-100"><Camera className="h-5 w-5" /></span>
+                <input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" disabled={saving} onChange={(event) => { void changeAvatar(event.target.files?.[0]); event.target.value = ""; }} />
+              </label>
+              <div className="min-w-0 flex-1 space-y-2">
+                <Input ref={nameInputRef} id="name" placeholder="Your display name" value={settings.name} maxLength={80} onChange={(e) => update({ name: e.target.value })} />
+                <Input id="profile-phone" type="tel" autoComplete="tel" placeholder="Mobile number for checkout" value={phone} maxLength={24} onChange={(e) => { phoneDirtyRef.current = true; setPhone(e.target.value); }} />
+              </div>
+            </div>
+            {account.snapshot?.roles.length ? <p className="text-[11px] text-muted-foreground">Account roles: {account.snapshot.roles.join(", ")} (managed securely)</p> : null}
+            {account.error && <div className="flex items-center gap-2 text-[11px] text-destructive"><span className="flex-1">{account.error}</span><Button size="sm" variant="ghost" onClick={() => void account.refresh()}><RefreshCw className="h-3.5 w-3.5" />Retry</Button></div>}
+            <Button variant="outline" size="sm" className="w-full" disabled={saving || !settings.name.trim()} onClick={() => void saveAccount()}>
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+              {saving ? "Saving…" : account.user ? "Save profile & preferences" : "Sign in to sync your profile"}
+            </Button>
+            <p className="text-xs text-muted-foreground">Your name, photo, persona, tone, language, and preferences sync to your account.</p>
           </section>
 
           {/* Who's chatting (persona) */}
@@ -181,18 +303,6 @@ export function SettingsSheet({
             </p>
           </section>
 
-          {/* Launch banner */}
-          <div
-            className="rounded-2xl border px-3 py-2.5 text-[12px] leading-snug"
-            style={{
-              borderColor: "color-mix(in oklab, var(--foreground) 15%, transparent)",
-              background: "color-mix(in oklab, var(--send-gradient-start, #a78bfa) 12%, transparent)",
-            }}
-          >
-            <span className="font-semibold">🎉 Free during launch</span>
-            <span className="ml-1 text-muted-foreground">All models &amp; languages unlocked. Pro pricing arrives soon — enjoy!</span>
-          </div>
-
           {/* Model */}
           <section className="space-y-3">
             <div className="text-xs uppercase tracking-wider text-muted-foreground">Model</div>
@@ -203,7 +313,7 @@ export function SettingsSheet({
                 return (
                   <button
                     key={m.id}
-                    onClick={() => { if (locked) { onUpgrade(); return; } update({ openRouterModel: m.id }); }}
+                    onClick={() => { if (locked) { openUpgrade(); return; } update({ openRouterModel: m.id }); }}
                     className={
                       "flex w-full items-center gap-3 rounded-2xl border px-3 py-2.5 text-left transition " +
                       (active ? "border-foreground/30 bg-foreground/[0.05]" : "border-border/60 hover:bg-foreground/[0.03]")
@@ -267,43 +377,50 @@ export function SettingsSheet({
           </section>
 
           {/* Plan + Usage */}
-          <section className="space-y-2">
-            <div className="text-xs uppercase tracking-wider text-muted-foreground">Plan &amp; usage</div>
-            <div className="flex items-center justify-between rounded-2xl border border-border/60 p-3">
-              <div className="flex items-center gap-3">
-                <span
-                  className="flex h-9 w-9 items-center justify-center rounded-full"
-                  style={{
-                    background: isProEffective ? "var(--send-gradient)" : "color-mix(in oklab, var(--foreground) 10%, transparent)",
-                    color: "var(--foreground)",
-                  }}
-                >
-                  <Zap className="h-4 w-4" />
-                </span>
-                <div>
-                  <div className="text-sm font-medium text-foreground">{isProEffective ? "Pro" : "Free"}</div>
-                  <div className="text-[11.5px] text-muted-foreground">
-                    {isProEffective ? "Ultra model · unlimited · all languages" : "5 text · 2 media · 2 voice per day"}
+          <section className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">Subscription &amp; usage</div>
+              {account.loading && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" aria-label="Refreshing plan" />}
+            </div>
+            <div className="rounded-2xl border border-border/60 p-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full" style={{ background: isProEffective ? "var(--send-gradient)" : "color-mix(in oklab, var(--foreground) 10%, transparent)", color: "var(--foreground)" }}>
+                    <Zap className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <div className="text-sm font-medium text-foreground">{account.currentPlan?.name ?? (isProEffective ? "Pro" : "Free")} <span className="text-[10px] font-normal text-muted-foreground">current plan</span></div>
+                    <div className="text-[11.5px] text-muted-foreground">{account.currentPlan?.tagline ?? (isProEffective ? "Unlimited AI with Ultra" : "5 text · 2 media · 2 voice per day")}</div>
                   </div>
                 </div>
+                {!isProEffective && <Button size="sm" onClick={openUpgrade}>Upgrade</Button>}
               </div>
-              {!isProEffective && (
-                <Button
-                  size="sm"
-                  className="font-semibold text-[color:var(--primary-foreground)]"
-                  style={{ background: "var(--send-gradient)" }}
-                  onClick={onUpgrade}
-                >
-                  Upgrade
-                </Button>
+              {isProEffective && (account.snapshot?.subscription?.current_period_end || account.snapshot?.profile.pro_until) && (
+                <p className="mt-2 border-t border-border/60 pt-2 text-[11px] text-muted-foreground">
+                  Pro active until {new Date(account.snapshot.subscription?.current_period_end ?? account.snapshot.profile.pro_until ?? "").toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                </p>
               )}
             </div>
 
+            <div className="grid grid-cols-2 gap-2">
+              {(account.snapshot?.plans ?? [
+                { code: "free", name: "Free", price_inr: 0, price_usd: 0, billing_period: "month", tagline: "Everyday essentials", features: [], limits: {} },
+                { code: "pro", name: "Pro", price_inr: 499, price_usd: 0, billing_period: "month", tagline: "Unlimited + Ultra", features: [], limits: {} },
+              ]).map((plan) => (
+                <div key={plan.code} className={"rounded-2xl border p-3 " + (account.planCode === plan.code ? "border-foreground/40 bg-accent/50" : "border-border/60")}>
+                  <div className="flex items-center justify-between"><span className="text-sm font-semibold">{plan.name}</span>{account.planCode === plan.code && <Check className="h-3.5 w-3.5" />}</div>
+                  <div className="mt-1 text-lg font-semibold">₹{plan.price_inr}<span className="text-[10px] font-normal text-muted-foreground">/{plan.billing_period}</span></div>
+                  <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{plan.tagline}</p>
+                </div>
+              ))}
+            </div>
+            <p className="text-[11px] text-muted-foreground">Each Pro payment adds 30 days. No automatic renewal; your plan updates here after payment confirmation.</p>
+
             {!isProEffective && (
               <div className="grid grid-cols-3 gap-2 pt-1">
-                <UsageTile icon={<MessageSquare className="h-3.5 w-3.5" />} label="Text" used={usage.text} of={FREE_LIMITS.text} />
-                <UsageTile icon={<ImageIcon className="h-3.5 w-3.5" />} label="Image/File" used={usage.media} of={FREE_LIMITS.media} />
-                <UsageTile icon={<Mic className="h-3.5 w-3.5" />} label="Voice" used={usage.voice} of={FREE_LIMITS.voice} />
+                <UsageTile icon={<MessageSquare className="h-3.5 w-3.5" />} label="Text" used={effectiveUsage.text} of={FREE_LIMITS.text} />
+                <UsageTile icon={<ImageIcon className="h-3.5 w-3.5" />} label="Image/File" used={effectiveUsage.media} of={FREE_LIMITS.media} />
+                <UsageTile icon={<Mic className="h-3.5 w-3.5" />} label="Voice" used={effectiveUsage.voice} of={FREE_LIMITS.voice} />
               </div>
             )}
           </section>
@@ -386,7 +503,18 @@ export function SettingsSheet({
 
           <PushToggle />
 
-
+          <section className="space-y-2">
+            <div className="text-xs uppercase tracking-wider text-muted-foreground">Help</div>
+            <Button variant="outline" className="w-full justify-start" onClick={() => { onOpenChange(false); setSupportOpen(true); }}>
+              <LifeBuoy className="h-4 w-4" /> Feedback &amp; support
+            </Button>
+            {account.user && (
+              <Button variant="ghost" className="w-full justify-start" disabled={signingOut} onClick={() => void signOut()}>
+                {signingOut ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
+                {signingOut ? "Signing out…" : "Sign out"}
+              </Button>
+            )}
+          </section>
 
           {/* Connections, permissions, activity */}
           <ConnectionsPanel />
@@ -399,25 +527,30 @@ export function SettingsSheet({
           <section className="space-y-2 border-t border-border/60 pt-4">
             <div className="text-xs uppercase tracking-wider text-muted-foreground">Legal</div>
             <nav className="flex flex-wrap gap-x-4 gap-y-1.5 text-[12.5px] text-muted-foreground">
-              {(["privacy", "terms", "refunds", "contact"] as const).map((doc) => (
-                <a
-                  key={doc}
-                  className="capitalize underline-offset-2 hover:text-foreground hover:underline"
-                  href={`/legal/${doc}`}
-                  onClick={() => trackLegalLinkClick(doc, "settings")}
-                >
-                  {doc}
+              {([
+                { doc: "privacy", label: "Privacy DPDPA" },
+                { doc: "terms", label: "Terms" },
+                { doc: "ai-usage", label: "AI Usage" },
+                { doc: "refunds", label: "Refunds" },
+                { doc: "cookies", label: "Cookies" },
+                { doc: "contact", label: "Contact" },
+              ] satisfies { doc: LegalDocId; label: string }[]).map(({ doc, label }) => (
+                <a key={doc} className="underline-offset-2 hover:text-foreground hover:underline" href={`/legal/${doc}`} onClick={() => trackLegalLinkClick(doc, "settings")}>
+                  {label}
                 </a>
               ))}
             </nav>
-            <p className="text-[11px] leading-relaxed text-muted-foreground">
-              Product of SevenVertex<br />
-              Powered by Xceln AI
-            </p>
+            <button type="button" className="text-left text-[12.5px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline" onClick={() => window.dispatchEvent(new Event(COOKIE_SETTINGS_EVENT))}>
+              Cookie settings
+            </button>
+            <DivisionFooter className="-mx-4 mt-4 px-0" />
           </section>
         </div>
       </SheetContent>
     </Sheet>
+    <UpgradeDialog open={upgradeOpen} onOpenChange={setUpgradeOpen} />
+    <SupportModal open={supportOpen} onOpenChange={setSupportOpen} />
+    </>
   );
 }
 

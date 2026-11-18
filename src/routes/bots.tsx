@@ -16,9 +16,10 @@ import {
 } from "@/lib/bots";
 import { SettingsSheet } from "@/components/askeasy/SettingsSheet";
 import { BotAvatar, preloadBotAvatars } from "@/components/askeasy/BotAvatar";
-import { useAuthUser, useSettings, useUsage, PERSONAS, type Persona } from "@/lib/askeasy";
+import { useSettings, useUsage, PERSONAS, type Persona } from "@/lib/askeasy";
 import easy from "@/assets/bots/easy.png";
 import logoAsset from "@/assets/askeasy-logo-transparent.png.asset.json";
+import { DivisionFooter } from "@/components/askeasy/DivisionFooter";
 
 const WELCOME_DISMISSED_KEY = "askeasy.welcome.dismissed.v1";
 
@@ -77,7 +78,6 @@ function BotsHome() {
   const { bots: customBots, addBot } = useCustomBots();
   const { settings, update } = useSettings();
   const { usage } = useUsage();
-  const user = useAuthUser();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"top" | "new">("top");
   const [activeCategory, setActiveCategory] = useState<BotCategory>("all");
@@ -232,10 +232,11 @@ function BotsHome() {
             <div className="text-[15px] font-semibold leading-tight">Your AI agents are ready</div>
             <p className="mt-1 text-[12px] opacity-70">Cute personal agents that help you get things done.</p>
             <button
+              onClick={() => setSettingsOpen(true)}
               className="mt-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-bold uppercase tracking-wider"
               style={{ background: "var(--lavender)", color: "var(--ink)" }}
             >
-              Unlock Pro $25/year
+              Free &amp; Pro plans · ₹499/month
             </button>
           </div>
           <img src={easy} alt="Easy mascot" className="h-24 w-24 object-contain" width={192} height={192} loading="lazy" />
@@ -390,15 +391,15 @@ function BotsHome() {
         }}
       />
 
+      <DivisionFooter tone="ink" className="mt-4" />
+
       <SettingsSheet
 
         open={settingsOpen}
         onOpenChange={setSettingsOpen}
         settings={settings}
         update={update}
-        isProEffective={!!user}
         usage={usage}
-        onUpgrade={() => setSettingsOpen(false)}
         onClearConversation={() => setSettingsOpen(false)}
         onSelectLanguage={(code) => update({ language: code })}
       />

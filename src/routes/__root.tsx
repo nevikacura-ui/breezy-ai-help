@@ -13,6 +13,8 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
+import { CookieConsent } from "@/components/askeasy/CookieConsent";
+import { CONSENT_DEFAULTS } from "@/lib/consent-defaults";
 
 
 function NotFoundComponent() {
@@ -77,6 +79,7 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
+    scripts: [{ children: CONSENT_DEFAULTS }],
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -86,12 +89,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "AskEasy — The easiest AI you'll ever use" },
       { property: "og:description", content: "AskEasy is a calm, beautifully simple AI assistant. Just ask anything — voice, camera, or text. Smart Mode picks the right model for you." },
       { property: "og:type", content: "website" },
-      { property: "og:image", content: "https://askeasy.ai/__l5e/assets-v1/0dc6c293-1f1b-4a5f-be21-db74111342ec/askeasy-logo-transparent.png" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:image", content: "https://askeasy.ai/__l5e/assets-v1/0dc6c293-1f1b-4a5f-be21-db74111342ec/askeasy-logo-transparent.png" },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "AskEasy — The easiest AI you'll ever use" },
       { name: "twitter:description", content: "AskEasy is a calm, beautifully simple AI assistant. Just ask anything — voice, camera, or text. Smart Mode picks the right model for you." },
     ],
@@ -134,6 +132,7 @@ function RootComponent() {
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <Toaster position="top-center" richColors />
+      <CookieConsent />
     </QueryClientProvider>
 
   );

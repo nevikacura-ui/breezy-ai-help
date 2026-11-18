@@ -28,7 +28,9 @@ import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as BotsBotIdRouteImport } from './routes/bots.$botId'
 import { Route as BotsNewRouteImport } from './routes/bots.new'
 import { Route as ChatBotIdRouteImport } from './routes/chat.$botId'
+import { Route as LegalAiUsageRouteImport } from './routes/legal.ai-usage'
 import { Route as LegalContactRouteImport } from './routes/legal.contact'
+import { Route as LegalCookiesRouteImport } from './routes/legal.cookies'
 import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
 import { Route as LegalRefundsRouteImport } from './routes/legal.refunds'
 import { Route as LegalTermsRouteImport } from './routes/legal.terms'
@@ -135,9 +137,19 @@ const ChatBotIdRoute = ChatBotIdRouteImport.update({
   path: '/chat/$botId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LegalAiUsageRoute = LegalAiUsageRouteImport.update({
+  id: '/ai-usage',
+  path: '/ai-usage',
+  getParentRoute: () => LegalRoute,
+} as any)
 const LegalContactRoute = LegalContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => LegalRoute,
+} as any)
+const LegalCookiesRoute = LegalCookiesRouteImport.update({
+  id: '/cookies',
+  path: '/cookies',
   getParentRoute: () => LegalRoute,
 } as any)
 const LegalPrivacyRoute = LegalPrivacyRouteImport.update({
@@ -211,7 +223,9 @@ export interface FileRoutesByFullPath {
   '/bots/$botId': typeof BotsBotIdRoute
   '/bots/new': typeof BotsNewRoute
   '/chat/$botId': typeof ChatBotIdRouteWithChildren
+  '/legal/ai-usage': typeof LegalAiUsageRoute
   '/legal/contact': typeof LegalContactRoute
+  '/legal/cookies': typeof LegalCookiesRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/refunds': typeof LegalRefundsRoute
   '/legal/terms': typeof LegalTermsRoute
@@ -242,7 +256,9 @@ export interface FileRoutesByTo {
   '/bots/$botId': typeof BotsBotIdRoute
   '/bots/new': typeof BotsNewRoute
   '/chat/$botId': typeof ChatBotIdRouteWithChildren
+  '/legal/ai-usage': typeof LegalAiUsageRoute
   '/legal/contact': typeof LegalContactRoute
+  '/legal/cookies': typeof LegalCookiesRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/refunds': typeof LegalRefundsRoute
   '/legal/terms': typeof LegalTermsRoute
@@ -275,7 +291,9 @@ export interface FileRoutesById {
   '/bots/$botId': typeof BotsBotIdRoute
   '/bots/new': typeof BotsNewRoute
   '/chat/$botId': typeof ChatBotIdRouteWithChildren
+  '/legal/ai-usage': typeof LegalAiUsageRoute
   '/legal/contact': typeof LegalContactRoute
+  '/legal/cookies': typeof LegalCookiesRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/refunds': typeof LegalRefundsRoute
   '/legal/terms': typeof LegalTermsRoute
@@ -309,7 +327,9 @@ export interface FileRouteTypes {
     | '/bots/$botId'
     | '/bots/new'
     | '/chat/$botId'
+    | '/legal/ai-usage'
     | '/legal/contact'
+    | '/legal/cookies'
     | '/legal/privacy'
     | '/legal/refunds'
     | '/legal/terms'
@@ -340,7 +360,9 @@ export interface FileRouteTypes {
     | '/bots/$botId'
     | '/bots/new'
     | '/chat/$botId'
+    | '/legal/ai-usage'
     | '/legal/contact'
+    | '/legal/cookies'
     | '/legal/privacy'
     | '/legal/refunds'
     | '/legal/terms'
@@ -372,7 +394,9 @@ export interface FileRouteTypes {
     | '/bots/$botId'
     | '/bots/new'
     | '/chat/$botId'
+    | '/legal/ai-usage'
     | '/legal/contact'
+    | '/legal/cookies'
     | '/legal/privacy'
     | '/legal/refunds'
     | '/legal/terms'
@@ -545,11 +569,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChatBotIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/legal/ai-usage': {
+      id: '/legal/ai-usage'
+      path: '/ai-usage'
+      fullPath: '/legal/ai-usage'
+      preLoaderRoute: typeof LegalAiUsageRouteImport
+      parentRoute: typeof LegalRoute
+    }
     '/legal/contact': {
       id: '/legal/contact'
       path: '/contact'
       fullPath: '/legal/contact'
       preLoaderRoute: typeof LegalContactRouteImport
+      parentRoute: typeof LegalRoute
+    }
+    '/legal/cookies': {
+      id: '/legal/cookies'
+      path: '/cookies'
+      fullPath: '/legal/cookies'
+      preLoaderRoute: typeof LegalCookiesRouteImport
       parentRoute: typeof LegalRoute
     }
     '/legal/privacy': {
@@ -650,14 +688,18 @@ const BotsRouteChildren: BotsRouteChildren = {
 const BotsRouteWithChildren = BotsRoute._addFileChildren(BotsRouteChildren)
 
 interface LegalRouteChildren {
+  LegalAiUsageRoute: typeof LegalAiUsageRoute
   LegalContactRoute: typeof LegalContactRoute
+  LegalCookiesRoute: typeof LegalCookiesRoute
   LegalPrivacyRoute: typeof LegalPrivacyRoute
   LegalRefundsRoute: typeof LegalRefundsRoute
   LegalTermsRoute: typeof LegalTermsRoute
 }
 
 const LegalRouteChildren: LegalRouteChildren = {
+  LegalAiUsageRoute: LegalAiUsageRoute,
   LegalContactRoute: LegalContactRoute,
+  LegalCookiesRoute: LegalCookiesRoute,
   LegalPrivacyRoute: LegalPrivacyRoute,
   LegalRefundsRoute: LegalRefundsRoute,
   LegalTermsRoute: LegalTermsRoute,

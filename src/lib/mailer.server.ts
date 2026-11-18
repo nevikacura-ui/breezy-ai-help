@@ -1,7 +1,7 @@
 /** Shared Resend sender for every AskEasy transactional email. Server-only. */
 
 export const FROM_EMAIL = "AskEasy <askeasy@nevika.ai>";
-export const SUPPORT_EMAIL = "askeasy@nevika.ai";
+export const SUPPORT_EMAIL = "info@nevika.ai";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
 
@@ -97,7 +97,7 @@ export async function sendReceiptEmail(args: {
         <tr><td style="padding:4px 16px 4px 0;color:#8a8177">Order</td><td>${esc(args.orderId)}</td></tr>
         <tr><td style="padding:4px 16px 4px 0;color:#8a8177">Pro until</td><td>${esc(new Date(args.proUntil).toDateString())}</td></tr>
       </table>
-      <p style="margin-top:16px">Cancel any time in Settings → Subscription. Refund policy: <a href="https://askeasy.ai/legal/refunds">askeasy.ai/legal/refunds</a>.</p>
+      <p style="margin-top:16px">Pro is active for the period shown above and does not renew automatically. Refund policy: <a href="https://askeasy.ai/legal/refunds">askeasy.ai/legal/refunds</a>.</p>
     `),
   });
 }

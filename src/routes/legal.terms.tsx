@@ -14,6 +14,7 @@ export const Route = createFileRoute("/legal/terms")({
       { property: "og:description", content: DESC },
       { property: "og:type", content: "article" },
       { property: "og:url", content: "https://askeasy.ai/legal/terms" },
+      { name: "twitter:card", content: "summary" },
     ],
     links: [{ rel: "canonical", href: "https://askeasy.ai/legal/terms" }],
   }),
@@ -22,7 +23,7 @@ export const Route = createFileRoute("/legal/terms")({
 
 function Terms() {
   return (
-    <LegalDoc title="Terms of Service" updated="2026-08-26">
+    <LegalDoc title="Terms of Service" updated="2026-11-18">
       <p>By using AskEasy at askeasy.ai you agree to these terms. If you do not agree, please don't use the service.</p>
 
       <h2>Your account</h2>
@@ -34,8 +35,8 @@ function Terms() {
       <h2>Free tier and Pro</h2>
       <ul>
         <li>The free tier includes a daily allowance of text, media and voice messages, and access to standard models.</li>
-        <li>Pro is ₹499 per month, billed through Cashfree, and unlocks unlimited messages and the Ultra model.</li>
-        <li>Pro renews monthly until cancelled. You can cancel at any time from Settings; access continues to the end of the paid period.</li>
+        <li>Pro is ₹499 for 30 days, paid through Cashfree, and unlocks unlimited messages and the Ultra model.</li>
+        <li>Pro does not renew automatically. Each successful payment adds 30 days; your plan and access end date appear in Settings.</li>
         <li>We may adjust prices or limits with notice on this page.</li>
       </ul>
 
@@ -78,7 +79,7 @@ function Terms() {
 
       <h2>Contact</h2>
       <p>
-        Questions: <a href="mailto:askeasy@nevika.ai">askeasy@nevika.ai</a>
+        Questions: <a href="mailto:info@nevika.ai">info@nevika.ai</a>
       </p>
     </LegalDoc>
   );

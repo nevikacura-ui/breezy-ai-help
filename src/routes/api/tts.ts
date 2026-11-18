@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
+import { isProfileProActive } from "@/lib/account";
 
 type Body = { text?: string; voiceRate?: number; instructions?: string };
 
@@ -27,12 +28,15 @@ export const Route = createFileRoute("/api/tts")({
         const { data: userData, error: userErr } = await supa.auth.getUser(token);
         if (userErr || !userData?.user) return new Response("Invalid session", { status: 401 });
 
-        // Quota (atomic check+bump)
-        const { data: allowed, error: qErr } = await supa.rpc("check_and_bump_usage", {
-          _kind: "voice", _n: 1, _limit: FREE_VOICE_LIMIT,
-        });
-        if (qErr) return new Response("Quota check failed", { status: 500 });
-        if (allowed === false) return new Response("Daily voice limit reached. Upgrade to Pro.", { status: 429 });
+        // Quota (atomic check+bump); Pro voice is unlimited.
+        const { data: profile } = await supa.from("profiles").select("is_pro, pro_until").eq("id", userData.user.id).maybeSingle();
+        if (!isProfileProActive(profile)) {
+          const { data: allowed, error: qErr } = await supa.rpc("check_and_bump_usage", {
+            _kind: "voice", _n: 1, _limit: FREE_VOICE_LIMIT,
+          });
+          if (qErr) return new Response("Quota check failed", { status: 500 });
+          if (allowed === false) return new Response("Daily voice limit reached. Upgrade to Pro.", { status: 429 });
+        }
 
         let body: Body;
         try { body = await request.json(); } catch { return new Response("Bad JSON", { status: 400 }); }

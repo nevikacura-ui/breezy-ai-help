@@ -4,7 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 /** Sender identity for all AskEasy transactional mail. */
 export const FROM_EMAIL = "AskEasy <askeasy@nevika.ai>";
-export const SUPPORT_EMAIL = "askeasy@nevika.ai";
+export const SUPPORT_EMAIL = "info@nevika.ai";
 
 /** Sends a message to the signed-in user's own verified email address. */
 export const emailMe = createServerFn({ method: "POST" })

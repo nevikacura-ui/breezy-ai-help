@@ -57,7 +57,7 @@ const LANG_SCRIPTS: Record<string, string> = {
   ja: "Japanese script (Kanji + Kana)",
 };
 
-const FREE_TEXT_LIMIT = 9999; // Launch trial: effectively unlimited
+const FREE_TEXT_LIMIT = 5;
 const TRIAL_MS = 3 * 24 * 60 * 60 * 1000;
 
 // --- Per-IP rate limit (in-memory ring; per-worker-instance floor) ---
@@ -188,39 +188,38 @@ export const Route = createFileRoute("/api/chat")({
         const proUntil = profile?.pro_until ? new Date(profile.pro_until as string).getTime() : 0;
         const isPro = !!profile?.is_pro && (proUntil === 0 || proUntil > Date.now());
 
-        // --- LAUNCH TRIAL: all models & all languages free for everyone ---
-        const LAUNCH_TRIAL = true;
-        if (!LAUNCH_TRIAL) {
-          if (mapped.tier === "pro" && !isPro) {
-            return j({ error: "Pro subscription required for this model" }, 403);
-          }
-          const langCode0 = body.language ?? "en";
-          const wantsLang0 = langCode0 !== "en" && !!LANG_NAMES[langCode0];
-          if (wantsLang0 && !isPro) {
-            const trialStart = profile?.trial_started_at
-              ? new Date(profile.trial_started_at as string).getTime()
-              : 0;
-            const trialActive = trialStart > 0 && Date.now() - trialStart < TRIAL_MS;
-            if (!trialActive) {
-              return j({ error: "Language trial expired. Upgrade to Pro to continue in this language.", code: "TRIAL_EXPIRED" }, 402);
-            }
+        // Paid entitlements are enforced here, not only hidden in the UI.
+        if (mapped.tier === "pro" && !isPro) {
+          return j({ error: "Pro subscription required for this model" }, 403);
+        }
+        const langCode0 = body.language ?? "en";
+        const wantsLang0 = langCode0 !== "en" && !!LANG_NAMES[langCode0];
+        if (wantsLang0 && !isPro) {
+          const trialStart = profile?.trial_started_at
+            ? new Date(profile.trial_started_at as string).getTime()
+            : 0;
+          const trialActive = trialStart > 0 && Date.now() - trialStart < TRIAL_MS;
+          if (!trialActive) {
+            return j({ error: "Language trial expired. Upgrade to Pro to continue in this language.", code: "TRIAL_EXPIRED" }, 402);
           }
         }
         const langCode = body.language ?? "en";
         const wantsLang = langCode !== "en" && !!LANG_NAMES[langCode];
 
-        // --- Free text quota (atomic check+bump) ---
-        const { data: allowed, error: quotaErr } = await supa.rpc("check_and_bump_usage", {
-          _kind: "text",
-          _n: 1,
-          _limit: FREE_TEXT_LIMIT,
-        });
-        if (quotaErr) {
-          console.error("check_and_bump_usage failed", quotaErr);
-          return j({ error: "Quota check failed" }, 500);
-        }
-        if (allowed === false) {
-          return j({ error: "Daily free limit reached. Upgrade to Pro for unlimited chats.", code: "QUOTA_EXCEEDED" }, 429);
+        // --- Free text quota (atomic check+bump); Pro is unlimited ---
+        if (!isPro) {
+          const { data: allowed, error: quotaErr } = await supa.rpc("check_and_bump_usage", {
+            _kind: "text",
+            _n: 1,
+            _limit: FREE_TEXT_LIMIT,
+          });
+          if (quotaErr) {
+            console.error("check_and_bump_usage failed", quotaErr);
+            return j({ error: "Quota check failed" }, 500);
+          }
+          if (allowed === false) {
+            return j({ error: "Daily free limit reached. Upgrade to Pro for unlimited chats.", code: "QUOTA_EXCEEDED" }, 429);
+          }
         }
 
         // --- Build request ---

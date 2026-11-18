@@ -1,35 +1,54 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { PRO_MONTHLY_INR } from "@/lib/account";
 
-const PRO_AMOUNT_INR = 499; // Pro plan monthly (edit here to change price everywhere)
+const PRO_AMOUNT_INR = PRO_MONTHLY_INR;
 
-// -------- profile + today's usage --------
+// -------- profile, preferences, plans + today's usage --------
 export const getMe = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
     const today = new Date().toISOString().slice(0, 10);
 
-    const [profileRes, usageRes] = await Promise.all([
-      supabase.from("profiles").select("id, display_name, is_pro, pro_until").eq("id" as never, userId).maybeSingle(),
+    const [profileRes, usageRes, plansRes, subscriptionRes, rolesRes, preferencesRes] = await Promise.all([
+      supabase.from("profiles").select("id, display_name, full_name, phone, avatar_url, email, is_pro, pro_until").eq("id" as never, userId).maybeSingle(),
       supabase.from("usage_daily").select("text_count, media_count, voice_count").eq("user_id", userId).eq("day", today).maybeSingle(),
+      supabase.from("askeasy_plans" as never).select("code, name, price_inr, price_usd, billing_period, tagline, features, limits").eq("is_active", true).order("sort_order", { ascending: true }),
+      supabase.from("askeasy_subscriptions" as never).select("plan_code, status, provider, current_period_end, cancel_at_period_end").eq("user_id", userId).order("current_period_end", { ascending: false }).limit(1).maybeSingle(),
+      supabase.from("user_roles" as never).select("role").eq("user_id", userId),
+      supabase.from("user_context").select("role, tone, preferred_language, facts").eq("user_id", userId).maybeSingle(),
     ]);
 
     if (profileRes.error) throw new Error(profileRes.error.message);
-    const usage = usageRes.data ?? { text_count: 0, media_count: 0, voice_count: 0 };
+    if (plansRes.error) throw new Error(plansRes.error.message);
+    const claims = context.claims as { email?: string; phone?: string; user_metadata?: { full_name?: string; avatar_url?: string } };
     const profile = profileRes.data as unknown as {
       id: string;
       display_name: string | null;
+      full_name: string | null;
+      phone: string | null;
+      avatar_url: string | null;
+      email: string | null;
       is_pro: boolean;
       pro_until: string | null;
     } | null;
+    const usage = usageRes.data ?? { text_count: 0, media_count: 0, voice_count: 0 };
+    const preferences = preferencesRes.data as unknown as { role: string | null; tone: string | null; preferred_language: string | null; facts: unknown } | null;
 
     return {
       profile: profile
-        ? { user_id: profile.id, display_name: profile.display_name, is_pro: profile.is_pro, pro_until: profile.pro_until }
-        : { user_id: userId, display_name: null, is_pro: false, pro_until: null },
+        ? { user_id: profile.id, display_name: profile.display_name, full_name: profile.full_name, phone: profile.phone, avatar_url: profile.avatar_url, email: profile.email, is_pro: profile.is_pro, pro_until: profile.pro_until }
+        : { user_id: userId, display_name: claims.user_metadata?.full_name ?? null, full_name: claims.user_metadata?.full_name ?? null, phone: claims.phone ?? null, avatar_url: claims.user_metadata?.avatar_url ?? null, email: claims.email ?? null, is_pro: false, pro_until: null },
       usage: { text: usage.text_count, media: usage.media_count, voice: usage.voice_count },
+      plans: ((plansRes.data ?? []) as unknown as { code: string; name: string; price_inr: number; price_usd: number; billing_period: string; tagline: string; features: unknown; limits: Record<string, string | number | boolean | string[] | null> }[]).map((plan) => ({
+        ...plan,
+        features: Array.isArray(plan.features) ? plan.features.filter((feature): feature is string => typeof feature === "string") : [],
+      })),
+      subscription: subscriptionRes.error ? null : subscriptionRes.data,
+      roles: rolesRes.error ? [] : ((rolesRes.data ?? []) as unknown as { role: string }[]).map((row) => row.role),
+      preferences: preferences ? { ...preferences, facts: Array.isArray(preferences.facts) ? preferences.facts.filter((fact): fact is string => typeof fact === "string") : [] } : null,
     };
   });
 
@@ -108,11 +127,18 @@ export const createCashfreeOrder = createServerFn({ method: "POST" })
     const base = env === "production" ? "https://api.cashfree.com/pg" : "https://sandbox.cashfree.com/pg";
     const orderId = `AE${Date.now()}${Math.floor(Math.random() * 1000)}`;
 
-    // Fetch email/name from auth for a nicer checkout
-    const email = (context.claims as { email?: string })?.email ?? `user_${context.userId.slice(0, 8)}@askeasy.app`;
-    const name = (context.claims as { user_metadata?: { full_name?: string } })?.user_metadata?.full_name ?? "AskEasy User";
+    // Fetch the verified account details; never send a placeholder phone to the payment provider.
+    const claims = context.claims as { email?: string; phone?: string; user_metadata?: { full_name?: string } };
+    const { data: accountProfile } = await context.supabase.from("profiles").select("display_name, phone").eq("id" as never, context.userId).maybeSingle();
+    const email = claims.email ?? `user_${context.userId.slice(0, 8)}@users.askeasy.ai`;
+    const checkoutProfile = accountProfile as unknown as { display_name?: string | null; phone?: string | null } | null;
+    const name = checkoutProfile?.display_name || claims.user_metadata?.full_name || "AskEasy User";
+    const phone = (checkoutProfile?.phone || claims.phone || "").replace(/\D/g, "");
+    if (phone.length < 10 || phone.length > 15) {
+      throw new Error("Add a valid mobile number in Settings → Your profile before checkout.");
+    }
 
-    const returnUrl = `https://project--14b98f02-993b-4e85-a0aa-3c3bd478b75d.lovable.app/upgrade/success?order={order_id}`;
+    const returnUrl = `https://askeasy.ai/upgrade/success?order={order_id}`;
 
     const res = await fetch(`${base}/orders`, {
       method: "POST",
@@ -130,10 +156,10 @@ export const createCashfreeOrder = createServerFn({ method: "POST" })
           customer_id: context.userId,
           customer_email: email,
           customer_name: name,
-          customer_phone: "9999999999",
+          customer_phone: phone,
         },
         order_meta: { return_url: returnUrl },
-        order_note: "AskEasy Pro (monthly)",
+        order_note: "AskEasy Pro (30 days)",
       }),
     });
 
@@ -143,16 +169,22 @@ export const createCashfreeOrder = createServerFn({ method: "POST" })
       throw new Error(body?.message || `Cashfree ${res.status}`);
     }
 
-    // Persist the pending payment
-    await context.supabase.from("payments").insert({
+    // Payment rows are server-owned; the authenticated user id is taken from the verified session.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error: paymentError } = await supabaseAdmin.from("payments").insert({
       user_id: context.userId,
       cashfree_order_id: orderId,
       payment_session_id: body.payment_session_id,
       amount: PRO_AMOUNT_INR,
+      plan: "pro",
+      environment: env,
+      order_type: "one_time",
+      reference_id: orderId,
       currency: "INR",
       status: "PENDING",
       raw: body,
-    });
+    } as never);
+    if (paymentError) throw new Error(paymentError.message);
 
     return {
       orderId,

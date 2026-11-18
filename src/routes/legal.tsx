@@ -1,5 +1,6 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { trackLegalLinkClick, type LegalDocId } from "@/lib/analytics";
+import { DivisionFooter } from "@/components/askeasy/DivisionFooter";
 
 export const Route = createFileRoute("/legal")({
   component: LegalLayout,
@@ -8,7 +9,9 @@ export const Route = createFileRoute("/legal")({
 const TABS: Array<{ to: string; label: string; doc: LegalDocId }> = [
   { to: "/legal/privacy", label: "Privacy", doc: "privacy" },
   { to: "/legal/terms", label: "Terms", doc: "terms" },
+  { to: "/legal/ai-usage", label: "AI Usage", doc: "ai-usage" },
   { to: "/legal/refunds", label: "Refunds", doc: "refunds" },
+  { to: "/legal/cookies", label: "Cookies", doc: "cookies" },
   { to: "/legal/contact", label: "Contact", doc: "contact" },
 ];
 
@@ -38,11 +41,8 @@ function LegalLayout() {
       <main className="mx-auto max-w-3xl px-5 py-10">
         <Outlet />
       </main>
-      <footer className="border-t border-border/60 py-8 text-center text-[12px] text-muted-foreground">
-        <p>© {new Date().getFullYear()} AskEasy · askeasy.ai</p>
-        <p className="mt-1">Product of SevenVertex</p>
-        <p>Powered by Xceln AI</p>
-      </footer>
+      <DivisionFooter />
+      <p className="pb-6 text-center text-[11px] text-muted-foreground">© {new Date().getFullYear()} AskEasy · askeasy.ai</p>
     </div>
   );
 }

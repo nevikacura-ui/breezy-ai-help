@@ -9,7 +9,9 @@ const PAGES: Array<{ path: string; priority: string; changefreq: string }> = [
   { path: "/auth", priority: "0.4", changefreq: "monthly" },
   { path: "/legal/privacy", priority: "0.4", changefreq: "yearly" },
   { path: "/legal/terms", priority: "0.4", changefreq: "yearly" },
+  { path: "/legal/ai-usage", priority: "0.4", changefreq: "yearly" },
   { path: "/legal/refunds", priority: "0.4", changefreq: "yearly" },
+  { path: "/legal/cookies", priority: "0.4", changefreq: "yearly" },
   { path: "/legal/contact", priority: "0.4", changefreq: "yearly" },
 ];
 

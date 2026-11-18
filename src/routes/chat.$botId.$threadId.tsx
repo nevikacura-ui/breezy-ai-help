@@ -4,7 +4,7 @@ import { ArrowLeft, Settings as SettingsIcon, RotateCcw, ThumbsUp, ThumbsDown, S
 import { getBotById, useCustomBots, useOnboarding, ONBOARDING_CATEGORIES, type Bot } from "@/lib/bots";
 import { BotAvatar } from "@/components/askeasy/BotAvatar";
 import {
-  sendToAI, useAuthUser, useSettings, useUsage,
+  sendToAI, useSettings, useUsage,
   personalityPrompt, tickStreak, splitFollowUps,
   type Mood,
   sendToAIDetailed,
@@ -52,7 +52,6 @@ function BotChat() {
   const bot = getBotById(botId, customBots);
   const { settings, update } = useSettings();
   const { usage } = useUsage();
-  const user = useAuthUser();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { threads, refresh: refreshThreads } = useThreads(botId);
@@ -746,9 +745,7 @@ function BotChat() {
         onOpenChange={setSettingsOpen}
         settings={settings}
         update={update}
-        isProEffective={!!user}
         usage={usage}
-        onUpgrade={() => setSettingsOpen(false)}
         onClearConversation={() => {
           saveThreadMessages(bot.id, threadId, []);
           setMessages([{ id: "g", role: "assistant", content: bot.greeting, createdAt: Date.now() }]);

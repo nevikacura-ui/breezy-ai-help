@@ -4,6 +4,7 @@ import { z } from "zod";
 import { useServerFn } from "@tanstack/react-start";
 import { getPaymentStatus } from "@/lib/pro.functions";
 import { CheckCircle2, Loader2, Sparkles } from "lucide-react";
+import { ACCOUNT_REFRESH_EVENT } from "@/lib/account";
 
 export const Route = createFileRoute("/upgrade/success")({
   validateSearch: z.object({ order: z.string().optional() }),
@@ -36,7 +37,10 @@ function SuccessPage() {
       try {
         const row = await check({ data: { orderId: order } });
         if (row?.status) setStatus(row.status);
-        if (row?.status === "SUCCESS" || row?.status === "PAID") return;
+        if (row?.status === "SUCCESS" || row?.status === "PAID") {
+          window.dispatchEvent(new Event(ACCOUNT_REFRESH_EVENT));
+          return;
+        }
       } catch { /* ignore */ }
       if (tries < 20) setTimeout(tick, 1500);
     };

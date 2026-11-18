@@ -1,5 +1,6 @@
 // Lightweight first-party analytics for AskEasy conversion tracking.
 // Events are persisted to the backend so funnels (e.g. onboarding) can be measured.
+import { canTrack } from "@/lib/consent";
 
 export type AnalyticsEventName =
   | "category_select"
@@ -8,7 +9,7 @@ export type AnalyticsEventName =
   | "legal_link_click";
 
 /** Which legal document was opened. */
-export type LegalDocId = "privacy" | "terms" | "refunds" | "contact";
+export type LegalDocId = "privacy" | "terms" | "refunds" | "contact" | "ai-usage" | "cookies";
 
 /** Where the link lived, so we can split onboarding vs checkout usage. */
 export type LegalLinkSurface = "settings" | "checkout" | "legal_nav" | "onboarding" | "footer";
@@ -44,26 +45,30 @@ function getSessionId(): string {
 
 export function trackEvent({ event, properties = {} }: AnalyticsPayload): void {
   if (typeof window === "undefined") return;
-  const body = JSON.stringify({
-    event,
-    properties,
-    session_id: getSessionId(),
-    path: window.location.pathname,
-    at: new Date().toISOString(),
-  });
-  // Fire-and-forget; never block UI on analytics.
-  try {
-    if (navigator.sendBeacon) {
-      navigator.sendBeacon("/api/public/analytics", new Blob([body], { type: "application/json" }));
-    } else {
-      void fetch("/api/public/analytics", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body,
-        keepalive: true,
-      }).catch(() => {});
+  // First-party behavioural events follow the same analytics consent purpose as other trackers.
+  void canTrack("analytics").then((allowed) => {
+    if (!allowed) return;
+    const body = JSON.stringify({
+      event,
+      properties,
+      session_id: getSessionId(),
+      path: window.location.pathname,
+      at: new Date().toISOString(),
+    });
+    // Fire-and-forget; never block UI on analytics.
+    try {
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon("/api/public/analytics", new Blob([body], { type: "application/json" }));
+      } else {
+        void fetch("/api/public/analytics", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body,
+          keepalive: true,
+        }).catch(() => {});
+      }
+    } catch {
+      /* ignore */
     }
-  } catch {
-    /* ignore */
-  }
+  }).catch(() => {});
 }

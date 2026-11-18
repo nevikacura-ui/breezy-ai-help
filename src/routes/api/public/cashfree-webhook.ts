@@ -75,8 +75,30 @@ export const Route = createFileRoute("/api/public/cashfree-webhook")({
             proUntil.setMonth(proUntil.getMonth() + 1);
             await supabaseAdmin
               .from("profiles")
-              .update({ is_pro: true, pro_until: proUntil.toISOString(), updated_at: new Date().toISOString() })
+              .update({ is_pro: true, plan: "pro", pro_until: proUntil.toISOString(), updated_at: new Date().toISOString() } as never)
               .eq("id" as never, existing.user_id);
+
+            const { data: existingSubscription } = await supabaseAdmin
+              .from("askeasy_subscriptions" as never)
+              .select("id")
+              .eq("provider_subscription_id", orderId)
+              .maybeSingle();
+            const subscriptionRow = {
+              user_id: existing.user_id,
+              plan_code: "pro",
+              status: "active",
+              provider: "cashfree",
+              provider_subscription_id: orderId,
+              current_period_start: new Date().toISOString(),
+              current_period_end: proUntil.toISOString(),
+              cancel_at_period_end: false,
+              cancelled_at: null,
+              updated_at: new Date().toISOString(),
+            };
+            const subscriptionResult = existingSubscription
+              ? await supabaseAdmin.from("askeasy_subscriptions" as never).update(subscriptionRow as never).eq("id", (existingSubscription as { id: string }).id)
+              : await supabaseAdmin.from("askeasy_subscriptions" as never).insert(subscriptionRow as never);
+            if (subscriptionResult.error) console.error("Subscription projection failed:", subscriptionResult.error.message);
 
             // Receipt email — never let a mail failure break the webhook ack.
             try {
